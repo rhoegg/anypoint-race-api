@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_b7eadc04_ab0c_478b_8654_8da56b366373_Input_Payload = Array<{|  racerId: String,   raceId: String,   token: String,   start: String,   finish: String,   racer: {|    displayName: String,     email: String,     racerId: String,     clientId: String  |}|} {"example": "{\\\"racerId\\\":\\\"99e090b5-54fb-45e4-96f8-f368bb09e65d\\\",\\\"raceId\\\":\\\"ec6dd17b-5de4-4f88-aa4e-3fe1be28b9a4\\\",\\\"token\\\":\\\"03558be5-b388-4f35-987a-e3216c1efcc8\\\",\\\"start\\\":\\\"2023-07-31T16:29:00.317753Z\\\",\\\"finish\\\":\\\"2023-07-31T16:31:22.585732Z\\\",\\\"racer\\\":{\\\"displayName\\\":\\\"Tweety Bird\\\",\\\"email\\\":\\\"tweety@wb.com\\\",\\\"racerId\\\":\\\"b713a4e7-ca9e-4ea1-80c5-d97a36fc8d71\\\",\\\"clientId\\\":\\\"tweety\\\"}}"}>
+

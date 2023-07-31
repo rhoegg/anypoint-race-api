@@ -1,0 +1,14 @@
+{
+	"racer.b713a4e7-ca9e-4ea1-80c5-d97a36fc8d71": {
+		"displayName": "Tweety Bird",
+		"email": "tweety@wb.com",
+		"racerId": "b713a4e7-ca9e-4ea1-80c5-d97a36fc8d71",
+		"clientId": "tweety"
+	},
+	"racer.99e090b5-54fb-45e4-96f8-f368bb09e65d": {
+		"displayName": "Sylvester",
+		"email": "sylvester@wb.com",
+		"racerId": "99e090b5-54fb-45e4-96f8-f368bb09e65d",
+		"clientId": "sylvester"
+	}
+}

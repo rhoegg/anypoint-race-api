@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+	<flow name="getFinishedRaces" doc:id="cc23160c-6db9-4f42-92d4-fe2281fa3232">
+		<os:retrieve-all doc:name="all racers" doc:id="38bf6624-15c8-4c51-8edb-6056ca02c3ed" objectStore="racerObjectStore" target="racers" />
+		<set-variable value='#[output application/json --- vars.racers mapObject (data, id) -&gt; {(id): read(data, "application/json")}]' doc:name="racers" doc:id="0c135073-61c9-4b3c-8f6d-7559696deb8f" variableName="racers" />
+		<os:retrieve-all doc:name="all races" doc:id="05e32f00-0c0b-4fb2-9058-b4954c3b0ea4" objectStore="raceObjectStore" />
+		<ee:transform doc:name="finished races" doc:id="7bf144d0-9fb5-43a7-8514-e398172b6968">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+
+var races = 
+	payload pluck (raceData) -> 
+		read(raceData, 'application/json')
+var completedRaces = 
+	races filter (race) -> race.finish?
+
+fun getRacer(race) =
+	vars.racers["racer.$(race.racerId)"]
+---
+completedRaces map (race) ->
+	race ++ {racer: getRacer(race)}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="updateResultsFirstToFinish" doc:id="a38361b9-6b4b-42bf-8678-993dfbeefbfb" >
+		<set-payload value="#[dw::pages::FirstToFinishResults::markdown(vars.standings)]" doc:name="FirstToFinishResults" doc:id="56dda8db-537c-4e9c-96b4-93176d617209" />
+		<set-variable value="${anypoint.portal.pages.results.firstToFinish}" doc:name="pagePath" doc:id="4a37006c-1eb2-4efb-bda5-437facd075a4" variableName="pagePath" />
+		<flow-ref doc:name="createPortalPageDraft" doc:id="cd98fff5-9c45-44c7-ba76-7d0fc256aff9" name="createPortalPageDraft" />
+	</flow>
+	<flow name="updateResultsFastest" doc:id="69dfc652-9dc0-4333-acd6-a4ea855c5d88" >
+		<set-payload value="#[dw::pages::FastestResults::markdown(vars.standings)]" doc:name="FastestResults" doc:id="78c7fede-a46a-47eb-ab8e-226ebe3b1131" />
+		<set-variable value="${anypoint.portal.pages.results.fastest}" doc:name="pagePath" doc:id="c9a6cf92-b703-418e-94c7-92daacfe2795" variableName="pagePath"/>
+		<flow-ref doc:name="createPortalPageDraft" doc:id="ede51332-75ff-4ed6-8606-cf8ed9c710fb" name="createPortalPageDraft"/>
+	</flow>
+	<flow name="updateResultsMost" doc:id="c894c8a3-b2db-4760-ae79-b62626a10036" >
+		<set-payload value="#[dw::pages::MostRacesResults::markdown(vars.standings)]" doc:name="MostRacesResults" doc:id="036ceef6-9d06-49ba-9b64-753ba684a2f8" />
+		<set-variable value="${anypoint.portal.pages.results.most}" doc:name="pagePath" doc:id="2718f0b3-0b42-4e52-a8f8-93a8b4306263" variableName="pagePath"/>
+		<flow-ref doc:name="createPortalPageDraft" doc:id="1e9d3e9c-b1d3-4a3a-8205-61b1e3679f29" name="createPortalPageDraft"/>
+	</flow>
+	<flow name="updateHallOfFame" doc:id="b7eadc04-ab0c-478b-8654-8da56b366373" >
+		<set-payload value="#[dw::pages::HallOfFame::markdown(vars.standings)]" doc:name="HallOfFame" doc:id="a8ab5b1d-89b4-4732-a2b1-edbe1e67d978" />
+		<set-variable value="${anypoint.portal.pages.results.halloffame}" doc:name="pagePath" doc:id="b7cb65ea-dedd-4637-9a74-793eaa5fbc7c" variableName="pagePath"/>
+		<flow-ref doc:name="createPortalPageDraft" doc:id="08e6413e-ec05-48bd-af8c-a560f782a932" name="createPortalPageDraft"/>
+	</flow>
+	<flow name="updateHome" doc:id="57d61e64-4ae5-4ff3-a808-852e3db79327" >
+		<set-payload value="#[dw::pages::Home::markdown(vars.standings)]" doc:name="Home" doc:id="a4a5a9c1-de18-4793-8760-d5ffdffb23d1" />
+		<set-variable value="home" doc:name="pagePath" doc:id="e8e4c752-4647-47b7-9a61-c261af2086c3" variableName="pagePath"/>
+		<logger level="INFO" doc:name="INFO" doc:id="858f1e88-64f3-4621-9ac4-0dbf17915901" message="#[payload]" category="race.leaderboard"/>
+		<flow-ref doc:name="createPortalPageDraft" doc:id="65e9b00d-d758-4333-8d77-6d0d461dfd07" name="createPortalPageDraft"/>
+	</flow>
+	<flow name="publishLeaderboards" doc:id="d54a4520-3dce-49c5-a55e-e0de873cc95c" >
+		<scheduler doc:name="Every 60 seconds" doc:id="13669058-e4c7-421a-9b1d-e11dcbc57813" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="60" timeUnit="SECONDS"/>
+			</scheduling-strategy>
+		</scheduler>
+<flow-ref doc:name="getFinishedRaces" doc:id="36ff187e-6d7d-4e2a-b6f2-3cf75007e1c5" name="getFinishedRaces" />
+				<set-variable value='#[output application/java&#10;&#10;var allResults = &#10;	payload groupBy $.racerId&#10;		pluck (racerResults) -&gt; &#10;			racerResults map (result) -&gt;&#10;				result ++ {&#10;					elapsed: ( // units = seconds&#10;						result.finish as DateTime as Number {unit: "milliseconds"}&#10;						- result.start as DateTime as Number {unit: "milliseconds"}&#10;					) / 1000 &#10;				}&#10;---&#10;allResults map (racerResults) -&gt; do {&#10;		var overallRacerResults = racerResults[0]&#10;		var firstRace = (racerResults orderBy $.finish)[0]&#10;		var lastRace = (racerResults orderBy $.finish)[-1]&#10;		var bestRace = (racerResults orderBy $.elapsed)[0]&#10;		var meanElapsed = avg(racerResults.*elapsed)&#10;		var count = sizeOf(racerResults)&#10;		---&#10;		overallRacerResults ++ {&#10;			count: count,&#10;			mean: meanElapsed,&#10;			best: bestRace,&#10;			first: firstRace,&#10;			last: lastRace&#10;		}&#10;	}]' doc:name="standings" doc:id="0029e869-aa25-40e9-80a4-35b38f557ce4" variableName="standings"/>
+				<scatter-gather doc:name="Scatter-Gather" doc:id="6fe31456-8877-4d10-89eb-23605bf70385" >
+			<route >
+				<flow-ref doc:name="updateResultsFirstToFinish" doc:id="2283deaa-c85e-4a58-b99e-5954b5b94d6e" name="updateResultsFirstToFinish" />
+			</route>
+			<route >
+				<flow-ref doc:name="updateResultsFastest" doc:id="7995e47f-888c-46e3-a89b-ac70ab3c4ac8" name="updateResultsFastest" />
+			</route>
+			<route >
+				<flow-ref doc:name="updateResultsMost" doc:id="17530b3a-0915-430e-b12e-a9eda6610a58" name="updateResultsMost"/>
+			</route>
+			<route >
+				<flow-ref doc:name="updateHallOfFame" doc:id="74da6963-2fe3-41d7-9280-ed49de027724" name="updateHallOfFame"/>
+			</route>
+			<route >
+				<flow-ref doc:name="updateHome" doc:id="be9f26c1-44e7-439e-9f5a-23c99677601e" name="updateHome"/>
+			</route>
+		</scatter-gather>
+		<flow-ref doc:name="publishPortalPageDraft" doc:id="1f1d938b-d7cf-4f05-b0f0-0f3901a434d8" name="publishPortalPageDraft" />
+		<logger level="INFO" doc:name="INFO" doc:id="babde8a7-95a5-4c85-9ade-73abb5dbe931" message="Leaderboards updated" category="race.leaderboards"/>
+	</flow>
+	<flow name="createPortalPageDraft" doc:id="92e53a61-08c2-4d26-adac-04f631616ebf" >
+		<http:request method="PUT" doc:name="PUT .../portal/draft/pages/{pageName}" doc:id="b6ecb48f-9992-49f0-a574-135032495dda" config-ref="exchangeV2HttpRequestConfig" path="/assets/${anypoint.businessGroup}/${anypoint.portal.assetId}/${anypoint.portal.version}/portal/draft/pages/{pagePath}" responseTimeout="55000">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Content-Type" : "text/markdown"
+}]]]></http:headers>
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"pagePath" : vars.pagePath
+}]]]></http:uri-params>
+		</http:request>
+	</flow>
+	<flow name="publishPortalPageDraft" doc:id="3b63c93b-0b58-4abd-b855-38b5e64e75af" >
+		<http:request method="PATCH" doc:name="PATCH .../portal" doc:id="3bcc9a59-d5bf-452b-ba76-0834e8a5f4e5" config-ref="exchangeV2HttpRequestConfig" path="/assets/${anypoint.businessGroup}/${anypoint.portal.assetId}/${anypoint.portal.version}/portal"/>
+	</flow>
+	<flow name="registerRacer" doc:id="7edfeca7-3d19-4a8a-94cb-b4ba51dfb9be" >
+		<validation:is-not-null doc:name="Is not null" doc:id="3f447caa-4739-4fc3-83c3-00a6f64aa268" value="#[attributes.headers.client_id]">
+			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:CLIENT_ID_MISSING" />
+		</validation:is-not-null>
+		<set-variable value="#[uuid()]" doc:name="racerId" doc:id="0fcf4698-21ca-46be-a877-3dac6f8d6673" variableName="racerId"/>
+		<ee:transform doc:name="racer" doc:id="cb6e3fad-0340-43fc-8d2c-d00cf78a8ef1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	displayName: payload.displayName,
+	email: payload.email,
+	racerId: vars.racerId,
+	clientId: attributes.headers.client_id
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<os:store doc:name="racer" doc:id="7beeef62-66d8-4499-9e62-1164545073b9" key="#['racer.' ++ vars.racerId]" objectStore="racerObjectStore"/>
+	</flow>
+	<flow name="retrieveRacer" doc:id="0c7b9d6c-682b-423e-86e9-4bc58586110a" >
+		<validation:is-not-null doc:name="Is not null" doc:id="a6658fca-d46b-4278-a168-15b568f1cd97" value="#[attributes.headers.client_id]">
+			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:CLIENT_ID_MISSING" />
+		</validation:is-not-null>
+		<os:retrieve doc:name="racer" doc:id="a82b00ca-e0ee-40b1-8728-e255d3307533" key="#['racer.' ++ vars.racerId]" objectStore="racerObjectStore"/>
+		<set-payload value="#[output application/json --- payload]" doc:name="to JSON" doc:id="fba8fefb-4ba8-48d8-9fa6-ab448184033d" />
+	</flow>
+	<flow name="startRace" doc:id="4327921b-3d52-47e3-855a-f59691c3a831">
+		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="06891a06-af15-4c69-b1b6-1ac9d98236a1" variableName="racerId" />
+		<set-variable value="#[uuid()]" doc:name="raceId" doc:id="ca899825-0302-4042-8b19-82bf321c8740" variableName="raceId" />
+		<set-variable value="#[uuid()]" doc:name="raceToken" doc:id="4842c28b-c95e-4b55-b42b-32b203eb2568" variableName="raceToken" />
+		<ee:transform doc:name="raceInfo" doc:id="597714b9-f777-4d3b-8a91-55040586b542">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	racerId: vars.racerId,
+	raceId: vars.raceId,
+	token: vars.raceToken,
+	start: now() as String
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<os:store doc:name="raceId" doc:id="a21edcbe-3350-47ae-bc01-36e309ccc519" objectStore="raceObjectStore" key="#[vars.raceId]" failIfPresent="true" />
+		<set-payload value="#[vars.raceToken]" doc:name="race token" doc:id="edcbb769-7484-4b83-8846-7bcc8a97f325" />
+		<set-variable value="#[output application/java&#10;var parentDir = attributes.requestPath splitBy &quot;/&quot; then $[0 to -2] then $ joinBy &quot;/&quot;&#10;---&#10;{ &#10;	Location: parentDir ++ '/races/$(vars.raceId)/finish'&#10;}]" doc:name="outboundHeaders" doc:id="9600a1f4-5cb0-4801-9a82-b2568be608a2" variableName="outboundHeaders"/>
+	</flow>
+	<flow name="finishRace" doc:id="2958156d-0447-4dc6-85d2-a42c117388ba">
+		<set-variable value="#[now()]" doc:name="finish" doc:id="e69aaf15-9103-4b99-b656-d089846eca66" variableName="finish" />
+		<set-variable value="#[attributes.uriParams.racerId]" doc:name="Set Variable" doc:id="ef2af9e6-6288-4fce-b92f-615e3f2f41e3" variableName="racerId"/>
+		<flow-ref doc:name="retrieveRacer" doc:id="2f7b3f1d-bbb1-42a6-8161-0c0b6614489a" name="retrieveRacer" target="racer"/>
+		<set-variable value="#[attributes.uriParams.raceId]" doc:name="raceId" doc:id="82a6e5a1-d831-4c19-9351-45b70e414b56" variableName="raceId"/>
+		<set-variable value="#[payload]" doc:name="requestToken" doc:id="ae622601-9ffa-42dc-95e5-bd002b18fbaa" variableName="requestToken" />
+		<os:retrieve doc:name="race" doc:id="b4b906fc-cd21-469a-b0f6-08bdf7a783da" key="#[vars.raceId]" objectStore="raceObjectStore" target="race" targetValue="#[output application/json --- payload]"/>
+		<validation:is-true doc:name="check token" doc:id="9bfc00e7-02ce-46ee-98f2-a6d4998c03d1" expression="#[vars.requestToken == vars.race.token]" message="#['Race token is not valid: ' ++ vars.requestToken]">
+			<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="APP:INVALID_RACE_TOKEN" />
+		</validation:is-true>
+		<set-variable value="#[output application/json --- vars.race ++ {finish: vars.finish}]" doc:name="race + finish time" doc:id="45c7a484-a4b3-449d-97ec-253284624c66" variableName="race" />
+		<os:store doc:name="race" doc:id="484d5e71-4010-4818-8b3d-faeb403b0117" key="#[vars.raceId]" objectStore="raceObjectStore">
+			<os:value ><![CDATA[#[vars.race]]]></os:value>
+		</os:store>
+		<ee:transform doc:name="response" doc:id="ee5cd78a-b9d4-40f4-af10-55fc665a7ac3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+
+var time = vars.race.finish - vars.race.start
+---
+{
+	name: vars.racer.displayName,
+	finished: vars.race.finish,
+	secondsToComplete: time as Number {unit: "milliseconds"} / 1000
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

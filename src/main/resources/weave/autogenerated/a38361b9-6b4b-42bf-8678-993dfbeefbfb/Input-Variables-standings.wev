@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_a38361b9_6b4b_42bf_8678_993dfbeefbfb_Input_Variables_standings = Array<{|  elapsed: Number,   racerId: String,   count: Number,   last: String | Null,   raceId: String,   start: String,   best: Number | Null,   racer: {|    displayName: String,     email: String,     racerId: String,     clientId: String  |},   first: String | Null,   token: String,   finish: String|}>
+
