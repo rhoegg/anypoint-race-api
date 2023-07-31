@@ -61,11 +61,14 @@ completedRaces map (race) ->
 	<flow name="publishLeaderboards" doc:id="d54a4520-3dce-49c5-a55e-e0de873cc95c" >
 		<scheduler doc:name="Every 60 seconds" doc:id="13669058-e4c7-421a-9b1d-e11dcbc57813" >
 			<scheduling-strategy >
-				<fixed-frequency frequency="60" timeUnit="SECONDS"/>
+				<fixed-frequency frequency="60" timeUnit="SECONDS" startDelay="5"/>
 			</scheduling-strategy>
 		</scheduler>
 <flow-ref doc:name="getFinishedRaces" doc:id="36ff187e-6d7d-4e2a-b6f2-3cf75007e1c5" name="getFinishedRaces" />
-				<set-variable value='#[output application/java&#10;&#10;var allResults = &#10;	payload groupBy $.racerId&#10;		pluck (racerResults) -&gt; &#10;			racerResults map (result) -&gt;&#10;				result ++ {&#10;					elapsed: ( // units = seconds&#10;						result.finish as DateTime as Number {unit: "milliseconds"}&#10;						- result.start as DateTime as Number {unit: "milliseconds"}&#10;					) / 1000 &#10;				}&#10;---&#10;allResults map (racerResults) -&gt; do {&#10;		var overallRacerResults = racerResults[0]&#10;		var firstRace = (racerResults orderBy $.finish)[0]&#10;		var lastRace = (racerResults orderBy $.finish)[-1]&#10;		var bestRace = (racerResults orderBy $.elapsed)[0]&#10;		var meanElapsed = avg(racerResults.*elapsed)&#10;		var count = sizeOf(racerResults)&#10;		---&#10;		overallRacerResults ++ {&#10;			count: count,&#10;			mean: meanElapsed,&#10;			best: bestRace,&#10;			first: firstRace,&#10;			last: lastRace&#10;		}&#10;	}]' doc:name="standings" doc:id="0029e869-aa25-40e9-80a4-35b38f557ce4" variableName="standings"/>
+				<validation:is-not-empty-collection doc:name="races are not empty" doc:id="e7dbc106-f81e-41cf-9fba-b1a9f9f8c90a" >
+			<error-mapping sourceType="VALIDATION:EMPTY_COLLECTION" targetType="APP:NO_RACES_RECORDED" />
+		</validation:is-not-empty-collection>
+		<set-variable value='#[output application/java&#10;&#10;var allResults = &#10;	payload groupBy $.racerId&#10;		pluck (racerResults) -&gt; &#10;			racerResults map (result) -&gt;&#10;				result ++ {&#10;					elapsed: ( // units = seconds&#10;						result.finish as DateTime as Number {unit: "milliseconds"}&#10;						- result.start as DateTime as Number {unit: "milliseconds"}&#10;					) / 1000 &#10;				}&#10;---&#10;allResults map (racerResults) -&gt; do {&#10;		var overallRacerResults = racerResults[0]&#10;		var firstRace = (racerResults orderBy $.finish)[0]&#10;		var lastRace = (racerResults orderBy $.finish)[-1]&#10;		var bestRace = (racerResults orderBy $.elapsed)[0]&#10;		var meanElapsed = avg(racerResults.*elapsed)&#10;		var count = sizeOf(racerResults)&#10;		---&#10;		overallRacerResults ++ {&#10;			count: count,&#10;			mean: meanElapsed,&#10;			best: bestRace,&#10;			first: firstRace,&#10;			last: lastRace&#10;		}&#10;	}]' doc:name="standings" doc:id="0029e869-aa25-40e9-80a4-35b38f557ce4" variableName="standings"/>
 				<scatter-gather doc:name="Scatter-Gather" doc:id="6fe31456-8877-4d10-89eb-23605bf70385" >
 			<route >
 				<flow-ref doc:name="updateResultsFirstToFinish" doc:id="2283deaa-c85e-4a58-b99e-5954b5b94d6e" name="updateResultsFirstToFinish" />
@@ -85,6 +88,11 @@ completedRaces map (race) ->
 		</scatter-gather>
 		<flow-ref doc:name="publishPortalPageDraft" doc:id="1f1d938b-d7cf-4f05-b0f0-0f3901a434d8" name="publishPortalPageDraft" />
 		<logger level="INFO" doc:name="INFO" doc:id="babde8a7-95a5-4c85-9ade-73abb5dbe931" message="Leaderboards updated" category="race.leaderboards"/>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="efbdfc4e-bcb7-439a-a134-042b09ae1bc9" >
+				<logger level="WARN" doc:name="WARN" doc:id="ae18bb21-340e-4cc8-b121-3f3be2151247" message="leaderboard update aborted: no races recorded" category="race.leaderboards"/>
+			</on-error-continue>
+		</error-handler>
 	</flow>
 	<flow name="createPortalPageDraft" doc:id="92e53a61-08c2-4d26-adac-04f631616ebf" >
 		<http:request method="PUT" doc:name="PUT .../portal/draft/pages/{pageName}" doc:id="b6ecb48f-9992-49f0-a574-135032495dda" config-ref="exchangeV2HttpRequestConfig" path="/assets/${anypoint.businessGroup}/${anypoint.portal.assetId}/${anypoint.portal.version}/portal/draft/pages/{pagePath}" responseTimeout="55000">
@@ -122,6 +130,7 @@ output application/json
 			</ee:message>
 		</ee:transform>
 		<os:store doc:name="racer" doc:id="7beeef62-66d8-4499-9e62-1164545073b9" key="#['racer.' ++ vars.racerId]" objectStore="racerObjectStore"/>
+		<logger level="INFO" doc:name="INFO" doc:id="60528fa0-8696-44a6-b973-5cdde3b4586c" message="Registered racer #[payload.racer] for client #[payload.clientId]: #{payload.email]" category="race.register"/>
 	</flow>
 	<flow name="retrieveRacer" doc:id="0c7b9d6c-682b-423e-86e9-4bc58586110a" >
 		<validation:is-not-null doc:name="Is not null" doc:id="a6658fca-d46b-4278-a168-15b568f1cd97" value="#[attributes.headers.client_id]">
