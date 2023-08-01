@@ -7,7 +7,7 @@ anypoint:
   businessGroup: "b507dcaa-0d5b-42e9-9446-97b82d7bf81e"
   portal:
     assetId: anypoint-race-api
-    version: "1.1.1"
+    version: "1.1.2"
     pages:
       results:
         firstToFinish: "yhd-zsf/Results: First to Finish"
