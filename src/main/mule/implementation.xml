@@ -75,6 +75,7 @@ output application/json
 			</ee:message>
 		</ee:transform>
 		<set-variable value="#[output application/java&#10;var parentDir = attributes.requestPath splitBy &quot;/&quot; then $[0 to -2] then $ joinBy &quot;/&quot;&#10;---&#10;{ &#10;	Location: parentDir ++ '/races/$(vars.raceId)/finish'&#10;}]" doc:name="outboundHeaders" doc:id="9600a1f4-5cb0-4801-9a82-b2568be608a2" variableName="outboundHeaders"/>
+		<logger level="INFO" doc:name="INFO" doc:id="eeed0813-3b1b-466c-a647-db37dd71e50e" message="racer #[vars.racerId] started a new race #[vars.raceId]" category="race.start"/>
 	</flow>
 	<flow name="finishLap" doc:id="86dc1729-b308-44c7-8ccb-af52cf3290f5" >
 		<set-variable value="#[now()]" doc:name="lapStart" doc:id="be1c5ab7-eba9-47b7-a13f-3e6a418bf027" variableName="lapStart"/>
@@ -83,7 +84,10 @@ output application/json
 		<validation:is-true doc:name="check token" doc:id="216b60d4-3209-4165-a119-46352cf7d30f" expression="#[vars.requestToken == vars.race.token]" message="#['Race token is not valid: ' ++ vars.requestToken]" >
 			<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="APP:INVALID_RACE_TOKEN" />
 		</validation:is-true>
-		<set-variable value='#[import mergeWith from dw::core::Objects&#10;output application/json&#10;var lastLapStart = vars.race.lapStart default vars.race.start&#10;var elapsed = (vars.lapStart - lastLapStart) as Number {unit: "milliseconds"} / 1000&#10;--- &#10;vars.race mergeWith {&#10;	laps: (vars.race.laps default 0) + 1,&#10;	lapStart: vars.lapStart,&#10;	lastLapElapsed: elapsed&#10;}]' doc:name="race + new lap" doc:id="e0e45b2e-ad5d-4841-b97c-97c549032ea9" variableName="race"/>
+		<validation:is-null doc:name="Is null" doc:id="e284ddd6-d5f1-4e0e-a835-c1703726f061" value="#[vars.race.finish]">
+			<error-mapping sourceType="VALIDATION:NOT_NULL" targetType="APP:LAP_FORBIDDEN" />
+		</validation:is-null>
+		<set-variable value='#[import mergeWith from dw::core::Objects&#10;output application/json&#10;var lastLapStart = vars.race.lapStart default vars.race.start&#10;var elapsed = (vars.lapStart - lastLapStart) as Number {unit: "milliseconds"} / 1000&#10;--- &#10;vars.race mergeWith {&#10;	laps: (vars.race.laps default 0) + 61,&#10;	lapStart: vars.lapStart,&#10;	lastLapElapsed: elapsed&#10;}]' doc:name="race + new lap" doc:id="e0e45b2e-ad5d-4841-b97c-97c549032ea9" variableName="race"/>
 		<set-variable value="#[vars.race update { case .token -&gt; uuid() }]" doc:name="rotate race token" doc:id="0f4be36b-eb9e-47eb-a32e-4e3c053f3c7e" variableName="race"/>
 		<os:store doc:name="race" doc:id="12acdbef-21db-4640-983b-2e87f9b5604a" key="#[vars.raceId]" objectStore="raceObjectStore" >
 			<os:value ><![CDATA[#[vars.race]]]></os:value>
@@ -100,6 +104,7 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<logger level="INFO" doc:name="INFO" doc:id="b17f5de4-e1a6-4b0e-b9a9-08f4a5bc06aa" message="racer #[vars.racerId] finished a lap in race #[vars.raceId]" category="race.lap"/>
 	</flow>
 	<flow name="finishRace" doc:id="2958156d-0447-4dc6-85d2-a42c117388ba">
 		<set-variable value="#[now()]" doc:name="finish" doc:id="e69aaf15-9103-4b99-b656-d089846eca66" variableName="finish" />
@@ -127,6 +132,7 @@ var time = vars.race.finish - vars.race.start
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<logger level="INFO" doc:name="INFO" doc:id="34ae51e6-4b7c-4e0e-87de-93c9cb1728da" message="racer #[vars.racerId] finished race #[vars.raceId]" category="race.finish"/>
 	</flow>
 	<sub-flow name="lookupRaceAndRacer" doc:id="3db4429f-8267-4166-b99f-51797d7dfaa0">
 		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="ef2af9e6-6288-4fce-b92f-615e3f2f41e3" variableName="racerId" />

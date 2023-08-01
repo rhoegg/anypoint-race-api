@@ -23,7 +23,7 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 				<validation:is-not-empty-collection doc:name="races are not empty" doc:id="25c6e773-5980-4da8-adbb-8f7c2f0352a6">
 			<error-mapping sourceType="VALIDATION:EMPTY_COLLECTION" targetType="APP:NO_RACES_RECORDED" />
 		</validation:is-not-empty-collection>
-		<set-variable value='#[output application/java&#10;&#10;var allResults = &#10;	payload groupBy $.racerId&#10;		pluck (racerResults) -&gt; &#10;			racerResults map (result) -&gt;&#10;				result ++ {&#10;					elapsed: ( // units = seconds&#10;						result.finish as DateTime as Number {unit: "milliseconds"}&#10;						- result.start as DateTime as Number {unit: "milliseconds"}&#10;					) / 1000 &#10;				}&#10;---&#10;allResults map (racerResults) -&gt; do {&#10;		var overallRacerResults = racerResults[0]&#10;		var firstRace = (racerResults orderBy $.finish)[0]&#10;		var lastRace = (racerResults orderBy $.finish)[-1]&#10;		var bestRace = (racerResults orderBy $.elapsed)[0]&#10;		var meanElapsed = avg(racerResults.*elapsed)&#10;		var count = sizeOf(racerResults)&#10;		---&#10;		overallRacerResults ++ {&#10;			count: count,&#10;			mean: meanElapsed,&#10;			best: bestRace,&#10;			first: firstRace,&#10;			last: lastRace&#10;		}&#10;	}]' doc:name="standings" doc:id="6f2e33ce-48fb-4cd9-a5b8-f0b05a3fc520" variableName="standings" />
+		<set-variable value='#[output application/java&#10;&#10;var allResults = &#10;	payload groupBy $.racerId&#10;		pluck (racerResults) -&gt; &#10;			racerResults map (result) -&gt;&#10;				result ++ {&#10;					elapsed: ( // units = seconds&#10;						result.finish as DateTime as Number {unit: "milliseconds"}&#10;						- result.start as DateTime as Number {unit: "milliseconds"}&#10;					) / 1000 &#10;				}&#10;---&#10;allResults map (racerResults) -&gt; do {&#10;		var overallRacerResults = racerResults[0]&#10;		var firstRace = (racerResults orderBy $.finish)[0]&#10;		var lastRace = (racerResults orderBy $.finish)[-1]&#10;		var bestRace = (racerResults orderBy $.elapsed)[0]&#10;		var meanElapsed = avg(racerResults.*elapsed)&#10;		var count = sizeOf(racerResults)&#10;		---&#10;		overallRacerResults ++ {&#10;			count: count,&#10;			mean: meanElapsed,&#10;			best: bestRace,&#10;			first: firstRace,&#10;			last: lastRace,&#10;			races: racerResults&#10;		}&#10;	}]' doc:name="standings" doc:id="6f2e33ce-48fb-4cd9-a5b8-f0b05a3fc520" variableName="standings" />
 		<flow-ref doc:name="updateExchangePortal" doc:id="d81bc732-1e9f-4ec4-9284-cea241f41a00" name="updateExchangePortal" />
 		<logger level="INFO" doc:name="INFO" doc:id="32315898-1b81-4597-ad8d-f12af8708130" message="Leaderboards updated" category="race.leaderboards" />
 		<error-handler>
@@ -36,21 +36,21 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 		</error-handler>
 	</flow>
 	<flow name="updateExchangePortal" doc:id="d855cd7b-54ba-44ca-97ba-08bfb922687d" maxConcurrency="1">
-		<scatter-gather doc:name="Scatter-Gather" doc:id="0267152f-fed0-4e5c-a3df-e63d90d93269">
-			<route>
-				<flow-ref doc:name="updateResultsFirstToFinish" doc:id="c9c83274-1060-4238-87f5-71df187506d5" name="updateResultsFirstToFinish" />
-			</route>
-			<route>
-				<flow-ref doc:name="updateResultsFastest" doc:id="f810329e-b956-445e-b124-7714e96018ff" name="updateResultsFastest" />
-			</route>
-			<route>
-				<flow-ref doc:name="updateResultsMost" doc:id="f8b57231-06f9-4448-bb4e-fae6e2b06ca6" name="updateResultsMost" />
-			</route>
-			<route>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="0267152f-fed0-4e5c-a3df-e63d90d93269" maxConcurrency="2">
+			<route >
 				<flow-ref doc:name="updateHallOfFame" doc:id="78ce42c0-8810-4384-8765-afb2e8481a66" name="updateHallOfFame" />
 			</route>
-			<route>
+			<route >
 				<flow-ref doc:name="updateHome" doc:id="81b65a5e-b4c9-410f-90cf-da65356d5ede" name="updateHome" />
+			</route>
+			<route >
+				<flow-ref doc:name="updateResultsFirstToFinish" doc:id="c9c83274-1060-4238-87f5-71df187506d5" name="updateResultsFirstToFinish" />
+			</route>
+			<route >
+				<flow-ref doc:name="updateResultsFastest" doc:id="f810329e-b956-445e-b124-7714e96018ff" name="updateResultsFastest" />
+			</route>
+			<route >
+				<flow-ref doc:name="updateResultsMost" doc:id="f8b57231-06f9-4448-bb4e-fae6e2b06ca6" name="updateResultsMost" />
 			</route>
 		</scatter-gather>
 		<flow-ref doc:name="publishPortalPageDraft" doc:id="c505526f-738d-476e-a874-55e2a6caa45f" name="publishPortalPageDraft" />
@@ -102,7 +102,6 @@ completedRaces map (race) ->
 	<flow name="updateHome" doc:id="14daa69b-5927-42f1-956e-77f55c65de4f" >
 		<set-payload value="#[dw::pages::Home::markdown(vars.standings)]" doc:name="Home" doc:id="c742653e-0c90-415b-a13c-b8b08fcbb2a0" />
 		<set-variable value="home" doc:name="pagePath" doc:id="e13d3684-c22e-4f90-8d83-ddfe96fd036b" variableName="pagePath"/>
-		<logger level="DEBUG" doc:name="DEBUG" doc:id="3e54dbf9-c07d-48e3-af23-12dfbb42a817" message="#[payload]" category="race.leaderboard"/>
 		<flow-ref doc:name="createPortalPageDraft" doc:id="8e70e200-54dd-473f-98a9-1cc169c83b9b" name="createPortalPageDraft"/>
 	</flow>
 	<flow name="createPortalPageDraft" doc:id="dafd9d2c-f780-4ffc-a9a6-d1553180366c" >

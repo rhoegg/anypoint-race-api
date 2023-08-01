@@ -1,4 +1,5 @@
-import slice from dw::core::Arrays
+import slice, some from dw::core::Arrays
+var timestampFormat = 'MMMM d HH:mm:ss O'
 
 var latestRacerHeader = [
 		"## Latest Racer",
@@ -8,9 +9,10 @@ var latestRacerHeader = [
 fun formatLatestRacer(standings) = do {
 	var latestRace = (standings orderBy $.last.finish)[-1] 
 	---
+	latestRacerHeader ++
 	[
 		"- Name: $(latestRace.racer.displayName)",
-		"- Finished: $(latestRace.last.finish as DateTime as String {format: 'MMMM d HH:mm:ss O'})",
+		"- Finished: $(latestRace.last.finish as DateTime as String {format: timestampFormat})",
 		"- Time: $(latestRace.last.elapsed)s"
 	]
 }
@@ -23,27 +25,33 @@ var speedyHeader = [
 		"| ---- | ---- | --------- |",
 	]
 
-fun formatSpeedy(standings) = 
-	standings map (raceResult, index) ->
-		"| " ++
-		(index + 1) ++
-		" | $(raceResult.racer.displayName)" ++
-		" | $(raceResult.best.elapsed)s"
+fun formatSpeedy(standings) =
+	speedyHeader ++
+	(
+		slice(standings orderBy $.best.elapsed, 0, 4) map (raceResult, index) ->
+			"| " ++
+			(index + 1) ++
+			" | $(raceResult.racer.displayName)" ++
+			" | $(raceResult.best.elapsed)s"
+	)
 
-var ogHeader = [
+var firstHeader = [
 		"",
-		"## OG Racers",
+		"## First Racers",
 		"",
 		"| Rank | Name | First Race |",
 		"| ---- | ---- | ---------- |",
 	]
 
 fun formatFirst(standings) =
-	standings map (raceResult, index) ->
-		" | " ++
-		(index + 1) ++
-		" | $(raceResult.racer.displayName)" ++
-		" | $(raceResult.first.finish as DateTime as String {format: 'MMMM d HH:mm:ss O'})"
+	firstHeader ++
+	(
+		slice(standings orderBy $.first.finish, 0, 4) map (raceResult, index) ->
+			" | " ++
+			(index + 1) ++
+			" | $(raceResult.racer.displayName)" ++
+			" | $(raceResult.first.finish as DateTime as String {format: timestampFormat})"
+	)
 
 var perseveranceHeader = [
 		"",
@@ -55,16 +63,60 @@ var perseveranceHeader = [
 	
 
 fun formatPerseverance(standings) =
-	standings map (raceResult, index) ->
-		"| " ++
-		(index + 1) ++
-		" | $(raceResult.racer.displayName)" ++
-		" | $(raceResult.count)" ++
-		" |"
+	perseveranceHeader ++
+	(
+		slice(standings orderBy (-1 * $.count), 0, 4) map (raceResult, index) ->
+			"| " ++
+			(index + 1) ++
+			" | $(raceResult.racer.displayName)" ++
+			" | $(raceResult.count)" ++
+			" |"
+	)
+
+fun lapHeaderFirst(threshold) = [
+	"",
+	"## First to $(threshold)"
+]
+
+fun lapHeaderFastest(threshold) = [
+	"",
+	"## Fastest $(threshold) laps"
+]
+
+fun formatLaps(standings, threshold = 10) = do {
+	var qualifiedRacers = standings filter (racer) -> ( 
+			racer.races some (race) -> (
+				race.laps >= threshold and race.finish?
+			)
+		)
+	var qualifiedStandings = qualifiedRacers map (racer) ->
+		racer update {
+			case races at .races -> races filter (race) ->
+				race.laps >= threshold
+		}
+	var first = flatten(qualifiedStandings map $.races) minBy $.finish
+	var fastest = flatten(qualifiedStandings map $.races) minBy $.elapsed
+	---
+	if (sizeOf(qualifiedStandings) > 0)
+		lapHeaderFirst(threshold) ++ 
+		[
+			"$(first.racer.displayName) - $(first.finish as DateTime as String {format: timestampFormat})"
+ 		] ++
+		lapHeaderFastest(threshold) ++
+		[
+			"$(fastest.racer.displayName) - $(fastest.elapsed)s"
+		] ++
+		formatLaps(qualifiedStandings, threshold * 10)
+	else
+		[]
+}
+	
 		
 fun markdown(standings) =
-	(latestRacerHeader ++ formatLatestRacer(standings)) ++
-	(speedyHeader ++ formatSpeedy(slice(standings orderBy $.best.elapsed, 0, 4))) ++
-	(ogHeader ++ formatFirst(slice(standings orderBy $.first.finish, 0, 4))) ++
-	(perseveranceHeader ++ formatPerseverance(slice(standings orderBy (-1 * $.count), 0, 4)))
- 		joinBy "\n"
+	(
+		formatLatestRacer(standings) ++
+		formatSpeedy(standings) ++
+		formatFirst(standings) ++
+		formatPerseverance(standings) ++
+		formatLaps(standings)
+	) joinBy "\n"

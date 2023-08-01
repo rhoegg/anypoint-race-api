@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:os="http://www.mulesoft.org/schema/mule/os"
-	xmlns:oauth="http://www.mulesoft.org/schema/mule/oauth"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:sockets="http://www.mulesoft.org/schema/mule/sockets" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:oauth="http://www.mulesoft.org/schema/mule/oauth" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/oauth http://www.mulesoft.org/schema/mule/oauth/current/mule-oauth.xsd
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
-http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/sockets http://www.mulesoft.org/schema/mule/sockets/current/mule-sockets.xsd">
 	<configuration-properties doc:name="Configuration properties" doc:id="7dd03197-6465-46dd-87c5-7f709a4dc803" file="config/config.yaml" />
-	<http:request-config name="exchangeV2HttpRequestConfig" doc:name="HTTP Request configuration" doc:id="4dc19007-7bd0-4d1c-9f92-0d43bef9bfab" basePath="/exchange/api/v2" >
-		<http:request-connection host="anypoint.mulesoft.com" port="443" protocol="HTTPS">
+	<http:request-config name="exchangeV2HttpRequestConfig" doc:name="HTTP Request configuration" doc:id="4dc19007-7bd0-4d1c-9f92-0d43bef9bfab" basePath="/exchange/api/v2" enableCookies="false" responseTimeout="120000">
+		<http:request-connection host="anypoint.mulesoft.com" port="443" protocol="HTTPS" connectionIdleTimeout="150000">
 			<http:authentication >
 				<oauth:client-credentials-grant-type clientId="${anypoint.app.clientId}" clientSecret="${anypoint.app.clientSecret}" tokenUrl="https://anypoint.mulesoft.com/accounts/api/v2/oauth2/token"/>
 			</http:authentication>
+			<http:client-socket-properties >
+				<sockets:tcp-client-socket-properties keepAlive="true" />
+			</http:client-socket-properties>
 		</http:request-connection>
 	</http:request-config>
 	<http:request-config name="accountsHttpRequestConfig" doc:name="HTTP Request configuration" doc:id="e532c8f1-25cb-40e7-a4bf-556e973c6b0b" basePath="/accounts" >
