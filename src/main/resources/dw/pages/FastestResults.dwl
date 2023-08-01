@@ -11,7 +11,7 @@ fun formatResults(standings) =
 		(index + 1) ++
 		" | $(raceResult.racer.displayName)" ++
 		" | $(raceResult.best.elapsed)s" ++
-		" | $(raceResult.best.finish as DateTime as String {format: 'MMMM d HH:mm:ss'})" ++
+		" | $(raceResult.best.finish as DateTime as String {format: 'MMMM d HH:mm:ss O'})" ++
 		" |"
 fun markdown(standings) =
 	(header ++ formatResults(standings orderBy $.best.elapsed))

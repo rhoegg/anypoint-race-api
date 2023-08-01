@@ -64,7 +64,7 @@ completedRaces map (race) ->
 	<flow name="updateHome" doc:id="57d61e64-4ae5-4ff3-a808-852e3db79327" >
 		<set-payload value="#[dw::pages::Home::markdown(vars.standings)]" doc:name="Home" doc:id="a4a5a9c1-de18-4793-8760-d5ffdffb23d1" />
 		<set-variable value="home" doc:name="pagePath" doc:id="e8e4c752-4647-47b7-9a61-c261af2086c3" variableName="pagePath"/>
-		<logger level="INFO" doc:name="INFO" doc:id="858f1e88-64f3-4621-9ac4-0dbf17915901" message="#[payload]" category="race.leaderboard"/>
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="858f1e88-64f3-4621-9ac4-0dbf17915901" message="#[payload]" category="race.leaderboard"/>
 		<flow-ref doc:name="createPortalPageDraft" doc:id="65e9b00d-d758-4333-8d77-6d0d461dfd07" name="createPortalPageDraft"/>
 	</flow>
 	<flow name="publishLeaderboards" doc:id="d54a4520-3dce-49c5-a55e-e0de873cc95c" >
@@ -73,7 +73,10 @@ completedRaces map (race) ->
 				<fixed-frequency frequency="60" timeUnit="SECONDS" startDelay="5"/>
 			</scheduling-strategy>
 		</scheduler>
-<flow-ref doc:name="getFinishedRaces" doc:id="36ff187e-6d7d-4e2a-b6f2-3cf75007e1c5" name="getFinishedRaces" />
+<idempotent-message-validator doc:name="Idempotent Message Validator" doc:id="3726812c-b9fe-4483-bdc9-b89a4e92cc0c" idExpression='#[now() as String {format: "yyyyMMddHHmm"}]' storePrefix="publishLeaderboards">
+			<os:private-object-store alias="publishLeaderboardsObjectStore" persistent="false" maxEntries="10" entryTtl="2" entryTtlUnit="MINUTES" expirationInterval="5" />
+		</idempotent-message-validator>
+		<flow-ref doc:name="getFinishedRaces" doc:id="36ff187e-6d7d-4e2a-b6f2-3cf75007e1c5" name="getFinishedRaces" />
 				<validation:is-not-empty-collection doc:name="races are not empty" doc:id="e7dbc106-f81e-41cf-9fba-b1a9f9f8c90a" >
 			<error-mapping sourceType="VALIDATION:EMPTY_COLLECTION" targetType="APP:NO_RACES_RECORDED" />
 		</validation:is-not-empty-collection>
@@ -98,8 +101,11 @@ completedRaces map (race) ->
 		<flow-ref doc:name="publishPortalPageDraft" doc:id="1f1d938b-d7cf-4f05-b0f0-0f3901a434d8" name="publishPortalPageDraft" />
 		<logger level="INFO" doc:name="INFO" doc:id="babde8a7-95a5-4c85-9ade-73abb5dbe931" message="Leaderboards updated" category="race.leaderboards"/>
 		<error-handler >
-			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="efbdfc4e-bcb7-439a-a134-042b09ae1bc9" >
+			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="efbdfc4e-bcb7-439a-a134-042b09ae1bc9" type="APP:NO_RACES_RECORDED">
 				<logger level="WARN" doc:name="WARN" doc:id="ae18bb21-340e-4cc8-b121-3f3be2151247" message="leaderboard update aborted: no races recorded" category="race.leaderboards"/>
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="fe268fe9-5391-418a-8d31-04af9db5074c" type="MULE:DUPLICATE_MESSAGE">
+				<logger level="DEBUG" doc:name="DEBUG" doc:id="2771a6e5-c7d5-4aee-99a5-6fc65a268ad5" message="Not publishing a second time in the same minute" category="race.publishLeaderboards"/>
 			</on-error-continue>
 		</error-handler>
 	</flow>

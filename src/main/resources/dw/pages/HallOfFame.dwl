@@ -10,7 +10,7 @@ fun formatLatestRacer(standings) = do {
 	---
 	[
 		"- Name: $(latestRace.racer.displayName)",
-		"- Finished: $(latestRace.last.finish as DateTime as String {format: 'MMMM d HH:mm:ss'})",
+		"- Finished: $(latestRace.last.finish as DateTime as String {format: 'MMMM d HH:mm:ss O'})",
 		"- Time: $(latestRace.last.elapsed)s"
 	]
 }
@@ -43,7 +43,7 @@ fun formatFirst(standings) =
 		" | " ++
 		(index + 1) ++
 		" | $(raceResult.racer.displayName)" ++
-		" | $(raceResult.first.finish as DateTime as String {format: 'MMMM d HH:mm:ss'})"
+		" | $(raceResult.first.finish as DateTime as String {format: 'MMMM d HH:mm:ss O'})"
 
 var perseveranceHeader = [
 		"",

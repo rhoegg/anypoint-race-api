@@ -10,7 +10,7 @@ fun formatResults(standings) =
 		"| " ++
 		(index + 1) ++
 		" | $(raceResult.racer.displayName)" ++
-		" | $(raceResult.first.finish as DateTime as String {format: 'MMMM d HH:mm:ss'})" ++
+		" | $(raceResult.first.finish as DateTime as String {format: 'MMMM d HH:mm:ss O'})" ++
 		" | $(raceResult.first.elapsed)s" ++
 		" | $(raceResult.best.elapsed)s" ++ 
 		" |"
