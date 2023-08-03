@@ -3,7 +3,7 @@
     <http:listener-config name="anypoint-race-api-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
-    <apikit:config name="anypoint-race-api-config" api="resource::b507dcaa-0d5b-42e9-9446-97b82d7bf81e:anypoint-race-api:1.1.2:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:1.0.0:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="anypoint-race-api-main">
         <http:listener config-ref="anypoint-race-api-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -140,5 +140,11 @@ output application/json
     </flow>
 	<flow name="post:\racers\(racerId)\races\(raceId)\finish:text\plain:anypoint-race-api-config">
         <flow-ref doc:name="finishRace" doc:id="1a10b516-7962-4752-9338-a3155e20fc7f" name="finishRace" />
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="b6a4ad9b-dfdc-40bc-8812-71c14b1a67f0" type="APP:INVALID_RACE_TOKEN">
+				<set-variable value="400" doc:name="httpStatus = 400" doc:id="2fda5507-d927-4381-b7dd-46e42feafe3f" variableName="httpStatus"/>
+				<set-payload value="invalid race token" doc:name="invalid race token" doc:id="4fa0c764-f788-4588-8a47-996b8f92937e" />
+			</on-error-continue>
+		</error-handler>
     </flow>
 </mule>

@@ -9,7 +9,7 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
 http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
 	<ee:object-store-caching-strategy name="racerIdCachingStrategy" doc:name="Caching Strategy" doc:id="8b2f7bb7-e055-434b-929c-bb931b876ad4" keyGenerationExpression="#[attributes.headers.client_id]" >
-		<os:private-object-store alias="registerCacheObjectStore" entryTtl="30" entryTtlUnit="DAYS" />
+		<os:private-object-store alias="registerCacheObjectStore" entryTtl="30" entryTtlUnit="DAYS"/>
 	</ee:object-store-caching-strategy>
 	<sub-flow name="getRacerId" doc:id="ecc8b7d9-7dfa-40a2-b3d9-16d899fca337" >
 		<ee:cache doc:name="Cache racerId" doc:id="8457d465-618c-45e0-b46e-353ef37f331e" cachingStrategy-ref="racerIdCachingStrategy">
@@ -87,7 +87,7 @@ output application/json
 		<validation:is-null doc:name="Is null" doc:id="e284ddd6-d5f1-4e0e-a835-c1703726f061" value="#[vars.race.finish]">
 			<error-mapping sourceType="VALIDATION:NOT_NULL" targetType="APP:LAP_FORBIDDEN" />
 		</validation:is-null>
-		<set-variable value='#[import mergeWith from dw::core::Objects&#10;output application/json&#10;var lastLapStart = vars.race.lapStart default vars.race.start&#10;var elapsed = (vars.lapStart - lastLapStart) as Number {unit: "milliseconds"} / 1000&#10;--- &#10;vars.race mergeWith {&#10;	laps: (vars.race.laps default 0) + 61,&#10;	lapStart: vars.lapStart,&#10;	lastLapElapsed: elapsed&#10;}]' doc:name="race + new lap" doc:id="e0e45b2e-ad5d-4841-b97c-97c549032ea9" variableName="race"/>
+		<set-variable value='#[import mergeWith from dw::core::Objects&#10;output application/json&#10;var lastLapStart = vars.race.lapStart default vars.race.start&#10;var elapsed = (vars.lapStart - lastLapStart) as Number {unit: "milliseconds"} / 1000&#10;--- &#10;vars.race mergeWith {&#10;	laps: (vars.race.laps default 0) + 1,&#10;	lapStart: vars.lapStart,&#10;	lastLapElapsed: elapsed&#10;}]' doc:name="race + new lap" doc:id="e0e45b2e-ad5d-4841-b97c-97c549032ea9" variableName="race"/>
 		<set-variable value="#[vars.race update { case .token -&gt; uuid() }]" doc:name="rotate race token" doc:id="0f4be36b-eb9e-47eb-a32e-4e3c053f3c7e" variableName="race"/>
 		<os:store doc:name="race" doc:id="12acdbef-21db-4640-983b-2e87f9b5604a" key="#[vars.raceId]" objectStore="raceObjectStore" >
 			<os:value ><![CDATA[#[vars.race]]]></os:value>

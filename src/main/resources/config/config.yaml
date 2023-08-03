@@ -1,18 +1,18 @@
 anypoint:
   api:
-    id: "18865119"
+    id: "18871097"
   app:
-    clientId: "bf857b9be7864cb5a98c3e89ae8c9bf6"
-    clientSecret: "64Fb288641994BBd86E4538000958856"
-  businessGroup: "b507dcaa-0d5b-42e9-9446-97b82d7bf81e"
+    clientId: "xxxxx"
+    clientSecret: "yyyyy"
+  businessGroup: "ae6d7954-6fc2-4f3e-8777-80ff8aabd859"
   portal:
     assetId: anypoint-race-api
-    version: "1.1.2"
+    version: "1.0.0"
     pages:
       results:
-        firstToFinish: "yhd-zsf/Results: First to Finish"
-        fastest: "ezc-wes/Results: Fastest"
-        most: "f1l-f5o/Results: Perseverance"
-        halloffame: "ihl-aks/Hall of Fame"  
+        firstToFinish: "90u-n91/Results: First to Finish"
+        fastest: "5sl-367/Results: Fastest"
+        most: "vjf-28f/Results: Perseverance"
+        halloffame: "qz7-40n/Hall of Fame"  
     
       

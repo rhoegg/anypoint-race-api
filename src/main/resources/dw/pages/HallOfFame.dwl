@@ -86,7 +86,7 @@ fun lapHeaderFastest(threshold) = [
 fun formatLaps(standings, threshold = 10) = do {
 	var qualifiedRacers = standings filter (racer) -> ( 
 			racer.races some (race) -> (
-				race.laps >= threshold and race.finish?
+				race.finish? and race.laps? and (race.laps >= threshold)
 			)
 		)
 	var qualifiedStandings = qualifiedRacers map (racer) ->
@@ -117,6 +117,6 @@ fun markdown(standings) =
 		formatLatestRacer(standings) ++
 		formatSpeedy(standings) ++
 		formatFirst(standings) ++
-		formatPerseverance(standings) ++
-		formatLaps(standings)
+		formatPerseverance(standings) //++
+		//formatLaps(standings)
 	) joinBy "\n"
