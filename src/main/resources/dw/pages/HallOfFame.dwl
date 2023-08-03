@@ -117,6 +117,6 @@ fun markdown(standings) =
 		formatLatestRacer(standings) ++
 		formatSpeedy(standings) ++
 		formatFirst(standings) ++
-		formatPerseverance(standings) //++
-		//formatLaps(standings)
+		formatPerseverance(standings) ++
+		formatLaps(standings)
 	) joinBy "\n"

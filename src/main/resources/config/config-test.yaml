@@ -1,0 +1,16 @@
+anypoint:
+  api:
+    id: "18871013"
+  app:
+    clientId: "xxxxx"
+    clientSecret: "yyyyy"
+  businessGroup: "a0078bb2-7721-4171-be84-7106dc5e1486"
+  portal:
+    assetId: anypoint-race-api
+    version: "1.0.1"
+    pages:
+      results:
+        firstToFinish: "kz2-1j6/Results: First to Finish"
+        fastest: "48h-98s/Results: Fastest"
+        most: "w3c-47j/Results: Perseverance"
+        halloffame: "t9t-xjb/Hall of Fame" 
