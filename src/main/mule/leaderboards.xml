@@ -19,6 +19,7 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 <idempotent-message-validator doc:name="Idempotent Message Validator" doc:id="b8750c7e-949c-4b7c-8868-b47526f8a3f8" idExpression='#[now() as String {format: "yyyyMMddHHmm"}]' storePrefix="publishLeaderboards">
 			<os:private-object-store alias="publishLeaderboardsObjectStore" persistent="false" maxEntries="10" entryTtl="2" entryTtlUnit="MINUTES" expirationInterval="5" />
 		</idempotent-message-validator>
+		<logger level="INFO" doc:name="INFO" doc:id="42b455b9-b793-4d3a-88b2-56b90a4ef0a6" message="Starting leaderboard update" category="race.leaderboards"/>
 		<flow-ref doc:name="getFinishedRaces" doc:id="7d39b98f-41ff-4613-8937-36bf4317c64e" name="getFinishedRaces" />
 				<validation:is-not-empty-collection doc:name="races are not empty" doc:id="25c6e773-5980-4da8-adbb-8f7c2f0352a6">
 			<error-mapping sourceType="VALIDATION:EMPTY_COLLECTION" targetType="APP:NO_RACES_RECORDED" />

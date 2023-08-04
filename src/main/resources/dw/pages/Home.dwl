@@ -1,5 +1,5 @@
 fun formatNewestRacer(standings) = do {
-	var newestRace = (standings orderBy $.first.start)[0] 
+	var newestRace = (standings orderBy $.first.start)[-1]
 	---
 	[
 		"",
@@ -16,7 +16,11 @@ var instructions = [
 	" - Gain access to the Race API",
 	" - Register yourself as a racer",
 	" - Start a race",
-	" - Finish your race"
+	" - Finish your race",
+	"",
+	"## Need help? Notice a problem?",
+	"",
+	"You can file an issue [here](https://github.com/rhoegg/anypoint-race-api/issues)."
 ]
 
 fun markdown(standings) =

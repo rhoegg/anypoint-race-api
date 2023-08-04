@@ -92,7 +92,7 @@ fun formatLaps(standings, threshold = 10) = do {
 	var qualifiedStandings = qualifiedRacers map (racer) ->
 		racer update {
 			case races at .races -> races filter (race) ->
-				race.laps >= threshold
+				(race.finish? and race.laps? and (race.laps >= threshold))
 		}
 	var first = flatten(qualifiedStandings map $.races) minBy $.finish
 	var fastest = flatten(qualifiedStandings map $.races) minBy $.elapsed
