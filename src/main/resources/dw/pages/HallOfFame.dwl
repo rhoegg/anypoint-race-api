@@ -28,7 +28,7 @@ var speedyHeader = [
 fun formatSpeedy(standings) =
 	speedyHeader ++
 	(
-		slice(standings orderBy $.best.elapsed, 0, 4) map (raceResult, index) ->
+		slice(standings orderBy $.best.elapsed, 0, 10) map (raceResult, index) ->
 			"| " ++
 			(index + 1) ++
 			" | $(raceResult.racer.displayName)" ++
@@ -46,7 +46,7 @@ var firstHeader = [
 fun formatFirst(standings) =
 	firstHeader ++
 	(
-		slice(standings orderBy $.first.finish, 0, 4) map (raceResult, index) ->
+		slice(standings orderBy $.first.finish, 0, 10) map (raceResult, index) ->
 			" | " ++
 			(index + 1) ++
 			" | $(raceResult.racer.displayName)" ++
@@ -65,7 +65,7 @@ var perseveranceHeader = [
 fun formatPerseverance(standings) =
 	perseveranceHeader ++
 	(
-		slice(standings orderBy (-1 * $.count), 0, 4) map (raceResult, index) ->
+		slice(standings orderBy (-1 * $.count), 0, 10) map (raceResult, index) ->
 			"| " ++
 			(index + 1) ++
 			" | $(raceResult.racer.displayName)" ++

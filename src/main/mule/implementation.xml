@@ -138,6 +138,8 @@ var time = vars.race.finish - vars.race.start
 		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="ef2af9e6-6288-4fce-b92f-615e3f2f41e3" variableName="racerId" />
 		<flow-ref doc:name="retrieveRacer" doc:id="2f7b3f1d-bbb1-42a6-8161-0c0b6614489a" name="retrieveRacer" target="racer" />
 		<set-variable value="#[attributes.uriParams.raceId]" doc:name="raceId" doc:id="82a6e5a1-d831-4c19-9351-45b70e414b56" variableName="raceId" />
-		<os:retrieve doc:name="race" doc:id="b4b906fc-cd21-469a-b0f6-08bdf7a783da" key="#[vars.raceId]" objectStore="raceObjectStore" target="race" targetValue="#[output application/json --- payload]" />
+		<os:retrieve doc:name="race" doc:id="b4b906fc-cd21-469a-b0f6-08bdf7a783da" key="#[vars.raceId]" objectStore="raceObjectStore" target="race" targetValue="#[output application/json --- payload]" >
+			<error-mapping sourceType="OS:KEY_NOT_FOUND" targetType="APP:INVALID_RACE" />
+		</os:retrieve>
 	</sub-flow>
 </mule>

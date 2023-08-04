@@ -117,8 +117,22 @@ completedRaces map (race) ->
 	"pagePath" : vars.pagePath
 }]]]></http:uri-params>
 		</http:request>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="eba4d322-2c1b-454f-9b1c-dce32dd80e13" type="HTTP:SERVICE_UNAVAILABLE, HTTP:TIMEOUT">
+				<logger level="WARN" doc:name="WARN" doc:id="f8b0be03-11a0-4dfb-821f-9755b70e90ec" message="Failed to update #[vars.pagePath]: #[error.description]" category="race.leaderboards"/>
+			</on-error-continue>
+		</error-handler>
 	</flow>
 	<flow name="publishPortalPageDraft" doc:id="65d05d06-7bb0-4760-818b-e6c8917af728" >
-		<http:request method="PATCH" doc:name="PATCH .../portal" doc:id="d051212c-9cf1-49ab-b3eb-55a912e7105f" config-ref="exchangeV2HttpRequestConfig" path="/assets/${anypoint.businessGroup}/${anypoint.portal.assetId}/${anypoint.portal.version}/portal" responseTimeout="55000"/>
+		<until-successful maxRetries="2" doc:name="Until Successful" doc:id="2950c063-a736-493e-ba33-3ca3899e9ad4" millisBetweenRetries="3000">
+			<try doc:name="Try" doc:id="150c9973-6bb9-4d9b-ae73-608a5f67ad4d" >
+				<http:request method="PATCH" doc:name="PATCH .../portal" doc:id="d051212c-9cf1-49ab-b3eb-55a912e7105f" config-ref="exchangeV2HttpRequestConfig" path="/assets/${anypoint.businessGroup}/${anypoint.portal.assetId}/${anypoint.portal.version}/portal" responseTimeout="55000" />
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="5f85ff1c-e001-48f7-8ecd-1950a4ede8e0" type="HTTP:BAD_REQUEST, HTTP:CLIENT_SECURITY, HTTP:FORBIDDEN, HTTP:METHOD_NOT_ALLOWED, HTTP:NOT_ACCEPTABLE, HTTP:NOT_FOUND, HTTP:TOO_MANY_REQUESTS, HTTP:UNAUTHORIZED, HTTP:UNSUPPORTED_MEDIA_TYPE">
+						<logger level="ERROR" doc:name="ERROR" doc:id="fb685020-2afa-4904-9b94-d6daf421744f" message="Fatal error publishing portal: #[error.description]" category="race.leaderboards"/>
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</until-successful>
 	</flow>
 </mule>

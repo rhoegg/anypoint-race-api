@@ -145,6 +145,10 @@ output application/json
 				<set-variable value="400" doc:name="httpStatus = 400" doc:id="2fda5507-d927-4381-b7dd-46e42feafe3f" variableName="httpStatus"/>
 				<set-payload value="invalid race token" doc:name="invalid race token" doc:id="4fa0c764-f788-4588-8a47-996b8f92937e" />
 			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="d5733da9-da92-4df1-919a-3ffd5c5fedc6" type="APP:INVALID_RACE">
+				<set-variable value="404" doc:name="httpStatus = 404" doc:id="8edfd840-a3f8-4ed6-97f8-8ef1ff6f7ea9" variableName="httpStatus"/>
+				<set-payload value="race not found" doc:name="race not found" doc:id="9badec58-2aec-4fc6-9c9b-5c6209ec50f1" />
+			</on-error-continue>
 		</error-handler>
     </flow>
 </mule>
