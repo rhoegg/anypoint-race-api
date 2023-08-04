@@ -11,9 +11,9 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
 	<flow name="publishLeaderboards" doc:id="b0d01136-5f96-43f5-a3c1-958c34590ab1">
-		<scheduler doc:name="Every 60 seconds" doc:id="2b287e8f-00e5-4d78-aa2f-1041aad38402">
+		<scheduler doc:name="Every 2.5 minutes" doc:id="2b287e8f-00e5-4d78-aa2f-1041aad38402">
 			<scheduling-strategy>
-				<fixed-frequency frequency="60" timeUnit="SECONDS" startDelay="5" />
+				<fixed-frequency frequency="150" timeUnit="SECONDS" startDelay="5" />
 			</scheduling-strategy>
 		</scheduler>
 <idempotent-message-validator doc:name="Idempotent Message Validator" doc:id="b8750c7e-949c-4b7c-8868-b47526f8a3f8" idExpression='#[now() as String {format: "yyyyMMddHHmm"}]' storePrefix="publishLeaderboards">
@@ -106,7 +106,7 @@ completedRaces map (race) ->
 		<flow-ref doc:name="createPortalPageDraft" doc:id="8e70e200-54dd-473f-98a9-1cc169c83b9b" name="createPortalPageDraft"/>
 	</flow>
 	<flow name="createPortalPageDraft" doc:id="dafd9d2c-f780-4ffc-a9a6-d1553180366c" >
-		<http:request method="PUT" doc:name="PUT .../portal/draft/pages/{pageName}" doc:id="124a529d-a1e7-4c83-aa22-790e78696dcd" config-ref="exchangeV2HttpRequestConfig" path="/assets/${anypoint.businessGroup}/${anypoint.portal.assetId}/${anypoint.portal.version}/portal/draft/pages/{pagePath}" responseTimeout="55000">
+		<http:request method="PUT" doc:name="PUT .../portal/draft/pages/{pageName}" doc:id="124a529d-a1e7-4c83-aa22-790e78696dcd" config-ref="exchangeV2HttpRequestConfig" path="/assets/${anypoint.businessGroup}/${anypoint.portal.assetId}/${anypoint.portal.version}/portal/draft/pages/{pagePath}" responseTimeout="${anypoint.portal.timeout}">
 			<http:headers ><![CDATA[#[output application/java
 ---
 {

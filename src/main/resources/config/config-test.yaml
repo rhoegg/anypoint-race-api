@@ -8,6 +8,7 @@ anypoint:
   portal:
     assetId: anypoint-race-api
     version: "1.0.1"
+    timeout: "20000"
     pages:
       results:
         firstToFinish: "kz2-1j6/Results: First to Finish"
