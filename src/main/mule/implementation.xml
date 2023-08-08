@@ -44,6 +44,9 @@ output application/json
 		</validation:is-not-null>
 		<os:retrieve doc:name="racer" doc:id="a82b00ca-e0ee-40b1-8728-e255d3307533" key="#['racer.' ++ vars.racerId]" objectStore="racerObjectStore"/>
 		<set-payload value="#[output application/json --- payload]" doc:name="to JSON" doc:id="fba8fefb-4ba8-48d8-9fa6-ab448184033d" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="55a0fc06-9792-4e4a-85c5-c3da80fd96a2" />
+		</error-handler>
 	</flow>
 	<flow name="startRace" doc:id="4327921b-3d52-47e3-855a-f59691c3a831">
 		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="06891a06-af15-4c69-b1b6-1ac9d98236a1" variableName="racerId" />
@@ -105,6 +108,9 @@ output application/json
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="INFO" doc:id="b17f5de4-e1a6-4b0e-b9a9-08f4a5bc06aa" message="racer #[vars.racerId] finished a lap in race #[vars.raceId]" category="race.lap"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="768dec70-9d72-4f56-943a-164286717fe7" />
+		</error-handler>
 	</flow>
 	<flow name="finishRace" doc:id="2958156d-0447-4dc6-85d2-a42c117388ba">
 		<set-variable value="#[now()]" doc:name="finish" doc:id="e69aaf15-9103-4b99-b656-d089846eca66" variableName="finish" />
@@ -133,6 +139,9 @@ var time = vars.race.finish - vars.race.start
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="INFO" doc:id="34ae51e6-4b7c-4e0e-87de-93c9cb1728da" message="racer #[vars.racerId] finished race #[vars.raceId]" category="race.finish"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="ff8c7c3b-5d60-415a-b520-caba69d05fa1" />
+		</error-handler>
 	</flow>
 	<sub-flow name="lookupRaceAndRacer" doc:id="3db4429f-8267-4166-b99f-51797d7dfaa0">
 		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="ef2af9e6-6288-4fce-b92f-615e3f2f41e3" variableName="racerId" />

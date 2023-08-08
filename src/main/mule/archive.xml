@@ -151,7 +151,7 @@ take(payload, batchSize)]]></ee:set-payload>
 			<vm:publish doc:name="key to migrate" doc:id="28f1c8ca-2aca-4a8a-b45d-c627ab71bc8b" config-ref="VM_Config" queueName="migrate" />
 		</foreach>
 	</flow>
-	<flow name="archiveFlow" doc:id="f42f99e3-b3e0-4207-9607-b77053662008" >
+	<flow name="migrateRacesPaced" doc:id="f42f99e3-b3e0-4207-9607-b77053662008" >
 		<scheduler doc:name="4 TPS" doc:id="d4072c8f-4284-46d8-9c6d-02410552fda9" >
 			<scheduling-strategy >
 				<fixed-frequency frequency="250" startDelay="30000"/>
