@@ -26,4 +26,5 @@ http://www.mulesoft.org/schema/mule/sockets http://www.mulesoft.org/schema/mule/
 	<os:object-store name="raceObjectStore" doc:name="Object store" doc:id="8b0941ba-f561-4df7-beb8-01ccd0c99cf8" entryTtl="30" entryTtlUnit="DAYS" />
 	<api-gateway:autodiscovery apiId="${anypoint.api.id}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="7e1fbca3-3bff-4464-acd9-f2ce95227e3e" flowRef="anypoint-race-api-main" />
 	<global-property doc:name="Global Property" doc:id="5742da46-ae77-46bf-a79f-bde3033cdb0d" name="mule.env" value="prod" />
+	<os:object-store name="hotRaceObjectStore" doc:name="Object store" doc:id="49b88d50-05c4-49cf-81a7-d209a2eaa218" persistent="false" entryTtl="7" entryTtlUnit="DAYS" expirationIntervalUnit="HOURS" />
 </mule>

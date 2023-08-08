@@ -62,7 +62,7 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<os:store doc:name="raceId" doc:id="a21edcbe-3350-47ae-bc01-36e309ccc519" objectStore="raceObjectStore" key="#[vars.raceId]" failIfPresent="true" />
+		<os:store doc:name="raceId" doc:id="a21edcbe-3350-47ae-bc01-36e309ccc519" objectStore="hotRaceObjectStore" key="#[vars.raceId]" failIfPresent="true" />
 		<ee:transform doc:name="response" doc:id="7e13d1b7-ee12-4c1e-9622-94bd36337f88" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -89,7 +89,7 @@ output application/json
 		</validation:is-null>
 		<set-variable value='#[import mergeWith from dw::core::Objects&#10;output application/json&#10;var lastLapStart = vars.race.lapStart default vars.race.start&#10;var elapsed = (vars.lapStart - lastLapStart) as Number {unit: "milliseconds"} / 1000&#10;--- &#10;vars.race mergeWith {&#10;	laps: (vars.race.laps default 0) + 1,&#10;	lapStart: vars.lapStart,&#10;	lastLapElapsed: elapsed&#10;}]' doc:name="race + new lap" doc:id="e0e45b2e-ad5d-4841-b97c-97c549032ea9" variableName="race"/>
 		<set-variable value="#[vars.race update { case .token -&gt; uuid() }]" doc:name="rotate race token" doc:id="0f4be36b-eb9e-47eb-a32e-4e3c053f3c7e" variableName="race"/>
-		<os:store doc:name="race" doc:id="12acdbef-21db-4640-983b-2e87f9b5604a" key="#[vars.raceId]" objectStore="raceObjectStore" >
+		<os:store doc:name="race" doc:id="12acdbef-21db-4640-983b-2e87f9b5604a" key="#[vars.raceId]" objectStore="hotRaceObjectStore" >
 			<os:value ><![CDATA[#[vars.race]]]></os:value>
 		</os:store>
 		<ee:transform doc:name="response" doc:id="923b9b21-7c53-47ea-a632-bdf291de2c86" >
@@ -114,7 +114,7 @@ output application/json
 			<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="APP:INVALID_RACE_TOKEN" />
 		</validation:is-true>
 		<set-variable value="#[output application/json --- vars.race ++ {finish: vars.finish}]" doc:name="race + finish time" doc:id="45c7a484-a4b3-449d-97ec-253284624c66" variableName="race" />
-		<os:store doc:name="race" doc:id="484d5e71-4010-4818-8b3d-faeb403b0117" key="#[vars.raceId]" objectStore="raceObjectStore">
+		<os:store doc:name="race" doc:id="484d5e71-4010-4818-8b3d-faeb403b0117" key="#[vars.raceId]" objectStore="hotRaceObjectStore">
 			<os:value><![CDATA[#[vars.race]]]></os:value>
 		</os:store>
 		<ee:transform doc:name="response" doc:id="ee5cd78a-b9d4-40f4-af10-55fc665a7ac3">
@@ -138,7 +138,7 @@ var time = vars.race.finish - vars.race.start
 		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="ef2af9e6-6288-4fce-b92f-615e3f2f41e3" variableName="racerId" />
 		<flow-ref doc:name="retrieveRacer" doc:id="2f7b3f1d-bbb1-42a6-8161-0c0b6614489a" name="retrieveRacer" target="racer" />
 		<set-variable value="#[attributes.uriParams.raceId]" doc:name="raceId" doc:id="82a6e5a1-d831-4c19-9351-45b70e414b56" variableName="raceId" />
-		<os:retrieve doc:name="race" doc:id="b4b906fc-cd21-469a-b0f6-08bdf7a783da" key="#[vars.raceId]" objectStore="raceObjectStore" target="race" targetValue="#[output application/json --- payload]" >
+		<os:retrieve doc:name="race" doc:id="b4b906fc-cd21-469a-b0f6-08bdf7a783da" key="#[vars.raceId]" objectStore="hotRaceObjectStore" target="race" targetValue="#[output application/json --- payload]" >
 			<error-mapping sourceType="OS:KEY_NOT_FOUND" targetType="APP:INVALID_RACE" />
 		</os:retrieve>
 	</sub-flow>

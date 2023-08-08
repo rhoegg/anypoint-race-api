@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+	<http:request-config name="fakeLocalHttpRequestConfig" doc:name="HTTP Request configuration" doc:id="e69026db-2ece-4d1f-ac86-bb7a0e6dfd5b" >
+		<http:request-connection host="localhost" port="8081" />
+	</http:request-config>
+	<vm:config name="VM_Config" doc:name="VM Config" doc:id="7e15a8dd-dc36-44a0-bdf2-5a70db42c6db" >
+		<vm:queues >
+			<vm:queue queueName="migrate" />
+		</vm:queues>
+	</vm:config>
+	<flow name="fakeRaces" doc:id="856f63f0-195d-4413-a3ac-bb4baa1821db" >
+		<ee:transform doc:name="3 clients" doc:id="10461a9b-f898-4991-8f0e-b32d05f5c78c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+[
+	{
+		clientId: "2c8b79ae19d54ae08f9d7155cb66ada3",
+		clientSecret: "01758644fc064d799157aC21E0661362",
+		racerId: "294c86a8-90f2-45de-b52c-c5a4374b3167"
+	},
+	{
+		clientId: "900e869637ad400bb6c9721e2589f8f2",
+		clientSecret: "7453C4D5ff4d487fBD4b723c5A3Cadb2",
+		racerId: "1b660f47-cb44-4ce8-bf1b-b4e5dffca8ca"
+	},
+	{
+		clientId: "42d537c8c8d84d8f8b6717f3d60061bb",
+		clientSecret: "49c11D1bE1A445AAAa8f0C638fA90615",
+		racerId: "6d7c16ca-ec73-454e-9f27-65f73aae48fd"
+	}
+]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<parallel-foreach doc:name="Parallel for each" doc:id="44e64a60-720f-49fd-98c7-37c372563b5a">
+			<set-variable value="#[payload]" doc:name="racer" doc:id="6f3d1778-b0a0-41ab-b991-22767c1b0974" variableName="racer"/>
+			<http:request method="POST" doc:name="start" doc:id="65a85ec0-55d3-4baf-a1fa-5307d7beaaa4" config-ref="fakeLocalHttpRequestConfig" path="/api/racers/{racerId}/start">
+				<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_secret" : vars.racer.clientSecret,
+	"client_id" : vars.racer.clientId
+}]]]></http:headers>
+				<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"racerId" : vars.racer.racerId
+}]]]></http:uri-params>
+			</http:request>
+			<set-variable value="#[payload.token]" doc:name="token" doc:id="877c70fc-83ee-4ec7-9d2b-e82d30e5fbd6" variableName="token"/>
+			<set-variable value="#[payload.raceId]" doc:name="raceId" doc:id="3194d592-5dda-4459-a56f-1efb6aede7d3" variableName="raceId"/>
+			<http:request method="POST" doc:name="finish" doc:id="3b24c7ee-be3e-4368-8be5-c533c2897b6c" config-ref="fakeLocalHttpRequestConfig" path="/api/racers/{racerId}/races/{raceId}/finish">
+				<http:body ><![CDATA[#[output text/plain --- vars.token]]]></http:body>
+				<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_secret" : vars.racer.clientSecret,
+	"client_id" : vars.racer.clientId
+}]]]></http:headers>
+				<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"raceId" : vars.raceId,
+	"racerId" : vars.racer.racerId
+}]]]></http:uri-params>
+			</http:request>
+		</parallel-foreach>
+	</flow>
+	<flow name="archiveRaces" doc:id="a7fdb83d-1914-47f6-a789-59629ab4ab56" maxConcurrency="1">
+		<scheduler doc:name="15 minutes" doc:id="90ff0f64-cb8d-4c00-b82f-22d74f222244" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="15" startDelay="3" timeUnit="MINUTES"/>
+			</scheduling-strategy>
+		</scheduler>
+		<idempotent-message-validator doc:name="Idempotent Message Validator" doc:id="e56431d6-78ac-4509-9701-745225889af0" idExpression='#[now() as String {format: "yyyyMMddHHmm"}]'/>
+		<os:retrieve-all doc:name="races from hot storage" doc:id="f60a000e-f45d-4c65-8ac6-899e676d8ac5" objectStore="hotRaceObjectStore"/>
+		<ee:transform doc:name="group by racer" doc:id="98e616c7-267e-40ab-9545-f45d9b34beaa" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+(payload pluck (data) -> read(data, "application/json"))
+	groupBy $.racerId
+	pluck (raceGroup) -> raceGroup]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Each racer's races" doc:id="0edd4538-bc60-4017-929e-75c1e5fbabb0" >
+			<os:retrieve doc:name="currentPage" doc:id="bd3bd353-aa2f-4252-866a-9d6f4e3c0003" key='#["racer." ++ payload[0].racerId ++ ".races.currentPage"]' objectStore="racerObjectStore" target="currentPage" targetValue="#[output application/json --- payload]">
+				<os:default-value ><![CDATA[#[output application/json --- []]]]></os:default-value>
+			</os:retrieve>
+			<ee:transform doc:name="new pages" doc:id="6e7c0fa3-95a4-4e36-b3d0-6867187a03d4" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+import * from dw::core::Arrays
+output application/json
+
+var pageSize = 10000
+var newPages = (vars.currentPage ++ payload) divideBy pageSize
+---
+{
+	currentPage: newPages[-1],
+	pages: newPages[0 to -2] default [],
+	raceIds: payload map $.raceId
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<set-variable value="#[payload.currentPage[0].racerId]" doc:name="racerId" doc:id="cb010920-342b-4d0d-b22e-b462e301d61d" variableName="racerId"/>
+			<os:store doc:name="currentPage" doc:id="b5d8d630-1640-4cfa-9082-b73eb71785e1" objectStore="racerObjectStore" key='#["racer." ++ vars.racerId ++ ".races.currentPage"]'>
+				<os:value ><![CDATA[#[payload.currentPage]]]></os:value>
+			</os:store>
+			<parallel-foreach doc:name="pages" doc:id="e8e20fde-bcdb-4c65-a2be-2fa3329bf466" collection="#[payload.pages]" target="pagesResult">
+				<os:store doc:name="page" doc:id="3cec54dc-005d-4747-a41a-3f305afb462c" objectStore="racerObjectStore" key='#["racer." ++ vars.racerId ++ ".races.page." ++ uuid()]'/>
+			</parallel-foreach>
+			<logger level="INFO" doc:name="INFO" doc:id="4f970b1d-2cf5-4b45-be62-9a8f003dbbe9" message="archived races #[payload.raceIds] for racer #[vars.racerId]" category="race.archive"/>
+			<parallel-foreach doc:name="raceIds" doc:id="f68e1c44-b3ef-4f35-82fb-d9e537a70668" maxConcurrency="8" collection="#[payload.raceIds]">
+				<os:remove doc:name="raceId" doc:id="826a6596-e1d5-43b1-b319-f0fef1d136ac" key="#[payload]" objectStore="hotRaceObjectStore"/>
+			</parallel-foreach>
+		</foreach>
+	</flow>
+	<flow name="migrateOriginalRaces" doc:id="b25633af-83c1-4496-a508-426c62f82ee3" >
+		<scheduler doc:name="5 minutes" doc:id="ad266f53-4546-4a75-b42b-6aaa13690e37">
+			<scheduling-strategy>
+				<fixed-frequency frequency="300" timeUnit="SECONDS" startDelay="30"/>
+			</scheduling-strategy>
+		</scheduler>
+		<idempotent-message-validator doc:name="Idempotent Message Validator" doc:id="15e22687-92d7-4393-919d-2f1e5c5e405d" idExpression='#[now() as String {format: "yyyyMMddHHmm"}]'/>
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="1b6da768-909f-45af-af43-3e596d437a37" category="race.archive" message="Migrating original races"/>
+		<os:retrieve-all-keys doc:name="from original storage" doc:id="9a4b2451-435c-4040-8d2b-2dc7bf6cbab3" objectStore="raceObjectStore"/>
+		<ee:transform doc:name="batch" doc:id="9e0d85ee-20d7-4c5a-b7ec-dbaf9accd081" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+import take from dw::core::Arrays
+output application/json
+
+var tps = 4 // retrieve and remove might both count?
+var batchSize = 5 * 60 * tps - 2 // wiggle room
+---
+take(payload, batchSize)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="INFO" doc:id="cb1bc619-c8c7-4e58-9b76-430ba99b06c9" message="migrating races #[payload]" category="race.archive"/>
+		<foreach doc:name="For Each" doc:id="d97b0598-3987-4ba9-b4de-578da1fa510b">
+			<vm:publish doc:name="key to migrate" doc:id="28f1c8ca-2aca-4a8a-b45d-c627ab71bc8b" config-ref="VM_Config" queueName="migrate" />
+		</foreach>
+	</flow>
+	<flow name="archiveFlow" doc:id="f42f99e3-b3e0-4207-9607-b77053662008" >
+		<scheduler doc:name="4 TPS" doc:id="d4072c8f-4284-46d8-9c6d-02410552fda9" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="250" startDelay="30000"/>
+			</scheduling-strategy>
+		</scheduler>
+		<vm:consume queueName="migrate" doc:name="key to migrate" doc:id="164dd062-3904-46b7-b43f-e731207e65fb" config-ref="VM_Config" timeout="50" timeoutUnit="MILLISECONDS"/>
+		<set-variable value="#[payload]" doc:name="raceId" doc:id="077d6530-3e6e-4799-b8ad-e3169a61119f" variableName="raceId" />
+		<os:retrieve doc:name="original storage" doc:id="6e9ca8e5-fe90-4c2f-826a-f936d32b6b7b" key="#[vars.raceId]" objectStore="raceObjectStore" />
+		<os:store doc:name="hot storage" doc:id="3176b280-82a1-4f8e-adbe-2a902f3027b9" key="#[vars.raceId]" objectStore="hotRaceObjectStore" />
+		<os:remove doc:name="original storage" doc:id="ab2d3d9c-cb8e-4a1f-bc8b-bee5acf633c8" key="#[vars.raceId]" objectStore="raceObjectStore" />
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="c848bcf3-e038-4fa6-9d4b-fc8f4eaa5e05" message="Migrated race #[vars.raceId] to hot storage" category="race.archive" />
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="b198ea3e-13b7-4948-a639-85e65e9b558b" type="VM:EMPTY_QUEUE">
+				<logger level="TRACE" doc:name="TRACE" doc:id="e91c3d77-e696-4e84-85e7-635418f37e50" message="no races to archive" category="race.archive"/>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>

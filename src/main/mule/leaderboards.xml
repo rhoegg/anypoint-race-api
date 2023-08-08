@@ -11,9 +11,9 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
 	<flow name="publishLeaderboards" doc:id="b0d01136-5f96-43f5-a3c1-958c34590ab1">
-		<scheduler doc:name="Every 2.5 minutes" doc:id="2b287e8f-00e5-4d78-aa2f-1041aad38402">
+		<scheduler doc:name="Every 10 minutes" doc:id="2b287e8f-00e5-4d78-aa2f-1041aad38402">
 			<scheduling-strategy>
-				<fixed-frequency frequency="150" timeUnit="SECONDS" startDelay="5" />
+				<fixed-frequency frequency="600" timeUnit="SECONDS" startDelay="5" />
 			</scheduling-strategy>
 		</scheduler>
 <idempotent-message-validator doc:name="Idempotent Message Validator" doc:id="b8750c7e-949c-4b7c-8868-b47526f8a3f8" idExpression='#[now() as String {format: "yyyyMMddHHmm"}]' storePrefix="publishLeaderboards">
@@ -32,11 +32,12 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 				<logger level="WARN" doc:name="WARN" doc:id="42f0ed40-ae38-4840-b0c8-2a72a31a7b3e" message="leaderboard update aborted: no races recorded" category="race.leaderboards" />
 			</on-error-continue>
 			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="1376d3c1-ea4a-4a06-80fb-8602f4cc3450" type="MULE:DUPLICATE_MESSAGE">
-				<logger level="DEBUG" doc:name="DEBUG" doc:id="10555a01-7be5-464f-a216-af15cf692373" message="Not publishing a second time in the same minute" category="race.publishLeaderboards" />
+				<logger level="DEBUG" doc:name="DEBUG" doc:id="10555a01-7be5-464f-a216-af15cf692373" message="Not publishing a second time in the same minute" category="race.leaderboards" />
 			</on-error-continue>
 		</error-handler>
 	</flow>
 	<flow name="updateExchangePortal" doc:id="d855cd7b-54ba-44ca-97ba-08bfb922687d" maxConcurrency="1">
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="2d7d8c8e-2ac8-4a9f-ae53-e5fb7a9c6d0a" category="race.leaderboards" message="Updating portal for #[sizeOf(vars.standings)] standings"/>
 		<scatter-gather doc:name="Scatter-Gather" doc:id="0267152f-fed0-4e5c-a3df-e63d90d93269" maxConcurrency="2">
 			<route >
 				<flow-ref doc:name="updateHallOfFame" doc:id="78ce42c0-8810-4384-8765-afb2e8481a66" name="updateHallOfFame" />
@@ -55,11 +56,18 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 			</route>
 		</scatter-gather>
 		<flow-ref doc:name="publishPortalPageDraft" doc:id="c505526f-738d-476e-a874-55e2a6caa45f" name="publishPortalPageDraft" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="4fe2f347-22cd-4c90-81bd-e17c953dee1d" >
+				<logger level="ERROR" doc:name="ERROR" doc:id="1bd97682-50ce-40f5-835f-7f47b7adbaaa" message="Error updating portal: #[error.description]" category="race.leaderboards"/>
+			</on-error-propagate>
+		</error-handler>
 	</flow>
 	<flow name="getFinishedRaces" doc:id="3e547877-65a8-4cde-8a28-0f726af8d4f5">
 		<os:retrieve-all doc:name="all racers" doc:id="8e35d781-016c-4bd3-8a2c-8936c9df2fbd" objectStore="racerObjectStore" target="racers" />
 		<set-variable value='#[output application/json --- vars.racers mapObject (data, id) -&gt; {(id): read(data, "application/json")}]' doc:name="racers" doc:id="69ec1fbd-63ec-43b9-8738-d2e5a8f07b13" variableName="racers" />
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="cff86923-1e69-4bc4-ade3-059cbc1d2609" message="Found #[sizeOf(vars.racers)] racers" category="race.leaderboards"/>
 		<os:retrieve-all doc:name="all races" doc:id="859db9ca-a807-465d-8010-859fadbfd758" objectStore="raceObjectStore" />
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="900dbc01-c7d7-4b0b-bb1b-4026bcb9698f" category="race.leaderboards" message="Found #[sizeOf(payload)] races"/>
 		<ee:transform doc:name="finished races" doc:id="39713d2b-f82b-4029-9558-7f525f586c26">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
