@@ -159,13 +159,18 @@ take(payload, batchSize)]]></ee:set-payload>
 		</scheduler>
 		<vm:consume queueName="migrate" doc:name="key to migrate" doc:id="164dd062-3904-46b7-b43f-e731207e65fb" config-ref="VM_Config" timeout="50" timeoutUnit="MILLISECONDS"/>
 		<set-variable value="#[payload]" doc:name="raceId" doc:id="077d6530-3e6e-4799-b8ad-e3169a61119f" variableName="raceId" />
-		<os:retrieve doc:name="original storage" doc:id="6e9ca8e5-fe90-4c2f-826a-f936d32b6b7b" key="#[vars.raceId]" objectStore="raceObjectStore" />
+		<os:retrieve doc:name="original storage" doc:id="6e9ca8e5-fe90-4c2f-826a-f936d32b6b7b" key="#[vars.raceId]" objectStore="raceObjectStore" >
+			<error-mapping sourceType="OS:KEY_NOT_FOUND" targetType="APP:RACE_GONE" />
+		</os:retrieve>
 		<os:store doc:name="hot storage" doc:id="3176b280-82a1-4f8e-adbe-2a902f3027b9" key="#[vars.raceId]" objectStore="hotRaceObjectStore" />
 		<os:remove doc:name="original storage" doc:id="ab2d3d9c-cb8e-4a1f-bc8b-bee5acf633c8" key="#[vars.raceId]" objectStore="raceObjectStore" />
 		<logger level="DEBUG" doc:name="DEBUG" doc:id="c848bcf3-e038-4fa6-9d4b-fc8f4eaa5e05" message="Migrated race #[vars.raceId] to hot storage" category="race.archive" />
 		<error-handler >
 			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="b198ea3e-13b7-4948-a639-85e65e9b558b" type="VM:EMPTY_QUEUE">
 				<logger level="TRACE" doc:name="TRACE" doc:id="e91c3d77-e696-4e84-85e7-635418f37e50" message="no races to archive" category="race.archive"/>
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="9b04a671-c37b-401e-957c-5fc95d922872" type="APP:RACE_GONE">
+				<logger level="WARN" doc:name="WARN" doc:id="80702e71-797a-4650-aa46-2ae25acff589" message="Could not migrate race #[vars.raceId] because it is no longer here" category="race.archive"/>
 			</on-error-continue>
 		</error-handler>
 	</flow>
