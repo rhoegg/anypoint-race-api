@@ -13,7 +13,7 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 	<flow name="publishLeaderboards" doc:id="b0d01136-5f96-43f5-a3c1-958c34590ab1">
 		<scheduler doc:name="Every 10 minutes" doc:id="2b287e8f-00e5-4d78-aa2f-1041aad38402">
 			<scheduling-strategy>
-				<fixed-frequency frequency="600" timeUnit="SECONDS" startDelay="5" />
+				<fixed-frequency frequency="600" timeUnit="SECONDS" startDelay="120" />
 			</scheduling-strategy>
 		</scheduler>
 <idempotent-message-validator doc:name="Idempotent Message Validator" doc:id="b8750c7e-949c-4b7c-8868-b47526f8a3f8" idExpression='#[now() as String {format: "yyyyMMddHHmm"}]' storePrefix="publishLeaderboards">
@@ -63,21 +63,27 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 		</error-handler>
 	</flow>
 	<flow name="getFinishedRaces" doc:id="3e547877-65a8-4cde-8a28-0f726af8d4f5">
-		<os:retrieve-all doc:name="all racers" doc:id="8e35d781-016c-4bd3-8a2c-8936c9df2fbd" objectStore="racerObjectStore" target="racers" />
-		<set-variable value='#[output application/json --- vars.racers mapObject (data, id) -&gt; {(id): read(data, "application/json")}]' doc:name="racers" doc:id="69ec1fbd-63ec-43b9-8738-d2e5a8f07b13" variableName="racers" />
-		<logger level="DEBUG" doc:name="DEBUG" doc:id="cff86923-1e69-4bc4-ade3-059cbc1d2609" message="Found #[sizeOf(vars.racers)] racers" category="race.leaderboards"/>
-		<os:retrieve-all doc:name="all races" doc:id="859db9ca-a807-465d-8010-859fadbfd758" objectStore="raceObjectStore" />
+		<os:retrieve-all doc:name="all racer data" doc:id="8e35d781-016c-4bd3-8a2c-8936c9df2fbd" objectStore="racerObjectStore"/>
+		<set-variable value='#[output application/json &#10;var racerEntries = payload filterObject (val, key) -&gt; (! (key contains "races"))&#10;--- &#10;racerEntries mapObject (data, id) -&gt; {(id): read(data, "application/json")}]' doc:name="racers" doc:id="69ec1fbd-63ec-43b9-8738-d2e5a8f07b13" variableName="racers" />
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="cff86923-1e69-4bc4-ade3-059cbc1d2609" message='Found #[sizeOf(vars.racers)] racers' category="race.leaderboards"/>
+		<ee:transform doc:name="races" doc:id="9abb9cfe-d555-41b5-87c4-92493504172d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var raceEntries = payload filterObject (data, key) -> (key contains "races")
+var pages = valuesOf(raceEntries) map read($, "application/json")
+---
+flatten(pages)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 		<logger level="DEBUG" doc:name="DEBUG" doc:id="900dbc01-c7d7-4b0b-bb1b-4026bcb9698f" category="race.leaderboards" message="Found #[sizeOf(payload)] races"/>
 		<ee:transform doc:name="finished races" doc:id="39713d2b-f82b-4029-9558-7f525f586c26">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 
-var races = 
-	payload pluck (raceData) -> 
-		read(raceData, 'application/json')
 var completedRaces = 
-	races filter (race) -> race.finish?
+	payload filter (race) -> race.finish? // shouldn't be necessary except I archived incomplete races oops
 
 fun getRacer(race) =
 	vars.racers["racer.$(race.racerId)"]
@@ -89,26 +95,31 @@ completedRaces map (race) ->
 		</ee:transform>
 	</flow>
 	<flow name="updateResultsFirstToFinish" doc:id="e3b4f8a0-573f-4d29-b2fd-4850bf011a61" >
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="8eb9bf6f-4fd0-4f72-8498-32825fc2b01e" category="race.leaderboards" message="Updating results page: First to Finish"/>
 		<set-payload value="#[dw::pages::FirstToFinishResults::markdown(vars.standings)]" doc:name="FirstToFinishResults" doc:id="aecc8dfa-9e16-4471-95f9-75bd7a7959ab" />
 		<set-variable value="${anypoint.portal.pages.results.firstToFinish}" doc:name="pagePath" doc:id="e9196f0f-85ef-4eaa-adc9-537d46228285" variableName="pagePath" />
 		<flow-ref doc:name="createPortalPageDraft" doc:id="49565f66-f3f7-45e1-b91e-ac0316c8a4d2" name="createPortalPageDraft" />
 	</flow>
 	<flow name="updateResultsFastest" doc:id="a960a36d-c2fd-455f-a755-5c89b9c4e336" >
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="30f1920b-5575-4195-bee2-4dc232905e35" message="Updating Results page: Fastest" category="race.leaderboards"/>
 		<set-payload value="#[dw::pages::FastestResults::markdown(vars.standings)]" doc:name="FastestResults" doc:id="d505b39b-e53b-46ed-881e-b3b3a9964601" />
 		<set-variable value="${anypoint.portal.pages.results.fastest}" doc:name="pagePath" doc:id="1769d9eb-6afe-4223-bd95-c2494e772e45" variableName="pagePath"/>
 		<flow-ref doc:name="createPortalPageDraft" doc:id="a708e485-9d30-49d5-ae2d-d7229561a914" name="createPortalPageDraft"/>
 	</flow>
 	<flow name="updateResultsMost" doc:id="f26970ab-2ec6-445c-94ee-9e3c301a01e0" >
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="8d1b73e0-b67d-4b7d-b79f-66c63de64d83" message="Updating Results page: Most races" category="race.leaderboards"/>
 		<set-payload value="#[dw::pages::MostRacesResults::markdown(vars.standings)]" doc:name="MostRacesResults" doc:id="d58be26d-d77e-4153-9a1c-30ccf23022fa" />
 		<set-variable value="${anypoint.portal.pages.results.most}" doc:name="pagePath" doc:id="c7153128-48a8-4fb7-9af1-b0ab440c0876" variableName="pagePath"/>
 		<flow-ref doc:name="createPortalPageDraft" doc:id="d64c1d39-7e09-40ed-a031-abd96c5c9deb" name="createPortalPageDraft"/>
 	</flow>
 	<flow name="updateHallOfFame" doc:id="23d6670e-7681-4620-823f-80a9ce1f5f81" >
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="aeb62ec3-242f-4dc7-9ac2-e9100fbef096" message="Updating Hall of Fame page" category="race.leaderboards"/>
 		<set-payload value="#[dw::pages::HallOfFame::markdown(vars.standings)]" doc:name="HallOfFame" doc:id="50f546a6-458a-4a10-a3f9-270d366cfaea" />
 		<set-variable value="${anypoint.portal.pages.results.halloffame}" doc:name="pagePath" doc:id="a9bce94a-8b78-4607-9826-90e68c12b973" variableName="pagePath"/>
 		<flow-ref doc:name="createPortalPageDraft" doc:id="015ac1c6-4770-4d04-bd3c-d41fe711808a" name="createPortalPageDraft"/>
 	</flow>
 	<flow name="updateHome" doc:id="14daa69b-5927-42f1-956e-77f55c65de4f" >
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="b9a5997e-b664-4c0a-92d4-73f7f9fe8548" message="Updating Home page" category="race.leaderboards"/>
 		<set-payload value="#[dw::pages::Home::markdown(vars.standings)]" doc:name="Home" doc:id="c742653e-0c90-415b-a13c-b8b08fcbb2a0" />
 		<set-variable value="home" doc:name="pagePath" doc:id="e13d3684-c22e-4f90-8d83-ddfe96fd036b" variableName="pagePath"/>
 		<flow-ref doc:name="createPortalPageDraft" doc:id="8e70e200-54dd-473f-98a9-1cc169c83b9b" name="createPortalPageDraft"/>
@@ -126,6 +137,7 @@ completedRaces map (race) ->
 	"pagePath" : vars.pagePath
 }]]]></http:uri-params>
 		</http:request>
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="70663d9a-2d13-49e1-8199-b37856d5272f" message="Draft updated: #[vars.pagePath]" category="race.leaderboards"/>
 		<error-handler >
 			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="eba4d322-2c1b-454f-9b1c-dce32dd80e13" type="HTTP:SERVICE_UNAVAILABLE, HTTP:TIMEOUT">
 				<logger level="WARN" doc:name="WARN" doc:id="f8b0be03-11a0-4dfb-821f-9755b70e90ec" message="Failed to update #[vars.pagePath]: #[error.description]" category="race.leaderboards"/>

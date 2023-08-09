@@ -92,6 +92,7 @@ output application/json
 	pluck (raceGroup) -> raceGroup]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<logger level="INFO" doc:name="don't archive races that aren't finished" doc:id="287be056-fcd7-49c5-9a29-98d32e2323cf" />
 		<foreach doc:name="For Each racer's races" doc:id="0edd4538-bc60-4017-929e-75c1e5fbabb0" >
 			<os:retrieve doc:name="currentPage" doc:id="bd3bd353-aa2f-4252-866a-9d6f4e3c0003" key='#["racer." ++ payload[0].racerId ++ ".races.currentPage"]' objectStore="racerObjectStore" target="currentPage" targetValue="#[output application/json --- payload]">
 				<os:default-value ><![CDATA[#[output application/json --- []]]]></os:default-value>
@@ -131,7 +132,7 @@ var newPages = (vars.currentPage ++ payload) divideBy pageSize
 				<fixed-frequency frequency="300" timeUnit="SECONDS" startDelay="30"/>
 			</scheduling-strategy>
 		</scheduler>
-		<idempotent-message-validator doc:name="Idempotent Message Validator" doc:id="15e22687-92d7-4393-919d-2f1e5c5e405d" idExpression='#[now() as String {format: "yyyyMMddHHmm"}]'/>
+		<idempotent-message-validator doc:name="Idempotent Message Validator" doc:id="15e22687-92d7-4393-919d-2f1e5c5e405d" idExpression='#[now() as String {format: "yyyyMMddHHmm"}]' doc:description='all replicas run the schedule so the "paced" flow runs WAY TOO MUCH. For now I will just divide by 4 and run on 4 replicas.'/>
 		<logger level="DEBUG" doc:name="DEBUG" doc:id="1b6da768-909f-45af-af43-3e596d437a37" category="race.archive" message="Migrating original races"/>
 		<os:retrieve-all-keys doc:name="from original storage" doc:id="9a4b2451-435c-4040-8d2b-2dc7bf6cbab3" objectStore="raceObjectStore"/>
 		<ee:transform doc:name="batch" doc:id="9e0d85ee-20d7-4c5a-b7ec-dbaf9accd081" >
@@ -154,7 +155,7 @@ take(payload, batchSize)]]></ee:set-payload>
 	<flow name="migrateRacesPaced" doc:id="f42f99e3-b3e0-4207-9607-b77053662008" >
 		<scheduler doc:name="4 TPS" doc:id="d4072c8f-4284-46d8-9c6d-02410552fda9" >
 			<scheduling-strategy >
-				<fixed-frequency frequency="250" startDelay="30000"/>
+				<fixed-frequency startDelay="30000"/>
 			</scheduling-strategy>
 		</scheduler>
 		<vm:consume queueName="migrate" doc:name="key to migrate" doc:id="164dd062-3904-46b7-b43f-e731207e65fb" config-ref="VM_Config" timeout="50" timeoutUnit="MILLISECONDS"/>
