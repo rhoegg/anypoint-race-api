@@ -14,4 +14,7 @@ anypoint:
         firstToFinish: "kz2-1j6/Results: First to Finish"
         fastest: "48h-98s/Results: Fastest"
         most: "w3c-47j/Results: Perseverance"
-        halloffame: "t9t-xjb/Hall of Fame" 
+        halloffame: "t9t-xjb/Hall of Fame"
+redis:
+  host: redis-15552.c1.us-east1-2.gce.cloud.redislabs.com
+  port: "15552"

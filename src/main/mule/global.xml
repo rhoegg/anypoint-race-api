@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:sockets="http://www.mulesoft.org/schema/mule/sockets" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
-	xmlns:os="http://www.mulesoft.org/schema/mule/os"
-	xmlns:oauth="http://www.mulesoft.org/schema/mule/oauth" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:redis="http://www.mulesoft.org/schema/mule/redis" xmlns:sockets="http://www.mulesoft.org/schema/mule/sockets"
+	xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:oauth="http://www.mulesoft.org/schema/mule/oauth" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/oauth http://www.mulesoft.org/schema/mule/oauth/current/mule-oauth.xsd
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
 http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
-http://www.mulesoft.org/schema/mule/sockets http://www.mulesoft.org/schema/mule/sockets/current/mule-sockets.xsd">
+http://www.mulesoft.org/schema/mule/sockets http://www.mulesoft.org/schema/mule/sockets/current/mule-sockets.xsd
+http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/redis/current/mule-redis.xsd">
 	<configuration-properties doc:name="Configuration properties" doc:id="7dd03197-6465-46dd-87c5-7f709a4dc803" file="config/config-${mule.env}.yaml" />
 	<http:request-config name="exchangeV2HttpRequestConfig" doc:name="HTTP Request configuration" doc:id="4dc19007-7bd0-4d1c-9f92-0d43bef9bfab" basePath="/exchange/api/v2" enableCookies="false" responseTimeout="120000">
 		<http:request-connection host="anypoint.mulesoft.com" port="443" protocol="HTTPS" connectionIdleTimeout="150000">
@@ -27,4 +28,7 @@ http://www.mulesoft.org/schema/mule/sockets http://www.mulesoft.org/schema/mule/
 	<api-gateway:autodiscovery apiId="${anypoint.api.id}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="7e1fbca3-3bff-4464-acd9-f2ce95227e3e" flowRef="anypoint-race-api-main" />
 	<global-property doc:name="Global Property" doc:id="5742da46-ae77-46bf-a79f-bde3033cdb0d" name="mule.env" value="prod" />
 	<os:object-store name="hotRaceObjectStore" doc:name="Object store" doc:id="49b88d50-05c4-49cf-81a7-d209a2eaa218" persistent="false" entryTtl="7" entryTtlUnit="DAYS" expirationIntervalUnit="HOURS" />
+	<redis:redis-config name="Redis_Redis" doc:name="Redis Redis" doc:id="ddba4915-df7f-4d30-a335-3d3ea9d6ca95" >
+		<redis:nonclustered-connection host="${redis.host}" port="${redis.port}" password="${redis.password}" />
+	</redis:redis-config>
 </mule>

@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
-	xmlns:os="http://www.mulesoft.org/schema/mule/os"
-	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:redis="http://www.mulesoft.org/schema/mule/redis" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking"
+	xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
 http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
-http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/redis/current/mule-redis.xsd">
 	<ee:object-store-caching-strategy name="racerIdCachingStrategy" doc:name="Caching Strategy" doc:id="8b2f7bb7-e055-434b-929c-bb931b876ad4" keyGenerationExpression="#[attributes.headers.client_id]" >
 		<os:private-object-store alias="registerCacheObjectStore" entryTtl="30" entryTtlUnit="DAYS"/>
 	</ee:object-store-caching-strategy>
@@ -21,7 +22,8 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 		<validation:is-not-null doc:name="Is not null" doc:id="3f447caa-4739-4fc3-83c3-00a6f64aa268" value="#[attributes.headers.client_id]">
 			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:CLIENT_ID_MISSING" />
 		</validation:is-not-null>
-		<flow-ref doc:name="getRacerId" doc:id="305dacb5-97c6-4d4e-bda6-ea882d1677f9" name="getRacerId" target="racerId"/>
+<!-- [STUDIO:"getRacerId"]		<flow-ref doc:name="getRacerId" doc:id="305dacb5-97c6-4d4e-bda6-ea882d1677f9" name="getRacerId" target="racerId"/> [STUDIO] -->
+		<set-variable value="#[uuid()]" doc:name="racerId" doc:id="aa2b8e03-d9bd-46bc-aba3-14c444a30334" variableName="racerId"/>
 		<ee:transform doc:name="racer" doc:id="cb6e3fad-0340-43fc-8d2c-d00cf78a8ef1" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -35,7 +37,10 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<os:store doc:name="racer" doc:id="7beeef62-66d8-4499-9e62-1164545073b9" key="#['racer.' ++ vars.racerId]" objectStore="racerObjectStore"/>
+		<redis:set doc:name="racer" doc:id="6c52874b-1116-464e-9040-46788abebcec" config-ref="Redis_Redis" key="#['racer:' ++ vars.racerId]" target="redisResult">
+			<redis:value ><![CDATA[#[output application/java --- write(payload, "application/json")]]]></redis:value>
+		</redis:set>
+<!-- [STUDIO:"racer"]		<os:store doc:name="racer" doc:id="7beeef62-66d8-4499-9e62-1164545073b9" key="#['racer.' ++ vars.racerId&#93;" objectStore="racerObjectStore"/> [STUDIO] -->
 		<logger level="INFO" doc:name="INFO" doc:id="60528fa0-8696-44a6-b973-5cdde3b4586c" message="Registered racer #[payload.racerId] for client #[payload.clientId]: #[payload.email]" category="race.register"/>
 	</flow>
 	<flow name="retrieveRacer" doc:id="0c7b9d6c-682b-423e-86e9-4bc58586110a" >
