@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-	xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:redis="http://www.mulesoft.org/schema/mule/redis"
+	xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
-http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/redis/current/mule-redis.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
 	<http:request-config name="fakeLocalHttpRequestConfig" doc:name="HTTP Request configuration" doc:id="e69026db-2ece-4d1f-ac86-bb7a0e6dfd5b" >
 		<http:request-connection host="localhost" port="8081" />
 	</http:request-config>
@@ -75,12 +77,6 @@ output application/java
 		</parallel-foreach>
 	</flow>
 	<flow name="archiveRaces" doc:id="a7fdb83d-1914-47f6-a789-59629ab4ab56" maxConcurrency="1">
-		<scheduler doc:name="15 minutes" doc:id="90ff0f64-cb8d-4c00-b82f-22d74f222244" >
-			<scheduling-strategy >
-				<fixed-frequency frequency="15" startDelay="3" timeUnit="MINUTES"/>
-			</scheduling-strategy>
-		</scheduler>
-		<idempotent-message-validator doc:name="Idempotent Message Validator" doc:id="e56431d6-78ac-4509-9701-745225889af0" idExpression='#[now() as String {format: "yyyyMMddHHmm"}]'/>
 		<os:retrieve-all doc:name="races from hot storage" doc:id="f60a000e-f45d-4c65-8ac6-899e676d8ac5" objectStore="hotRaceObjectStore"/>
 		<ee:transform doc:name="group by racer" doc:id="98e616c7-267e-40ab-9545-f45d9b34beaa" >
 			<ee:message >
@@ -127,12 +123,6 @@ var newPages = (vars.currentPage ++ payload) divideBy pageSize
 		</foreach>
 	</flow>
 	<flow name="migrateOriginalRaces" doc:id="b25633af-83c1-4496-a508-426c62f82ee3" >
-		<scheduler doc:name="5 minutes" doc:id="ad266f53-4546-4a75-b42b-6aaa13690e37">
-			<scheduling-strategy>
-				<fixed-frequency frequency="300" timeUnit="SECONDS" startDelay="30"/>
-			</scheduling-strategy>
-		</scheduler>
-		<idempotent-message-validator doc:name="Idempotent Message Validator" doc:id="15e22687-92d7-4393-919d-2f1e5c5e405d" idExpression='#[now() as String {format: "yyyyMMddHHmm"}]' doc:description='all replicas run the schedule so the "paced" flow runs WAY TOO MUCH. For now I will just divide by 4 and run on 4 replicas.'/>
 		<logger level="DEBUG" doc:name="DEBUG" doc:id="1b6da768-909f-45af-af43-3e596d437a37" category="race.archive" message="Migrating original races"/>
 		<os:retrieve-all-keys doc:name="from original storage" doc:id="9a4b2451-435c-4040-8d2b-2dc7bf6cbab3" objectStore="raceObjectStore"/>
 		<ee:transform doc:name="batch" doc:id="9e0d85ee-20d7-4c5a-b7ec-dbaf9accd081" >
@@ -153,11 +143,6 @@ take(payload, batchSize)]]></ee:set-payload>
 		</foreach>
 	</flow>
 	<flow name="migrateRacesPaced" doc:id="f42f99e3-b3e0-4207-9607-b77053662008" >
-		<scheduler doc:name="4 TPS" doc:id="d4072c8f-4284-46d8-9c6d-02410552fda9" >
-			<scheduling-strategy >
-				<fixed-frequency startDelay="30000"/>
-			</scheduling-strategy>
-		</scheduler>
 		<vm:consume queueName="migrate" doc:name="key to migrate" doc:id="164dd062-3904-46b7-b43f-e731207e65fb" config-ref="VM_Config" timeout="50" timeoutUnit="MILLISECONDS"/>
 		<set-variable value="#[payload]" doc:name="raceId" doc:id="077d6530-3e6e-4799-b8ad-e3169a61119f" variableName="raceId" />
 		<os:retrieve doc:name="original storage" doc:id="6e9ca8e5-fe90-4c2f-826a-f936d32b6b7b" key="#[vars.raceId]" objectStore="raceObjectStore" >
@@ -174,5 +159,24 @@ take(payload, batchSize)]]></ee:set-payload>
 				<logger level="WARN" doc:name="WARN" doc:id="80702e71-797a-4650-aa46-2ae25acff589" message="Could not migrate race #[vars.raceId] because it is no longer here" category="race.archive"/>
 			</on-error-continue>
 		</error-handler>
+	</flow>
+	<flow name="migrateSeason1Flow" doc:id="8faca787-39c6-405a-a099-cf2e197d8da2" >
+		<scheduler doc:name="Scheduler" doc:id="f64a7fb9-10ba-461d-b6b4-8ceef2bc2624" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="1" timeUnit="DAYS"/>
+			</scheduling-strategy>
+		</scheduler>
+		<os:retrieve-all-keys doc:name="Retrieve all keys" doc:id="815df1c5-f6c6-4fa3-bd62-7f8c6af82e45" objectStore="racerObjectStore"/>
+		<logger level="INFO" doc:name="INFO" doc:id="e340d45c-5e3b-4743-b2f5-763fd399affa" category="race.migrate.season1" message="MIgrating #[sizeOf(payload)] objects"/>
+		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="909d06c4-29d7-41be-b61e-b8ea3ead3d2b" />
+		<parallel-foreach doc:name="Parallel For Each" doc:id="8d37b048-0e90-4001-8909-65242a8fcaef" maxConcurrency="3">
+			<set-variable value="#[payload]" doc:name="season1Key" doc:id="ccc9de7f-49b6-4a96-9d2f-3d1250bce177" variableName="season1Key" />
+			<os:retrieve doc:name="Retrieve" doc:id="59d12fc2-949d-4406-8456-c4322ead87f6" key="#[vars.season1Key]" objectStore="racerObjectStore" />
+			<redis:set doc:name="season1:key" doc:id="6ee8e0db-f73c-4fac-8d80-ecf29c5cc3df" config-ref="Redis_Redis" key='#["season1:$(vars.season1Key)"]'>
+			<redis:value><![CDATA[#[output application/java --- write(payload, "application/json")]]]></redis:value>
+		</redis:set>
+			<logger level="DEBUG" doc:name="DEBUG" doc:id="6d94058f-48c2-4ea9-9a89-9e408bf912d7" message="Migrated #[vars.season1Key]" category="race.migrate.season1" />
+		</parallel-foreach>
+		<logger level="INFO" doc:name="INFO" doc:id="ee8316b6-6bb0-4bfe-9322-67c925075789" message="Finished object store migration" category="race.migrate.season1"/>
 	</flow>
 </mule>

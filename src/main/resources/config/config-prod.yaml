@@ -15,5 +15,7 @@ anypoint:
         fastest: "5sl-367/Results: Fastest"
         most: "vjf-28f/Results: Perseverance"
         halloffame: "qz7-40n/Hall of Fame"  
-    
+redis:
+  host: redis-18615.c1.us-east1-2.gce.cloud.redislabs.com
+  port: "18615"
       

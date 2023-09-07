@@ -47,7 +47,6 @@ output application/json
 		<redis:set doc:name="racer" doc:id="6c52874b-1116-464e-9040-46788abebcec" config-ref="Redis_Redis" key="#['racer:' ++ vars.racerId]" target="redisResult">
 			<redis:value ><![CDATA[#[output application/java --- write(payload, "application/json")]]]></redis:value>
 		</redis:set>
-<!-- [STUDIO:"racer"]		<os:store doc:name="racer" doc:id="7beeef62-66d8-4499-9e62-1164545073b9" key="#['racer.' ++ vars.racerId&#93;" objectStore="racerObjectStore"/> [STUDIO] -->
 		<logger level="INFO" doc:name="INFO" doc:id="60528fa0-8696-44a6-b973-5cdde3b4586c" message="Registered racer #[payload.racerId] for client #[payload.clientId]: #[payload.email]" category="race.register"/>
 	</flow>
 	<flow name="retrieveRacer" doc:id="0c7b9d6c-682b-423e-86e9-4bc58586110a" >
