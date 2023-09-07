@@ -64,8 +64,6 @@ var payloadNoNewline = payload replace "\n" with ""
 read(payloadNoNewline, "application/json")]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<!-- [STUDIO:"racer"]		<os:retrieve doc:name="racer" doc:id="a82b00ca-e0ee-40b1-8728-e255d3307533" key="#['racer.' ++ vars.racerId&#93;" objectStore="racerObjectStore"/> [STUDIO] -->
-<!-- [STUDIO:"to JSON"]		<set-payload value='#[output application/json &#45;&#45;- payload&#93;' doc:name="to JSON" doc:id="fba8fefb-4ba8-48d8-9fa6-ab448184033d" /> [STUDIO] -->
 		<error-handler >
 			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="55a0fc06-9792-4e4a-85c5-c3da80fd96a2" />
 		</error-handler>
@@ -90,7 +88,6 @@ output application/json
 		<redis:set doc:name="Set" doc:id="4111c289-c1f2-4d3d-acd3-e47a68e4ca32" config-ref="Redis_Redis" key="#['race:' ++ vars.raceId]">
 			<redis:value ><![CDATA[#[output application/java --- write(payload, "application/json")]]]></redis:value>
 		</redis:set>
-<!-- [STUDIO:"raceId"]		<os:store doc:name="raceId" doc:id="a21edcbe-3350-47ae-bc01-36e309ccc519" objectStore="hotRaceObjectStore" key="#[vars.raceId&#93;" failIfPresent="true" /> [STUDIO] -->
 		<ee:transform doc:name="response" doc:id="7e13d1b7-ee12-4c1e-9622-94bd36337f88" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -120,9 +117,6 @@ output application/json
 		<redis:set doc:name="Set" doc:id="a6b3bc0a-b8a0-408d-8755-989bd719aeb6" config-ref="Redis_Redis" key="#[vars.raceId]">
 			<redis:value ><![CDATA[#[output application/java --- write(vars.race, "application/json")]]]></redis:value>
 		</redis:set>
-<!-- [STUDIO:"race"]		<os:store doc:name="race" doc:id="12acdbef-21db-4640-983b-2e87f9b5604a" key="#[vars.raceId&#93;" objectStore="hotRaceObjectStore" >
-			<os:value ><![CDATA[#[vars.race&#93;&#93;&#93;></os:value>
-		</os:store> [STUDIO] -->
 		<ee:transform doc:name="response" doc:id="923b9b21-7c53-47ea-a632-bdf291de2c86" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -151,9 +145,6 @@ output application/json
 		<redis:set doc:name="Set" doc:id="c34a4e77-fd58-4467-9c59-85cc74eae944" config-ref="Redis_Redis" key="#[vars.raceId]" >
 			<redis:value ><![CDATA[#[output application/java --- write(vars.race, "application/json")]]]></redis:value>
 		</redis:set>
-<!-- [STUDIO:"race"]		<os:store doc:name="race" doc:id="484d5e71-4010-4818-8b3d-faeb403b0117" key="#[vars.raceId&#93;" objectStore="hotRaceObjectStore">
-			<os:value><![CDATA[#[vars.race&#93;&#93;&#93;></os:value>
-		</os:store> [STUDIO] -->
 		<ee:transform doc:name="response" doc:id="ee5cd78a-b9d4-40f4-af10-55fc665a7ac3">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
@@ -181,8 +172,5 @@ var time = vars.race.finish - vars.race.start
 		<redis:get doc:name="Get race" doc:id="9e19107d-5ccb-4bd1-9ab1-3558bb595931" config-ref="Redis_Redis" key='#["race:" ++ vars.raceId]' target="race" targetValue='#[output application/json --- read(payload, "application/json")]'>
 			<error-mapping targetType="APP:INVALID_RACE" sourceType="REDIS:INVALID_REQUEST_DATA"/>
 		</redis:get>
-<!-- [STUDIO:"race"]		<os:retrieve doc:name="race" doc:id="b4b906fc-cd21-469a-b0f6-08bdf7a783da" key="#[vars.raceId&#93;" objectStore="hotRaceObjectStore" target="race" targetValue="#[output application/json &#45;&#45;- payload&#93;" >
-			<error-mapping sourceType="OS:KEY_NOT_FOUND" targetType="APP:INVALID_RACE" />
-		</os:retrieve> [STUDIO] -->
 	</sub-flow>
 </mule>
