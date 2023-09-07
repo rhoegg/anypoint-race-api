@@ -53,8 +53,19 @@ output application/json
 		<validation:is-not-null doc:name="Is not null" doc:id="a6658fca-d46b-4278-a168-15b568f1cd97" value="#[attributes.headers.client_id]">
 			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:CLIENT_ID_MISSING" />
 		</validation:is-not-null>
-		<os:retrieve doc:name="racer" doc:id="a82b00ca-e0ee-40b1-8728-e255d3307533" key="#['racer.' ++ vars.racerId]" objectStore="racerObjectStore"/>
-		<set-payload value="#[output application/json --- payload]" doc:name="to JSON" doc:id="fba8fefb-4ba8-48d8-9fa6-ab448184033d" />
+		<redis:get doc:name="Get racer" doc:id="deebf049-1e83-4688-9d4c-228841565a01" key="#['racer:' ++ vars.racerId]" config-ref="Redis_Redis"/>
+<ee:transform doc:name="Transform Message" doc:id="2bf62e0a-3cc0-4ece-b5fa-f9e781d22f53" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+import * from dw::core::Strings
+var payloadNoNewline = payload replace "\n" with ""
+---
+read(payloadNoNewline, "application/json")]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<!-- [STUDIO:"racer"]		<os:retrieve doc:name="racer" doc:id="a82b00ca-e0ee-40b1-8728-e255d3307533" key="#['racer.' ++ vars.racerId&#93;" objectStore="racerObjectStore"/> [STUDIO] -->
+<!-- [STUDIO:"to JSON"]		<set-payload value='#[output application/json &#45;&#45;- payload&#93;' doc:name="to JSON" doc:id="fba8fefb-4ba8-48d8-9fa6-ab448184033d" /> [STUDIO] -->
 		<error-handler >
 			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="55a0fc06-9792-4e4a-85c5-c3da80fd96a2" />
 		</error-handler>
@@ -76,7 +87,10 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<os:store doc:name="raceId" doc:id="a21edcbe-3350-47ae-bc01-36e309ccc519" objectStore="hotRaceObjectStore" key="#[vars.raceId]" failIfPresent="true" />
+		<redis:set doc:name="Set" doc:id="4111c289-c1f2-4d3d-acd3-e47a68e4ca32" config-ref="Redis_Redis" key="#['race:' ++ vars.raceId]">
+			<redis:value ><![CDATA[#[output application/java --- write(payload, "application/json")]]]></redis:value>
+		</redis:set>
+<!-- [STUDIO:"raceId"]		<os:store doc:name="raceId" doc:id="a21edcbe-3350-47ae-bc01-36e309ccc519" objectStore="hotRaceObjectStore" key="#[vars.raceId&#93;" failIfPresent="true" /> [STUDIO] -->
 		<ee:transform doc:name="response" doc:id="7e13d1b7-ee12-4c1e-9622-94bd36337f88" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -103,9 +117,12 @@ output application/json
 		</validation:is-null>
 		<set-variable value='#[import mergeWith from dw::core::Objects&#10;output application/json&#10;var lastLapStart = vars.race.lapStart default vars.race.start&#10;var elapsed = (vars.lapStart - lastLapStart) as Number {unit: "milliseconds"} / 1000&#10;--- &#10;vars.race mergeWith {&#10;	laps: (vars.race.laps default 0) + 1,&#10;	lapStart: vars.lapStart,&#10;	lastLapElapsed: elapsed&#10;}]' doc:name="race + new lap" doc:id="e0e45b2e-ad5d-4841-b97c-97c549032ea9" variableName="race"/>
 		<set-variable value="#[vars.race update { case .token -&gt; uuid() }]" doc:name="rotate race token" doc:id="0f4be36b-eb9e-47eb-a32e-4e3c053f3c7e" variableName="race"/>
-		<os:store doc:name="race" doc:id="12acdbef-21db-4640-983b-2e87f9b5604a" key="#[vars.raceId]" objectStore="hotRaceObjectStore" >
-			<os:value ><![CDATA[#[vars.race]]]></os:value>
-		</os:store>
+		<redis:set doc:name="Set" doc:id="a6b3bc0a-b8a0-408d-8755-989bd719aeb6" config-ref="Redis_Redis" key="#[vars.raceId]">
+			<redis:value ><![CDATA[#[output application/java --- write(vars.race, "application/json")]]]></redis:value>
+		</redis:set>
+<!-- [STUDIO:"race"]		<os:store doc:name="race" doc:id="12acdbef-21db-4640-983b-2e87f9b5604a" key="#[vars.raceId&#93;" objectStore="hotRaceObjectStore" >
+			<os:value ><![CDATA[#[vars.race&#93;&#93;&#93;></os:value>
+		</os:store> [STUDIO] -->
 		<ee:transform doc:name="response" doc:id="923b9b21-7c53-47ea-a632-bdf291de2c86" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -131,9 +148,12 @@ output application/json
 			<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="APP:INVALID_RACE_TOKEN" />
 		</validation:is-true>
 		<set-variable value="#[output application/json --- vars.race ++ {finish: vars.finish}]" doc:name="race + finish time" doc:id="45c7a484-a4b3-449d-97ec-253284624c66" variableName="race" />
-		<os:store doc:name="race" doc:id="484d5e71-4010-4818-8b3d-faeb403b0117" key="#[vars.raceId]" objectStore="hotRaceObjectStore">
-			<os:value><![CDATA[#[vars.race]]]></os:value>
-		</os:store>
+		<redis:set doc:name="Set" doc:id="c34a4e77-fd58-4467-9c59-85cc74eae944" config-ref="Redis_Redis" key="#[vars.raceId]" >
+			<redis:value ><![CDATA[#[output application/java --- write(vars.race, "application/json")]]]></redis:value>
+		</redis:set>
+<!-- [STUDIO:"race"]		<os:store doc:name="race" doc:id="484d5e71-4010-4818-8b3d-faeb403b0117" key="#[vars.raceId&#93;" objectStore="hotRaceObjectStore">
+			<os:value><![CDATA[#[vars.race&#93;&#93;&#93;></os:value>
+		</os:store> [STUDIO] -->
 		<ee:transform doc:name="response" doc:id="ee5cd78a-b9d4-40f4-af10-55fc665a7ac3">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
@@ -158,8 +178,11 @@ var time = vars.race.finish - vars.race.start
 		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="ef2af9e6-6288-4fce-b92f-615e3f2f41e3" variableName="racerId" />
 		<flow-ref doc:name="retrieveRacer" doc:id="2f7b3f1d-bbb1-42a6-8161-0c0b6614489a" name="retrieveRacer" target="racer" />
 		<set-variable value="#[attributes.uriParams.raceId]" doc:name="raceId" doc:id="82a6e5a1-d831-4c19-9351-45b70e414b56" variableName="raceId" />
-		<os:retrieve doc:name="race" doc:id="b4b906fc-cd21-469a-b0f6-08bdf7a783da" key="#[vars.raceId]" objectStore="hotRaceObjectStore" target="race" targetValue="#[output application/json --- payload]" >
+		<redis:get doc:name="Get race" doc:id="9e19107d-5ccb-4bd1-9ab1-3558bb595931" config-ref="Redis_Redis" key='#["race:" ++ vars.raceId]' target="race" targetValue='#[output application/json --- read(payload, "application/json")]'>
+			<error-mapping targetType="APP:INVALID_RACE" sourceType="REDIS:INVALID_REQUEST_DATA"/>
+		</redis:get>
+<!-- [STUDIO:"race"]		<os:retrieve doc:name="race" doc:id="b4b906fc-cd21-469a-b0f6-08bdf7a783da" key="#[vars.raceId&#93;" objectStore="hotRaceObjectStore" target="race" targetValue="#[output application/json &#45;&#45;- payload&#93;" >
 			<error-mapping sourceType="OS:KEY_NOT_FOUND" targetType="APP:INVALID_RACE" />
-		</os:retrieve>
+		</os:retrieve> [STUDIO] -->
 	</sub-flow>
 </mule>
