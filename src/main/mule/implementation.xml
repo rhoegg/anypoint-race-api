@@ -72,6 +72,7 @@ read(payloadNoNewline, "application/json")]]></ee:set-payload>
 		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="06891a06-af15-4c69-b1b6-1ac9d98236a1" variableName="racerId" />
 		<set-variable value="#[uuid()]" doc:name="raceId" doc:id="ca899825-0302-4042-8b19-82bf321c8740" variableName="raceId" />
 		<set-variable value="#[uuid()]" doc:name="raceToken" doc:id="4842c28b-c95e-4b55-b42b-32b203eb2568" variableName="raceToken" />
+		<set-variable value="#[attributes.requestPath]" doc:name="requestPath" doc:id="578d9de7-0a2d-480c-9316-875fcf3267e4" variableName="requestPath"/>
 		<ee:transform doc:name="raceInfo" doc:id="597714b9-f777-4d3b-8a91-55040586b542">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
@@ -85,7 +86,7 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<redis:set doc:name="Set" doc:id="4111c289-c1f2-4d3d-acd3-e47a68e4ca32" config-ref="Redis_Redis" key="#['race:' ++ vars.raceId]">
+		<redis:set doc:name="race:{raceToken}" doc:id="4111c289-c1f2-4d3d-acd3-e47a68e4ca32" config-ref="Redis_Redis" key="#['race:' ++ vars.raceId]">
 			<redis:value ><![CDATA[#[output application/java --- write(payload, "application/json")]]]></redis:value>
 		</redis:set>
 		<ee:transform doc:name="response" doc:id="7e13d1b7-ee12-4c1e-9622-94bd36337f88" >
@@ -99,7 +100,7 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<set-variable value="#[output application/java&#10;var parentDir = attributes.requestPath splitBy &quot;/&quot; then $[0 to -2] then $ joinBy &quot;/&quot;&#10;---&#10;{ &#10;	Location: parentDir ++ '/races/$(vars.raceId)/finish'&#10;}]" doc:name="outboundHeaders" doc:id="9600a1f4-5cb0-4801-9a82-b2568be608a2" variableName="outboundHeaders"/>
+		<set-variable value="#[output application/java&#10;var parentDir = vars.requestPath splitBy &quot;/&quot; then $[0 to -2] then $ joinBy &quot;/&quot;&#10;---&#10;{ &#10;	Location: parentDir ++ '/races/$(vars.raceId)/finish'&#10;}]" doc:name="outboundHeaders" doc:id="9600a1f4-5cb0-4801-9a82-b2568be608a2" variableName="outboundHeaders"/>
 		<logger level="INFO" doc:name="INFO" doc:id="eeed0813-3b1b-466c-a647-db37dd71e50e" message="racer #[vars.racerId] started a new race #[vars.raceId]" category="race.start"/>
 	</flow>
 	<flow name="finishLap" doc:id="86dc1729-b308-44c7-8ccb-af52cf3290f5" >
@@ -114,7 +115,7 @@ output application/json
 		</validation:is-null>
 		<set-variable value='#[import mergeWith from dw::core::Objects&#10;output application/json&#10;var lastLapStart = vars.race.lapStart default vars.race.start&#10;var elapsed = (vars.lapStart - lastLapStart) as Number {unit: "milliseconds"} / 1000&#10;--- &#10;vars.race mergeWith {&#10;	laps: (vars.race.laps default 0) + 1,&#10;	lapStart: vars.lapStart,&#10;	lastLapElapsed: elapsed&#10;}]' doc:name="race + new lap" doc:id="e0e45b2e-ad5d-4841-b97c-97c549032ea9" variableName="race"/>
 		<set-variable value="#[vars.race update { case .token -&gt; uuid() }]" doc:name="rotate race token" doc:id="0f4be36b-eb9e-47eb-a32e-4e3c053f3c7e" variableName="race"/>
-		<redis:set doc:name="Set" doc:id="a6b3bc0a-b8a0-408d-8755-989bd719aeb6" config-ref="Redis_Redis" key="#[vars.raceId]">
+		<redis:set doc:name="race:{raceToken}" doc:id="a6b3bc0a-b8a0-408d-8755-989bd719aeb6" config-ref="Redis_Redis" key='#["race:" ++ vars.raceId]'>
 			<redis:value ><![CDATA[#[output application/java --- write(vars.race, "application/json")]]]></redis:value>
 		</redis:set>
 		<ee:transform doc:name="response" doc:id="923b9b21-7c53-47ea-a632-bdf291de2c86" >
