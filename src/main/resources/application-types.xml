@@ -376,15 +376,16 @@ type racers = {|
 ]]></types:shape>
     </types:type>
     <types:type name="race" format="json">
-      <types:shape format="weave" example="examples/example-race-1.json"><![CDATA[%dw 2.0
+      <types:shape format="weave" example="examples/example-race-2.json"><![CDATA[%dw 2.0
 
 type race = {|
   racerId: String, 
   raceId: String, 
   token: String, 
   start: String, 
+  url: String, 
   finish: String
-|} {"example": "{\\\"racerId\\\":\\\"99e090b5-54fb-45e4-96f8-f368bb09e65d\\\",\\\"raceId\\\":\\\"ec6dd17b-5de4-4f88-aa4e-3fe1be28b9a4\\\",\\\"token\\\":\\\"03558be5-b388-4f35-987a-e3216c1efcc8\\\",\\\"start\\\":\\\"2023-07-31T16:29:00.317753Z\\\",\\\"finish\\\":\\\"2023-07-31T16:31:22.585732Z\\\"}"}
+|} {"example": "{\\\"racerId\\\":\\\"99e090b5-54fb-45e4-96f8-f368bb09e65d\\\",\\\"raceId\\\":\\\"ec6dd17b-5de4-4f88-aa4e-3fe1be28b9a4\\\",\\\"token\\\":\\\"03558be5-b388-4f35-987a-e3216c1efcc8\\\",\\\"start\\\":\\\"2023-07-31T16:29:00.317753Z\\\",\\\"url\\\":\\\"http:\\/\\/mockbin.org\\/bin\\/c919b528-86c4-413d-a516-8c9c4b795387\\\",\\\"finish\\\":\\\"2023-07-31T16:31:22.585732Z\\\"}"}
 
 ]]></types:shape>
     </types:type>
@@ -1062,6 +1063,15 @@ type auto_d855cd7b_54ba_44ca_97ba_08bfb922687d_Output_Variables_racers = Any
           <types:variable name="racers" type="auto_d855cd7b-54ba-44ca-97ba-08bfb922687d_Output-Variables-racers"/>
         </types:variables>
       </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#cbf9a2b4-f0ba-47cd-b369-9d7862b74062">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:variables>
+          <types:variable name="race" type="race"/>
+        </types:variables>
+      </types:input-event>
     </types:processor-declaration>
   </types:enrichment>
 </types:mule>
