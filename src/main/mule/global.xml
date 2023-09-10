@@ -31,4 +31,7 @@ http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/re
 	<redis:redis-config name="Redis_Redis" doc:name="Redis Redis" doc:id="ddba4915-df7f-4d30-a335-3d3ea9d6ca95" >
 		<redis:nonclustered-connection host="${redis.host}" port="${redis.port}" password="${redis.password}" />
 	</redis:redis-config>
+	<http:request-config name="racerHttpRequestConfig" doc:name="HTTP Request configuration" doc:id="c4023e16-3f25-40e2-8ba4-d1ed309fd7f8" >
+		<http:request-connection host="localhost" port="8081" />
+	</http:request-config>
 </mule>
