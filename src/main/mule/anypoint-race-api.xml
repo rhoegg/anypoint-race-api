@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
-http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
     <http:listener-config name="anypoint-race-api-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
-    <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:1.0.0:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:2.0.0:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="anypoint-race-api-main">
         <http:listener config-ref="anypoint-race-api-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -137,31 +136,67 @@ output application/json
         <flow-ref doc:name="startRace" doc:id="e756d0ac-78ad-4cd9-8b5f-c9921064f627" name="startRace" />
     </flow>
     <flow name="post:\racers\(racerId)\races\(raceId)\lap:text\plain:anypoint-race-api-config">
-		<flow-ref doc:name="finishLap" doc:id="c92d9374-c7dc-4f3f-b1e0-c87a3d4176d8" name="finishLap"/>
+        <flow-ref doc:name="finishLap" doc:id="c92d9374-c7dc-4f3f-b1e0-c87a3d4176d8" name="finishLap" />
     </flow>
-	<flow name="post:\racers\(racerId)\races\(raceId)\finish:text\plain:anypoint-race-api-config">
+    <flow name="post:\racers\(racerId)\races\(raceId)\finish:text\plain:anypoint-race-api-config">
         <flow-ref doc:name="finishRace" doc:id="1a10b516-7962-4752-9338-a3155e20fc7f" name="finishRace" />
-		<error-handler >
-			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="b6a4ad9b-dfdc-40bc-8812-71c14b1a67f0" type="APP:INVALID_RACE_TOKEN">
-				<set-variable value="400" doc:name="httpStatus = 400" doc:id="2fda5507-d927-4381-b7dd-46e42feafe3f" variableName="httpStatus"/>
-				<set-payload value="invalid race token" doc:name="invalid race token" doc:id="4fa0c764-f788-4588-8a47-996b8f92937e" />
-			</on-error-continue>
-			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="d5733da9-da92-4df1-919a-3ffd5c5fedc6" type="APP:INVALID_RACE">
-				<set-variable value="404" doc:name="httpStatus = 404" doc:id="8edfd840-a3f8-4ed6-97f8-8ef1ff6f7ea9" variableName="httpStatus"/>
-				<set-payload value="race not found" doc:name="race not found" doc:id="9badec58-2aec-4fc6-9c9b-5c6209ec50f1" />
-			</on-error-continue>
-		</error-handler>
+        <error-handler>
+            <on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="b6a4ad9b-dfdc-40bc-8812-71c14b1a67f0" type="APP:INVALID_RACE_TOKEN">
+                <set-variable value="400" doc:name="httpStatus = 400" doc:id="2fda5507-d927-4381-b7dd-46e42feafe3f" variableName="httpStatus" />
+                <set-payload value="invalid race token" doc:name="invalid race token" doc:id="4fa0c764-f788-4588-8a47-996b8f92937e" />
+            </on-error-continue>
+            <on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="d5733da9-da92-4df1-919a-3ffd5c5fedc6" type="APP:INVALID_RACE">
+                <set-variable value="404" doc:name="httpStatus = 404" doc:id="8edfd840-a3f8-4ed6-97f8-8ef1ff6f7ea9" variableName="httpStatus" />
+                <set-payload value="race not found" doc:name="race not found" doc:id="9badec58-2aec-4fc6-9c9b-5c6209ec50f1" />
+            </on-error-continue>
+        </error-handler>
     </flow>
-	<flow name="anypoint-race-apiFlow" doc:id="58c52848-669f-4ad9-8544-7f116cd488e6" >
-		<http:listener doc:name="GET /backup" doc:id="edf3afb7-d93c-4bf9-8faf-25dfc73a8d69" config-ref="anypoint-race-api-httpListenerConfig" path="/backup"/>
-		<os:retrieve-all doc:name="Retrieve all (nearly 1M keys? let's see)" doc:id="abc30195-19c3-48f0-8f0a-37a304b2c3ca" objectStore="raceObjectStore"/>
-		<ee:transform doc:name="Transform Message" doc:id="0bbaef11-96bb-4320-bdbd-a1758ecc5e63" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+    <flow name="anypoint-race-apiFlow" doc:id="58c52848-669f-4ad9-8544-7f116cd488e6">
+        <http:listener doc:name="GET /backup" doc:id="edf3afb7-d93c-4bf9-8faf-25dfc73a8d69" config-ref="anypoint-race-api-httpListenerConfig" path="/backup" />
+        <os:retrieve-all doc:name="Retrieve all (nearly 1M keys? let's see)" doc:id="abc30195-19c3-48f0-8f0a-37a304b2c3ca" objectStore="raceObjectStore" />
+        <ee:transform doc:name="Transform Message" doc:id="0bbaef11-96bb-4320-bdbd-a1758ecc5e63">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
 output application/json deferred=true
 ---
 payload]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-	</flow>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\racers\(racerId)\races\(raceId)\lap:application\json:anypoint-race-api-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="racerId">attributes.uriParams.'racerId'</ee:set-variable>
+                <ee:set-variable variableName="raceId">attributes.uriParams.'raceId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  laps: 8,
+  lapSeconds: 3.818
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\racers\(racerId)\start:application\json:anypoint-race-api-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="racerId">attributes.uriParams.'racerId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  raceId: "6f22d64b-a542-437a-81de-b3dc5e68d66c"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
 </mule>
