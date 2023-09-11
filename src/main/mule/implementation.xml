@@ -170,9 +170,10 @@ var time = vars.race.finish - vars.race.start
 		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="ef2af9e6-6288-4fce-b92f-615e3f2f41e3" variableName="racerId" />
 		<flow-ref doc:name="retrieveRacer" doc:id="2f7b3f1d-bbb1-42a6-8161-0c0b6614489a" name="retrieveRacer" target="racer" />
 		<set-variable value="#[attributes.uriParams.raceId]" doc:name="raceId" doc:id="82a6e5a1-d831-4c19-9351-45b70e414b56" variableName="raceId" />
-		<redis:get doc:name="Get race" doc:id="9e19107d-5ccb-4bd1-9ab1-3558bb595931" config-ref="Redis_Redis" key='#["race:" ++ vars.raceId]' target="race" targetValue='#[output application/json --- read(payload, "application/json")]'>
+		<redis:get doc:name="Get race" doc:id="9e19107d-5ccb-4bd1-9ab1-3558bb595931" config-ref="Redis_Redis" key='#["race:" ++ vars.raceId]' target="race">
 			<error-mapping targetType="APP:INVALID_RACE" sourceType="REDIS:INVALID_REQUEST_DATA"/>
 		</redis:get>
+		<set-variable value='#[output application/json&#10;---&#10;read(vars.race, "application/json")]' doc:name="race" doc:id="9f6e0ba3-9a96-4619-abcd-91d03c126dc7" variableName="race"/>
 	</sub-flow>
 	<flow name="notifyRaceToken" doc:id="cbf9a2b4-f0ba-47cd-b369-9d7862b74062" >
 		<http:request method="POST" doc:name="POST /race/{raceId}/token" doc:id="f9fdff86-e659-4e66-bdd7-350d20cead27" config-ref="racerHttpRequestConfig" url='#["$(vars.race.url)/race/$(vars.race.raceId)/token"]'>

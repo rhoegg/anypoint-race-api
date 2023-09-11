@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:os="http://www.mulesoft.org/schema/mule/os"
+<mule xmlns:redis="http://www.mulesoft.org/schema/mule/redis"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os"
 	xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
 http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd 
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/redis/current/mule-redis.xsd">
 	<flow name="publishLeaderboards" doc:id="b0d01136-5f96-43f5-a3c1-958c34590ab1">
 		<scheduler doc:name="Every 10 minutes" doc:id="2b287e8f-00e5-4d78-aa2f-1041aad38402">
 			<scheduling-strategy>
@@ -63,19 +64,35 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 		</error-handler>
 	</flow>
 	<flow name="getFinishedRaces" doc:id="3e547877-65a8-4cde-8a28-0f726af8d4f5">
-		<os:retrieve-all doc:name="all racer data" doc:id="8e35d781-016c-4bd3-8a2c-8936c9df2fbd" objectStore="racerObjectStore"/>
-		<set-variable value='#[output application/json &#10;var racerEntries = payload filterObject (val, key) -&gt; (! (key contains "races"))&#10;--- &#10;racerEntries mapObject (data, id) -&gt; {(id): read(data, "application/json")}]' doc:name="racers" doc:id="69ec1fbd-63ec-43b9-8738-d2e5a8f07b13" variableName="racers" />
-		<logger level="DEBUG" doc:name="DEBUG" doc:id="cff86923-1e69-4bc4-ade3-059cbc1d2609" message='Found #[sizeOf(vars.racers)] racers' category="race.leaderboards"/>
-		<ee:transform doc:name="races" doc:id="9abb9cfe-d555-41b5-87c4-92493504172d" >
+		<http:listener doc:name="Listener" doc:id="1b05f70a-d50a-4af9-be28-f9c5399b9a89" config-ref="anypoint-race-api-httpListenerConfig" path="/getRaces"/>
+		<redis:range-from-list start="#[0]" stop="#[-1]" doc:name="Get all Keys from racer List" doc:id="c5df8e8c-e480-4590-9df8-55715401b4fd" config-ref="Redis_Redis" key="season2:racers"/>
+		<parallel-foreach doc:name="Parallel For Each" doc:id="acf92130-8a19-4f69-a3b3-950d3cd3b4e1">
+			<redis:get doc:name="Get" doc:id="7aef54f1-99bf-4f0d-a61b-0d9678c297f9" config-ref="Redis_Redis" key="#[payload]"/>
+		</parallel-foreach>
+		<set-variable value='#[output application/json&#10;import * from dw::core::Strings&#10;var racerValues =&#10;	(payload..payload map (val) -&gt; val replace "\n" with "")&#10;		map (val) -&gt; read(val, "application/json")&#10;---&#10;{(&#10;	racerValues map (racer) -&gt; {&#10;		(racer.racerId): racer&#10;	}&#10;)}]' doc:name="racers" doc:id="69ec1fbd-63ec-43b9-8738-d2e5a8f07b13" variableName="racers" />
+		<redis:range-from-list start="#[0]" stop="#[-1]" doc:name="Get all Keys from race List" doc:id="5644dcea-fad0-412c-b985-74c23a5886c1" config-ref="Redis_Redis" key="season2:races" />
+		<parallel-foreach doc:name="Parallel For Each" doc:id="e2bbe507-52fd-4543-b28b-02f16f02eac4" >
+			<redis:get doc:name="Get" doc:id="9f1089b2-d2de-410e-a54f-e6d085604508" config-ref="Redis_Redis" key="#[payload]" />
+			<ee:transform doc:name="Transform Message" doc:id="37e6b2c9-7db0-4e59-bad9-0166b1c0fe01" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+import * from dw::core::Strings
+var payloadNoNewline = payload replace "\n" with ""
+---
+read(payloadNoNewline, "application/json")]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</parallel-foreach>
+		<ee:transform doc:name="Transform Message" doc:id="61f1f5a8-ffa8-4844-8827-39bf55b1b2c0" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
-var raceEntries = payload filterObject (data, key) -> (key contains "races")
-var pages = valuesOf(raceEntries) map read($, "application/json")
 ---
-flatten(pages)]]></ee:set-payload>
+payload..payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="cff86923-1e69-4bc4-ade3-059cbc1d2609" message='Found #[sizeOf(vars.racers)] racers' category="race.leaderboards"/>
 		<logger level="DEBUG" doc:name="DEBUG" doc:id="900dbc01-c7d7-4b0b-bb1b-4026bcb9698f" category="race.leaderboards" message="Found #[sizeOf(payload)] races"/>
 		<ee:transform doc:name="finished races" doc:id="39713d2b-f82b-4029-9558-7f525f586c26">
 			<ee:message>
@@ -83,10 +100,10 @@ flatten(pages)]]></ee:set-payload>
 output application/json
 
 var completedRaces = 
-	payload filter (race) -> race.finish? // shouldn't be necessary except I archived incomplete races oops
+	payload filter (race) -> race.finish?
 
 fun getRacer(race) =
-	vars.racers["racer.$(race.racerId)"]
+	vars.racers[race.racerId]
 ---
 completedRaces map (race) ->
 	race ++ {racer: getRacer(race)}
