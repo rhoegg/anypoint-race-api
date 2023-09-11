@@ -70,37 +70,24 @@ read(payloadNoNewline, "application/json")]]></ee:set-payload>
 	</flow>
 	<flow name="startRace" doc:id="4327921b-3d52-47e3-855a-f59691c3a831">
 		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="06891a06-af15-4c69-b1b6-1ac9d98236a1" variableName="racerId" />
-		<set-variable value="#[uuid()]" doc:name="raceId" doc:id="ca899825-0302-4042-8b19-82bf321c8740" variableName="raceId" />
-		<set-variable value="#[uuid()]" doc:name="raceToken" doc:id="4842c28b-c95e-4b55-b42b-32b203eb2568" variableName="raceToken" />
 		<set-variable value="#[attributes.requestPath]" doc:name="requestPath" doc:id="578d9de7-0a2d-480c-9316-875fcf3267e4" variableName="requestPath"/>
-		<ee:transform doc:name="raceInfo" doc:id="597714b9-f777-4d3b-8a91-55040586b542">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-	racerId: vars.racerId,
-	raceId: vars.raceId,
-	token: vars.raceToken,
-	start: now() as String
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<redis:set doc:name="race:{raceToken}" doc:id="4111c289-c1f2-4d3d-acd3-e47a68e4ca32" config-ref="Redis_Redis" key="#['race:' ++ vars.raceId]">
-			<redis:value ><![CDATA[#[output application/java --- write(payload, "application/json")]]]></redis:value>
+		<set-variable value="#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	racerId: vars.racerId,&#10;	raceId: uuid(),&#10;	token: uuid(),&#10;	start: now() as String,&#10;	url: payload.racerUrl&#10;}]" doc:name="race" doc:id="cf22a59b-b3e3-4825-b9e6-bbfc1ad9a749" variableName="race"/>
+		<redis:set doc:name="race:{raceId}" doc:id="4111c289-c1f2-4d3d-acd3-e47a68e4ca32" config-ref="Redis_Redis" key="#['race:' ++ vars.race.raceId]">
+			<redis:value ><![CDATA[#[output application/java --- write(vars.race, "application/json")]]]></redis:value>
 		</redis:set>
+		<flow-ref doc:name="notifyRaceToken" doc:id="97eed252-cbc0-485e-b187-1e0e0ce68072" name="notifyRaceToken" target="notifyResponse" />
 		<ee:transform doc:name="response" doc:id="7e13d1b7-ee12-4c1e-9622-94bd36337f88" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
 {
-	raceId: vars.raceId
+	raceId: vars.race.raceId
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<set-variable value="#[output application/java&#10;var parentDir = vars.requestPath splitBy &quot;/&quot; then $[0 to -2] then $ joinBy &quot;/&quot;&#10;---&#10;{ &#10;	Location: parentDir ++ '/races/$(vars.raceId)/finish'&#10;}]" doc:name="outboundHeaders" doc:id="9600a1f4-5cb0-4801-9a82-b2568be608a2" variableName="outboundHeaders"/>
-		<logger level="INFO" doc:name="INFO" doc:id="eeed0813-3b1b-466c-a647-db37dd71e50e" message="racer #[vars.racerId] started a new race #[vars.raceId]" category="race.start"/>
+		<set-variable value="#[output application/java&#10;var parentDir = vars.requestPath splitBy &quot;/&quot; then $[0 to -2] then $ joinBy &quot;/&quot;&#10;---&#10;{ &#10;	Location: parentDir ++ '/races/$(vars.race.raceId)/finish'&#10;}]" doc:name="outboundHeaders" doc:id="9600a1f4-5cb0-4801-9a82-b2568be608a2" variableName="outboundHeaders"/>
+		<logger level="INFO" doc:name="INFO" doc:id="eeed0813-3b1b-466c-a647-db37dd71e50e" message="racer #[vars.racerId] started a new race #[vars.race.raceId]" category="race.start"/>
 	</flow>
 	<flow name="finishLap" doc:id="86dc1729-b308-44c7-8ccb-af52cf3290f5" >
 		<set-variable value="#[now()]" doc:name="lapStart" doc:id="be1c5ab7-eba9-47b7-a13f-3e6a418bf027" variableName="lapStart"/>
@@ -109,14 +96,15 @@ output application/json
 		<validation:is-true doc:name="check token" doc:id="216b60d4-3209-4165-a119-46352cf7d30f" expression="#[vars.requestToken == vars.race.token]" message="#['Race token is not valid: ' ++ vars.requestToken]" >
 			<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="APP:INVALID_RACE_TOKEN" />
 		</validation:is-true>
-		<validation:is-null doc:name="Is null" doc:id="e284ddd6-d5f1-4e0e-a835-c1703726f061" value="#[vars.race.finish]">
+		<validation:is-null doc:name="Validate race still in progress" doc:id="e284ddd6-d5f1-4e0e-a835-c1703726f061" value="#[vars.race.finish]">
 			<error-mapping sourceType="VALIDATION:NOT_NULL" targetType="APP:LAP_FORBIDDEN" />
 		</validation:is-null>
 		<set-variable value='#[import mergeWith from dw::core::Objects&#10;output application/json&#10;var lastLapStart = vars.race.lapStart default vars.race.start&#10;var elapsed = (vars.lapStart - lastLapStart) as Number {unit: "milliseconds"} / 1000&#10;--- &#10;vars.race mergeWith {&#10;	laps: (vars.race.laps default 0) + 1,&#10;	lapStart: vars.lapStart,&#10;	lastLapElapsed: elapsed&#10;}]' doc:name="race + new lap" doc:id="e0e45b2e-ad5d-4841-b97c-97c549032ea9" variableName="race"/>
 		<set-variable value="#[vars.race update { case .token -&gt; uuid() }]" doc:name="rotate race token" doc:id="0f4be36b-eb9e-47eb-a32e-4e3c053f3c7e" variableName="race"/>
-		<redis:set doc:name="race:{raceToken}" doc:id="a6b3bc0a-b8a0-408d-8755-989bd719aeb6" config-ref="Redis_Redis" key='#["race:" ++ vars.raceId]'>
+		<redis:set doc:name="race:{raceId}" doc:id="a6b3bc0a-b8a0-408d-8755-989bd719aeb6" config-ref="Redis_Redis" key='#["race:" ++ vars.raceId]'>
 			<redis:value ><![CDATA[#[output application/java --- write(vars.race, "application/json")]]]></redis:value>
 		</redis:set>
+		<flow-ref doc:name="notifyRaceToken" doc:id="10c9d3dc-e12a-4d0d-93e7-95253849d811" name="notifyRaceToken" target="notifyResponse"/>
 		<ee:transform doc:name="response" doc:id="923b9b21-7c53-47ea-a632-bdf291de2c86" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0

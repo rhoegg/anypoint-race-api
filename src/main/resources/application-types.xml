@@ -938,15 +938,6 @@ type auto_d855cd7b_54ba_44ca_97ba_08bfb922687d_Output_Variables_racers = Any
       </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
-  <types:enrichment select="#597714b9-f777-4d3b-8a91-55040586b542">
-    <types:processor-declaration>
-      <types:output-event>
-        <types:message>
-          <types:payload type="race"/>
-        </types:message>
-      </types:output-event>
-    </types:processor-declaration>
-  </types:enrichment>
   <types:enrichment select="#7bf144d0-9fb5-43a7-8514-e398172b6968">
     <types:processor-declaration>
       <types:output-event>

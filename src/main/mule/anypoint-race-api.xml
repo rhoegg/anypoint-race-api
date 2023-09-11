@@ -132,13 +132,13 @@ output application/json
             </on-error-continue>
         </error-handler>
     </flow>
-    <flow name="post:\racers\(racerId)\start:anypoint-race-api-config">
+    <flow name="post:\racers\(racerId)\start:application\json:anypoint-race-api-config">
         <flow-ref doc:name="startRace" doc:id="e756d0ac-78ad-4cd9-8b5f-c9921064f627" name="startRace" />
     </flow>
-    <flow name="post:\racers\(racerId)\races\(raceId)\lap:text\plain:anypoint-race-api-config">
+    <flow name="post:\racers\(racerId)\races\(raceId)\lap:application\json:anypoint-race-api-config">
         <flow-ref doc:name="finishLap" doc:id="c92d9374-c7dc-4f3f-b1e0-c87a3d4176d8" name="finishLap" />
     </flow>
-    <flow name="post:\racers\(racerId)\races\(raceId)\finish:text\plain:anypoint-race-api-config">
+	<flow name="post:\racers\(racerId)\races\(raceId)\finish:text\plain:anypoint-race-api-config">
         <flow-ref doc:name="finishRace" doc:id="1a10b516-7962-4752-9338-a3155e20fc7f" name="finishRace" />
         <error-handler>
             <on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="b6a4ad9b-dfdc-40bc-8812-71c14b1a67f0" type="APP:INVALID_RACE_TOKEN">
@@ -151,7 +151,7 @@ output application/json
             </on-error-continue>
         </error-handler>
     </flow>
-    <flow name="anypoint-race-apiFlow" doc:id="58c52848-669f-4ad9-8544-7f116cd488e6">
+    <flow name="backupSeason" doc:id="58c52848-669f-4ad9-8544-7f116cd488e6">
         <http:listener doc:name="GET /backup" doc:id="edf3afb7-d93c-4bf9-8faf-25dfc73a8d69" config-ref="anypoint-race-api-httpListenerConfig" path="/backup" />
         <os:retrieve-all doc:name="Retrieve all (nearly 1M keys? let's see)" doc:id="abc30195-19c3-48f0-8f0a-37a304b2c3ca" objectStore="raceObjectStore" />
         <ee:transform doc:name="Transform Message" doc:id="0bbaef11-96bb-4320-bdbd-a1758ecc5e63">
@@ -160,42 +160,6 @@ output application/json
 output application/json deferred=true
 ---
 payload]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
-    </flow>
-    <flow name="post:\racers\(racerId)\races\(raceId)\lap:application\json:anypoint-race-api-config">
-        <ee:transform doc:name="Transform Message">
-            <ee:variables>
-                <ee:set-variable variableName="racerId">attributes.uriParams.'racerId'</ee:set-variable>
-                <ee:set-variable variableName="raceId">attributes.uriParams.'raceId'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform doc:name="Transform Message">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  laps: 8,
-  lapSeconds: 3.818
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
-    </flow>
-    <flow name="post:\racers\(racerId)\start:application\json:anypoint-race-api-config">
-        <ee:transform doc:name="Transform Message">
-            <ee:variables>
-                <ee:set-variable variableName="racerId">attributes.uriParams.'racerId'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform doc:name="Transform Message">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  raceId: "6f22d64b-a542-437a-81de-b3dc5e68d66c"
-}]]></ee:set-payload>
             </ee:message>
         </ee:transform>
     </flow>
