@@ -1,16 +1,16 @@
 anypoint:
   api:
-    id: "18871013"
+    id: "12345"
   app:
     clientId: "xxxxx"
     clientSecret: "yyyyy"
-  businessGroup: "a0078bb2-7721-4171-be84-7106dc5e1486"
+  businessGroup: "3ab0f923-8bcb-4e7b-aa6e-0b984a18c811"
   portal:
     assetId: anypoint-race-api
-    version: "1.0.1"
+    version: "fixme"
     timeout: "20000"
     pages:
-      results:
+      results:                                              # Fixme
         firstToFinish: "kz2-1j6/Results: First to Finish"
         fastest: "48h-98s/Results: Fastest"
         most: "w3c-47j/Results: Perseverance"
