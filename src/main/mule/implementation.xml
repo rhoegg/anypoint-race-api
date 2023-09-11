@@ -86,14 +86,9 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-<<<<<<< HEAD
 		<redis:set doc:name="race:{raceToken}" doc:id="4111c289-c1f2-4d3d-acd3-e47a68e4ca32" config-ref="Redis_Redis" key="#['race:' ++ vars.raceId]">
 			<redis:value ><![CDATA[#[output application/java --- write(payload, "application/json")]]]></redis:value>
 		</redis:set>
-=======
-		<flow-ref doc:name="notifyRaceToken" doc:id="7e07e86f-5357-4b7a-9acd-625a513593fe" name="notifyRaceToken" target="racerApiResponse"/>
-		<os:store doc:name="raceId" doc:id="a21edcbe-3350-47ae-bc01-36e309ccc519" objectStore="hotRaceObjectStore" key="#[vars.raceId]" failIfPresent="true" />
->>>>>>> d16801305ff9302ef2ca2ff0e331de6b4bb32c6b
 		<ee:transform doc:name="response" doc:id="7e13d1b7-ee12-4c1e-9622-94bd36337f88" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -119,16 +114,9 @@ output application/json
 		</validation:is-null>
 		<set-variable value='#[import mergeWith from dw::core::Objects&#10;output application/json&#10;var lastLapStart = vars.race.lapStart default vars.race.start&#10;var elapsed = (vars.lapStart - lastLapStart) as Number {unit: "milliseconds"} / 1000&#10;--- &#10;vars.race mergeWith {&#10;	laps: (vars.race.laps default 0) + 1,&#10;	lapStart: vars.lapStart,&#10;	lastLapElapsed: elapsed&#10;}]' doc:name="race + new lap" doc:id="e0e45b2e-ad5d-4841-b97c-97c549032ea9" variableName="race"/>
 		<set-variable value="#[vars.race update { case .token -&gt; uuid() }]" doc:name="rotate race token" doc:id="0f4be36b-eb9e-47eb-a32e-4e3c053f3c7e" variableName="race"/>
-<<<<<<< HEAD
 		<redis:set doc:name="race:{raceToken}" doc:id="a6b3bc0a-b8a0-408d-8755-989bd719aeb6" config-ref="Redis_Redis" key='#["race:" ++ vars.raceId]'>
 			<redis:value ><![CDATA[#[output application/java --- write(vars.race, "application/json")]]]></redis:value>
 		</redis:set>
-=======
-		<flow-ref doc:name="notifyRaceToken" doc:id="c73d9e91-2795-4e42-9c89-93d1794ce0f2" name="notifyRaceToken" target="racerApiResponse"/>
-		<os:store doc:name="race" doc:id="12acdbef-21db-4640-983b-2e87f9b5604a" key="#[vars.raceId]" objectStore="hotRaceObjectStore" >
-			<os:value ><![CDATA[#[vars.race]]]></os:value>
-		</os:store>
->>>>>>> d16801305ff9302ef2ca2ff0e331de6b4bb32c6b
 		<ee:transform doc:name="response" doc:id="923b9b21-7c53-47ea-a632-bdf291de2c86" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0

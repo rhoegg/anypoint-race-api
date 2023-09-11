@@ -161,11 +161,6 @@ take(payload, batchSize)]]></ee:set-payload>
 		</error-handler>
 	</flow>
 	<flow name="migrateSeason1Flow" doc:id="8faca787-39c6-405a-a099-cf2e197d8da2" >
-		<scheduler doc:name="Scheduler" doc:id="f64a7fb9-10ba-461d-b6b4-8ceef2bc2624" >
-			<scheduling-strategy >
-				<fixed-frequency frequency="1" timeUnit="DAYS"/>
-			</scheduling-strategy>
-		</scheduler>
 		<os:retrieve-all-keys doc:name="Retrieve all keys" doc:id="815df1c5-f6c6-4fa3-bd62-7f8c6af82e45" objectStore="racerObjectStore"/>
 		<logger level="INFO" doc:name="INFO" doc:id="e340d45c-5e3b-4743-b2f5-763fd399affa" category="race.migrate.season1" message="MIgrating #[sizeOf(payload)] objects"/>
 		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="909d06c4-29d7-41be-b61e-b8ea3ead3d2b" />
