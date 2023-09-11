@@ -110,7 +110,23 @@ fun formatLaps(standings, threshold = 10) = do {
 	else
 		[]
 }
-	
+
+fun season1() = [
+	"",
+	"## Season 1 Best Times:",
+ 	"",
+ 	"| Rank | Name | Best Time |",
+ 	"| ---- | ---- | --------- |",
+ 	"| 1 | Ryan Carter | 0.002s",
+ 	"| 2 | Alex Martinez (MuleSoft) | 0.002s",
+ 	"| 3 | Pranav Davar | 0.003s",
+ 	"| 4 | Samuel Gomes | 0.01s",
+ 	"| 5 | Abdulmenam Ahmed | 0.01s",
+ 	"| 6 | Avinash Vaddi | 0.16s",
+ 	"| 7 | Alex Martinez (Postman/GitHub Actions) | 0.173s",
+ 	"| 8 | Tommaso Bolis | 0.209s",
+ 	"| 9 | Justin | 0.576s",
+ 	"| 10 | Adam Lounsbury | 1.888s"]
 		
 fun markdown(standings) =
 	(
@@ -118,5 +134,6 @@ fun markdown(standings) =
 		formatSpeedy(standings) ++
 		formatFirst(standings) ++
 		formatPerseverance(standings) ++
-		formatLaps(standings)
+		formatLaps(standings) ++
+		season1()
 	) joinBy "\n"

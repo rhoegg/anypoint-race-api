@@ -1,13 +1,13 @@
 anypoint:
   api:
-    id: "18871097"
+    id: "18961598"
   app:
     clientId: "xxxxx"
     clientSecret: "yyyyy"
   businessGroup: "ae6d7954-6fc2-4f3e-8777-80ff8aabd859"
   portal:
     assetId: anypoint-race-api
-    version: "1.0.0"
+    version: "2.0.0"
     timeout: "20000"
     pages:
       results:

@@ -44,9 +44,13 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<redis:set doc:name="racer" doc:id="6c52874b-1116-464e-9040-46788abebcec" config-ref="Redis_Redis" key="#['racer:' ++ vars.racerId]" target="redisResult">
+		<set-variable value="#['racer:' ++ vars.racerId]" doc:name="racerKey" doc:id="656140bf-ac85-4829-b42e-206a0fdf51ab" variableName="racerKey"/>
+		<redis:set doc:name="racerKey" doc:id="6c52874b-1116-464e-9040-46788abebcec" config-ref="Redis_Redis" key="#[vars.racerKey]" target="redisResult">
 			<redis:value ><![CDATA[#[output application/java --- write(payload, "application/json")]]]></redis:value>
 		</redis:set>
+		<redis:push-to-list doc:name="season2:racers" doc:id="20de0f5a-9cce-469d-bd59-07e02a6c3c7a" config-ref="Redis_Redis" key="season2:racers">
+			<redis:value ><![CDATA[#[vars.racerKey]]]></redis:value>
+		</redis:push-to-list>
 		<logger level="INFO" doc:name="INFO" doc:id="60528fa0-8696-44a6-b973-5cdde3b4586c" message="Registered racer #[payload.racerId] for client #[payload.clientId]: #[payload.email]" category="race.register"/>
 	</flow>
 	<flow name="retrieveRacer" doc:id="0c7b9d6c-682b-423e-86e9-4bc58586110a" >
@@ -78,9 +82,13 @@ read(payloadNoNewline, "application/json")]]></ee:set-payload>
 		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="06891a06-af15-4c69-b1b6-1ac9d98236a1" variableName="racerId" />
 		<set-variable value="#[attributes.requestPath]" doc:name="requestPath" doc:id="578d9de7-0a2d-480c-9316-875fcf3267e4" variableName="requestPath"/>
 		<set-variable value="#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	racerId: vars.racerId,&#10;	raceId: uuid(),&#10;	token: uuid(),&#10;	start: now() as String,&#10;	url: payload.racerUrl&#10;}]" doc:name="race" doc:id="cf22a59b-b3e3-4825-b9e6-bbfc1ad9a749" variableName="race"/>
-		<redis:set doc:name="race:{raceId}" doc:id="4111c289-c1f2-4d3d-acd3-e47a68e4ca32" config-ref="Redis_Redis" key="#['race:' ++ vars.race.raceId]">
+		<set-variable value="#['race:' ++ vars.race.raceId]" doc:name="raceKey" doc:id="336d75b6-1e8d-49ac-8bd3-eabcb7b8e726" variableName="raceKey"/>
+		<redis:set doc:name="raceKey" doc:id="4111c289-c1f2-4d3d-acd3-e47a68e4ca32" config-ref="Redis_Redis" key="#[vars.raceKey]">
 			<redis:value ><![CDATA[#[output application/java --- write(vars.race, "application/json")]]]></redis:value>
 		</redis:set>
+		<redis:push-to-list doc:name="season2:races" doc:id="7c82fb25-8e88-460c-ad87-df56a0a46f98" config-ref="Redis_Redis" key="season2:races" ifExists="true">
+			<redis:value ><![CDATA[#[vars.raceKey]]]></redis:value>
+		</redis:push-to-list>
 		<flow-ref doc:name="notifyRaceToken" doc:id="97eed252-cbc0-485e-b187-1e0e0ce68072" name="notifyRaceToken" target="notifyResponse" />
 		<ee:transform doc:name="response" doc:id="7e13d1b7-ee12-4c1e-9622-94bd36337f88" >
 			<ee:message >
