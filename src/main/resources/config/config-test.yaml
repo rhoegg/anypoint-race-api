@@ -7,14 +7,14 @@ anypoint:
   businessGroup: "3ab0f923-8bcb-4e7b-aa6e-0b984a18c811"
   portal:
     assetId: anypoint-race-api
-    version: "fixme"
+    version: "2.0.0"
     timeout: "20000"
     pages:
-      results:                                              # Fixme
-        firstToFinish: "kz2-1j6/Results: First to Finish"
-        fastest: "48h-98s/Results: Fastest"
-        most: "w3c-47j/Results: Perseverance"
-        halloffame: "t9t-xjb/Hall of Fame"
+      results:
+        firstToFinish: "7aq-sjs/Results: First to Finish"
+        fastest: "0t1-29r/Results: Fastest"
+        most: "99i-oc0/Results: Perseverance"
+        halloffame: "5ip-grn/Hall of Fame"
 redis:
   host: redis-15552.c1.us-east1-2.gce.cloud.redislabs.com
   port: "15552"
