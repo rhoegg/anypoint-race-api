@@ -82,7 +82,7 @@ read(payloadNoNewline, "application/json")]]></ee:set-payload>
 		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="06891a06-af15-4c69-b1b6-1ac9d98236a1" variableName="racerId" />
 		<set-variable value="#[attributes.requestPath]" doc:name="requestPath" doc:id="578d9de7-0a2d-480c-9316-875fcf3267e4" variableName="requestPath"/>
 		<set-variable value="#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	racerId: vars.racerId,&#10;	raceId: uuid(),&#10;	token: uuid(),&#10;	start: now() as String,&#10;	url: payload.racerUrl&#10;}]" doc:name="race" doc:id="cf22a59b-b3e3-4825-b9e6-bbfc1ad9a749" variableName="race"/>
-		<set-variable value="#['race:' ++ vars.race.raceId]" doc:name="raceKey" doc:id="336d75b6-1e8d-49ac-8bd3-eabcb7b8e726" variableName="raceKey"/>
+		<set-variable value="#['race:' ++ vars.race.raceId]" doc:name="raceKey" doc:id="336d75b6-1e8d-49ac-8bd3-eabcb7b8e726" variableName="raceKey" />
 		<redis:set doc:name="raceKey" doc:id="4111c289-c1f2-4d3d-acd3-e47a68e4ca32" config-ref="Redis_Redis" key="#[vars.raceKey]">
 			<redis:value ><![CDATA[#[output application/java --- write(vars.race, "application/json")]]]></redis:value>
 		</redis:set>
@@ -143,7 +143,7 @@ output application/json
 			<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="APP:INVALID_RACE_TOKEN" />
 		</validation:is-true>
 		<set-variable value="#[output application/json --- vars.race ++ {finish: vars.finish}]" doc:name="race + finish time" doc:id="45c7a484-a4b3-449d-97ec-253284624c66" variableName="race" />
-		<redis:set doc:name="race:{raceId}" doc:id="c34a4e77-fd58-4467-9c59-85cc74eae944" config-ref="Redis_Redis" key="#[vars.raceId]" >
+		<redis:set doc:name="race:{raceId}" doc:id="c34a4e77-fd58-4467-9c59-85cc74eae944" config-ref="Redis_Redis" key='#["race:" ++ vars.raceId]' >
 			<redis:value ><![CDATA[#[output application/java --- write(vars.race, "application/json")]]]></redis:value>
 		</redis:set>
 		<ee:transform doc:name="response" doc:id="ee5cd78a-b9d4-40f4-af10-55fc665a7ac3">
