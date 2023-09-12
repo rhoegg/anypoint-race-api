@@ -48,7 +48,7 @@ output application/json
 		<redis:set doc:name="racerKey" doc:id="6c52874b-1116-464e-9040-46788abebcec" config-ref="Redis_Redis" key="#[vars.racerKey]" target="redisResult">
 			<redis:value ><![CDATA[#[output application/java --- write(payload, "application/json")]]]></redis:value>
 		</redis:set>
-		<redis:push-to-list doc:name="season2:racers" doc:id="20de0f5a-9cce-469d-bd59-07e02a6c3c7a" config-ref="Redis_Redis" key="season2:racers">
+		<redis:push-to-list doc:name="season2:racers" doc:id="20de0f5a-9cce-469d-bd59-07e02a6c3c7a" config-ref="Redis_Redis" key="season2:racers" target="redisResult">
 			<redis:value ><![CDATA[#[vars.racerKey]]]></redis:value>
 		</redis:push-to-list>
 		<logger level="INFO" doc:name="INFO" doc:id="60528fa0-8696-44a6-b973-5cdde3b4586c" message="Registered racer #[payload.racerId] for client #[payload.clientId]: #[payload.email]" category="race.register"/>
@@ -105,7 +105,7 @@ output application/json
 	</flow>
 	<flow name="finishLap" doc:id="86dc1729-b308-44c7-8ccb-af52cf3290f5" >
 		<set-variable value="#[now()]" doc:name="lapStart" doc:id="be1c5ab7-eba9-47b7-a13f-3e6a418bf027" variableName="lapStart"/>
-		<set-variable value="#[payload]" doc:name="requestToken" doc:id="16deff18-d95e-4228-8953-0756673e301a" variableName="requestToken" />
+		<set-variable value="#[payload.token]" doc:name="requestToken" doc:id="16deff18-d95e-4228-8953-0756673e301a" variableName="requestToken" />
 		<flow-ref doc:name="lookupRaceAndRacer" doc:id="3a7abdf5-7e69-454b-8f21-207d67a730ef" name="lookupRaceAndRacer"/>
 		<validation:is-true doc:name="check token" doc:id="216b60d4-3209-4165-a119-46352cf7d30f" expression="#[vars.requestToken == vars.race.token]" message="#['Race token is not valid: ' ++ vars.requestToken]" >
 			<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="APP:INVALID_RACE_TOKEN" />
@@ -179,8 +179,14 @@ var time = vars.race.finish - vars.race.start
 		<http:request method="POST" doc:name="POST /race/{raceId}/token" doc:id="f9fdff86-e659-4e66-bdd7-350d20cead27" config-ref="racerHttpRequestConfig" url='#["$(vars.race.url)/race/$(vars.race.raceId)/token"]'>
 			<http:body ><![CDATA[#[output text/plain --- vars.race.token]]]></http:body>
 		</http:request>
+		<validation:is-true doc:name="validate Racer API mime type" doc:id="a00b1fda-01f3-4630-a7c1-01d5f3fb8d6d" expression="#[payload.^mimeType startsWith 'application/json']" message='#["Unexpected Racer API response Content-Type $(payload.^mimeType)"]'>
+			<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="APP:CALLBACK_UNEXPECTED_MEDIA_TYPE" />
+		</validation:is-true>
 		<validation:is-true doc:name="validate racer ID in API response" doc:id="c43ee84d-2a3b-45ca-b8dc-d85e973e08f1" expression='#[(payload.racerId default "undefined")  == vars.race.racerId]' message="invalid or missing Racer ID in Racer API Response">
 			<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="APP:INVALID_RACER_ID" />
 		</validation:is-true>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="9de81873-d3c3-457d-a393-5e2277e27eaa" />
+		</error-handler>
 	</flow>
 </mule>
