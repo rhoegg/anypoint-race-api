@@ -3,7 +3,7 @@
     <http:listener-config name="anypoint-race-api-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
-    <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:2.0.0:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:2.0.1:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="anypoint-race-api-main">
         <http:listener config-ref="anypoint-race-api-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -134,21 +134,21 @@ output application/json
     </flow>
     <flow name="post:\racers\(racerId)\start:application\json:anypoint-race-api-config">
         <flow-ref doc:name="startRace" doc:id="e756d0ac-78ad-4cd9-8b5f-c9921064f627" name="startRace" />
-		<error-handler >
-			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="4edb87c3-9b1f-485e-b772-c5c0db94e2e0" type="APP:CALLBACK_UNEXPECTED_MEDIA_TYPE">
-				<set-variable value="415" doc:name="httpStatus = 415" doc:id="f46192ac-2f7a-49aa-8d61-380268bb52f5" variableName="httpStatus"/>
-				<set-payload value="#[error.description]" doc:name="error.description" doc:id="95ba191a-e3de-4f50-9e32-59d0ca5f4622" />
-			</on-error-propagate>
-			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="a17dc4b0-e83d-4919-b52c-4e4c7fb7d5a8" type="APP:INVALID_RACER_ID">
-				<set-variable value="500" doc:name="httpStatus = 500" doc:id="ebaaaf9d-4d34-4481-89f0-3ed7890e010f" variableName="httpStatus"/>
-				<set-payload value="#[error.description]" doc:name="Set Payload" doc:id="80985162-a82b-4a98-a491-4113e5fb3905" />
-			</on-error-propagate>
-		</error-handler>
+        <error-handler>
+            <on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="4edb87c3-9b1f-485e-b772-c5c0db94e2e0" type="APP:CALLBACK_UNEXPECTED_MEDIA_TYPE">
+                <set-variable value="415" doc:name="httpStatus = 415" doc:id="f46192ac-2f7a-49aa-8d61-380268bb52f5" variableName="httpStatus" />
+                <set-payload value="#[error.description]" doc:name="error.description" doc:id="95ba191a-e3de-4f50-9e32-59d0ca5f4622" />
+            </on-error-propagate>
+            <on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="a17dc4b0-e83d-4919-b52c-4e4c7fb7d5a8" type="APP:INVALID_RACER_ID">
+                <set-variable value="500" doc:name="httpStatus = 500" doc:id="ebaaaf9d-4d34-4481-89f0-3ed7890e010f" variableName="httpStatus" />
+                <set-payload value="#[error.description]" doc:name="Set Payload" doc:id="80985162-a82b-4a98-a491-4113e5fb3905" />
+            </on-error-propagate>
+        </error-handler>
     </flow>
     <flow name="post:\racers\(racerId)\races\(raceId)\lap:application\json:anypoint-race-api-config">
         <flow-ref doc:name="finishLap" doc:id="c92d9374-c7dc-4f3f-b1e0-c87a3d4176d8" name="finishLap" />
     </flow>
-	<flow name="post:\racers\(racerId)\races\(raceId)\finish:text\plain:anypoint-race-api-config">
+    <flow name="post:\racers\(racerId)\races\(raceId)\finish:text\plain:anypoint-race-api-config">
         <flow-ref doc:name="finishRace" doc:id="1a10b516-7962-4752-9338-a3155e20fc7f" name="finishRace" />
         <error-handler>
             <on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="b6a4ad9b-dfdc-40bc-8812-71c14b1a67f0" type="APP:INVALID_RACE_TOKEN">
