@@ -147,6 +147,12 @@ output application/json
     </flow>
     <flow name="post:\racers\(racerId)\races\(raceId)\lap:application\json:anypoint-race-api-config">
         <flow-ref doc:name="finishLap" doc:id="c92d9374-c7dc-4f3f-b1e0-c87a3d4176d8" name="finishLap" />
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="9841f286-4e02-4761-8a75-bbafdddfe060" type="APP:INVALID_RACE_TOKEN" >
+				<set-variable value="400" doc:name="httpStatus = 40" doc:id="e168f96f-0382-4253-85ce-ff7d98d18c4b" variableName="httpStatus" />
+				<set-payload value="invalid race token" doc:name="invalid race token" doc:id="4c367df0-c8b5-4590-b645-9f529b6b9f79" />
+			</on-error-continue>
+		</error-handler>
     </flow>
     <flow name="post:\racers\(racerId)\races\(raceId)\finish:text\plain:anypoint-race-api-config">
         <flow-ref doc:name="finishRace" doc:id="1a10b516-7962-4752-9338-a3155e20fc7f" name="finishRace" />
@@ -159,6 +165,10 @@ output application/json
                 <set-variable value="404" doc:name="httpStatus = 404" doc:id="8edfd840-a3f8-4ed6-97f8-8ef1ff6f7ea9" variableName="httpStatus" />
                 <set-payload value="race not found" doc:name="race not found" doc:id="9badec58-2aec-4fc6-9c9b-5c6209ec50f1" />
             </on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="146ebc82-f15b-4ecb-a028-371eab24429c" type="APP:RACECOMPLETED">
+				<set-variable value="409" doc:name="httpStatus = 409" doc:id="a6352ec9-0feb-4b7a-a127-2168ac0f5975" variableName="httpStatus" />
+				<set-payload value="Race already completed" doc:name="race already completed" doc:id="a1289db6-39a7-4367-8840-779f939e031d" />
+			</on-error-continue>
         </error-handler>
     </flow>
     <flow name="backupSeason" doc:id="58c52848-669f-4ad9-8544-7f116cd488e6">

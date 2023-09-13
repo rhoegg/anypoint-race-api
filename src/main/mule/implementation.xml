@@ -139,6 +139,9 @@ output application/json
 		<set-variable value="#[now()]" doc:name="finish" doc:id="e69aaf15-9103-4b99-b656-d089846eca66" variableName="finish" />
 		<set-variable value="#[payload]" doc:name="requestToken" doc:id="ae622601-9ffa-42dc-95e5-bd002b18fbaa" variableName="requestToken" />
 		<flow-ref doc:name="lookupRaceAndRacer" doc:id="547d7cd5-f1cc-41a1-83e8-2f7c9c683599" name="lookupRaceAndRacer" />
+		<validation:is-null doc:name="Is race already finished?" doc:id="0ec0c4d2-8089-48d9-872b-9b17dbff7f63" value="#[vars.race.finish]" message="This race has already ended.">
+			<error-mapping sourceType="VALIDATION:NOT_NULL" targetType="APP:RACECOMPLETED" />
+		</validation:is-null>
 		<validation:is-true doc:name="check token" doc:id="9bfc00e7-02ce-46ee-98f2-a6d4998c03d1" expression="#[vars.requestToken == vars.race.token]" message="#['Race token is not valid: ' ++ vars.requestToken]">
 			<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="APP:INVALID_RACE_TOKEN" />
 		</validation:is-true>
