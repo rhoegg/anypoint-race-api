@@ -55,6 +55,9 @@ http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/re
 			<route >
 				<flow-ref doc:name="updateResultsMost" doc:id="f8b57231-06f9-4448-bb4e-fae6e2b06ca6" name="updateResultsMost" />
 			</route>
+			<route >
+				<flow-ref doc:name="updateResultsEasterEgg" doc:id="09232364-0261-4c25-8651-cf5d19c6c41b" name="updateResultsEasterEgg"/>
+			</route>
 		</scatter-gather>
 		<flow-ref doc:name="publishPortalPageDraft" doc:id="c505526f-738d-476e-a874-55e2a6caa45f" name="publishPortalPageDraft" />
 		<error-handler >
@@ -140,6 +143,12 @@ completedRaces map (race) ->
 		<set-payload value="#[dw::pages::Home::markdown(vars.standings)]" doc:name="Home" doc:id="c742653e-0c90-415b-a13c-b8b08fcbb2a0" />
 		<set-variable value="home" doc:name="pagePath" doc:id="e13d3684-c22e-4f90-8d83-ddfe96fd036b" variableName="pagePath"/>
 		<flow-ref doc:name="createPortalPageDraft" doc:id="8e70e200-54dd-473f-98a9-1cc169c83b9b" name="createPortalPageDraft"/>
+	</flow>
+	<flow name="updateResultsEasterEgg" doc:id="067493f0-4f80-4441-a52a-dd9150745e11">
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="6909e7d2-b485-4b36-a978-76483fdb7377" message="Updating results page: First to Finish" category="race.leaderboards" />
+		<set-payload value="#[dw::pages::EasterEggResults::markdown(vars.standings)]" doc:name="EasterEgg" doc:id="93b0fea4-a210-4e6c-baa3-c64c070b27a4" />
+		<set-variable value="${anypoint.portal.pages.results.easterEgg}" doc:name="pagePath" doc:id="24dc117b-5b69-46a4-aa78-604aa5d61a2f" variableName="pagePath" />
+		<flow-ref doc:name="createPortalPageDraft" doc:id="e635a2ba-b2a5-4605-aa7b-ba8571ec9187" name="createPortalPageDraft" />
 	</flow>
 	<flow name="createPortalPageDraft" doc:id="dafd9d2c-f780-4ffc-a9a6-d1553180366c" >
 		<http:request method="PUT" doc:name="PUT .../portal/draft/pages/{pageName}" doc:id="124a529d-a1e7-4c83-aa22-790e78696dcd" config-ref="exchangeV2HttpRequestConfig" path="/assets/${anypoint.businessGroup}/${anypoint.portal.assetId}/${anypoint.portal.version}/portal/draft/pages/{pagePath}" responseTimeout="${anypoint.portal.timeout}">

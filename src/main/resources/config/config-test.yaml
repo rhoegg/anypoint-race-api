@@ -15,6 +15,7 @@ anypoint:
         fastest: "0t1-29r/Results: Fastest"
         most: "99i-oc0/Results: Perseverance"
         halloffame: "5ip-grn/Hall of Fame"
+        easterEgg: "dla-n7g/Results: Easter Egg"
 redis:
   host: redis-15552.c1.us-east1-2.gce.cloud.redislabs.com
   port: "15552"
