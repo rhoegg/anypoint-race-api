@@ -143,13 +143,17 @@ output application/json
                 <set-variable value="500" doc:name="httpStatus = 500" doc:id="ebaaaf9d-4d34-4481-89f0-3ed7890e010f" variableName="httpStatus" />
                 <set-payload value="#[error.description]" doc:name="Set Payload" doc:id="80985162-a82b-4a98-a491-4113e5fb3905" />
             </on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="14dd86f3-b9ad-4e9b-b439-a3cb620a694a" type="APP:INVALID_URL">
+				<set-variable value="500" doc:name="httpStatus = 500" doc:id="c3b164ed-1608-4bc1-ad39-191d0d1c4e4f" variableName="httpStatus" />
+				<set-payload value='#["Invalid racerURL"]' doc:name="Set Payload" doc:id="b3ec6991-93d6-4358-991a-0bd6822874ae" />
+			</on-error-propagate>
         </error-handler>
     </flow>
     <flow name="post:\racers\(racerId)\races\(raceId)\lap:application\json:anypoint-race-api-config">
         <flow-ref doc:name="finishLap" doc:id="c92d9374-c7dc-4f3f-b1e0-c87a3d4176d8" name="finishLap" />
 		<error-handler >
 			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="9841f286-4e02-4761-8a75-bbafdddfe060" type="APP:INVALID_RACE_TOKEN" >
-				<set-variable value="400" doc:name="httpStatus = 40" doc:id="e168f96f-0382-4253-85ce-ff7d98d18c4b" variableName="httpStatus" />
+				<set-variable value="400" doc:name="httpStatus = 400" doc:id="e168f96f-0382-4253-85ce-ff7d98d18c4b" variableName="httpStatus" />
 				<set-payload value="invalid race token" doc:name="invalid race token" doc:id="4c367df0-c8b5-4590-b645-9f529b6b9f79" />
 			</on-error-continue>
 		</error-handler>
