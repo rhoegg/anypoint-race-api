@@ -86,7 +86,7 @@ read(payloadNoNewline, "application/json")]]></ee:set-payload>
 		<redis:set doc:name="raceKey" doc:id="4111c289-c1f2-4d3d-acd3-e47a68e4ca32" config-ref="Redis_Redis" key="#[vars.raceKey]">
 			<redis:value ><![CDATA[#[output application/java --- write(vars.race, "application/json")]]]></redis:value>
 		</redis:set>
-		<redis:push-to-list doc:name="season2:races" doc:id="7c82fb25-8e88-460c-ad87-df56a0a46f98" config-ref="Redis_Redis" key="season2:races" ifExists="true">
+		<redis:push-to-list doc:name="season2:races" doc:id="7c82fb25-8e88-460c-ad87-df56a0a46f98" config-ref="Redis_Redis" key="season2:races">
 			<redis:value ><![CDATA[#[vars.raceKey]]]></redis:value>
 		</redis:push-to-list>
 		<flow-ref doc:name="notifyRaceToken" doc:id="97eed252-cbc0-485e-b187-1e0e0ce68072" name="notifyRaceToken" target="notifyResponse" />

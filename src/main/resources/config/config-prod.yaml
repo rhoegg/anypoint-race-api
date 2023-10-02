@@ -14,7 +14,8 @@ anypoint:
         firstToFinish: "90u-n91/Results: First to Finish"
         fastest: "5sl-367/Results: Fastest"
         most: "vjf-28f/Results: Perseverance"
-        halloffame: "qz7-40n/Hall of Fame"  
+        halloffame: "qz7-40n/Hall of Fame"
+        easterEgg: "cr0-6ca/Results: 2023 Mystery"
 redis:
   host: redis-18615.c1.us-east1-2.gce.cloud.redislabs.com
   port: "18615"
