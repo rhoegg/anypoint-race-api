@@ -12,11 +12,11 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
 http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/redis/current/mule-redis.xsd">
 	<flow name="publishLeaderboards" doc:id="b0d01136-5f96-43f5-a3c1-958c34590ab1">
-		<scheduler doc:name="Every 10 minutes" doc:id="2b287e8f-00e5-4d78-aa2f-1041aad38402">
+<!-- [STUDIO:"Every 10 minutes"]		<scheduler doc:name="Every 10 minutes" doc:id="2b287e8f-00e5-4d78-aa2f-1041aad38402">
 			<scheduling-strategy>
 				<fixed-frequency frequency="600" timeUnit="SECONDS" startDelay="10" />
 			</scheduling-strategy>
-		</scheduler>
+		</scheduler> [STUDIO] -->
 <idempotent-message-validator doc:name="Idempotent Message Validator" doc:id="b8750c7e-949c-4b7c-8868-b47526f8a3f8" idExpression='#[now() as String {format: "yyyyMMddHHmm"}]' storePrefix="publishLeaderboards">
 			<os:private-object-store alias="publishLeaderboardsObjectStore" persistent="false" maxEntries="10" entryTtl="2" entryTtlUnit="MINUTES" expirationInterval="5" />
 		</idempotent-message-validator>

@@ -19,4 +19,7 @@ anypoint:
 redis:
   host: redis-18615.c1.us-east1-2.gce.cloud.redislabs.com
   port: "18615"
+
+race:
+  expiry: "259200" # seconds
       
