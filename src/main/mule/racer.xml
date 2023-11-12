@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:redis="http://www.mulesoft.org/schema/mule/redis" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking"
+	xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/redis/current/mule-redis.xsd">
+	<ee:object-store-caching-strategy name="racerIdCachingStrategy" doc:name="Caching Strategy" doc:id="8b2f7bb7-e055-434b-929c-bb931b876ad4" keyGenerationExpression="#[attributes.headers.client_id]" >
+		<os:private-object-store alias="registerCacheObjectStore" entryTtl="30" entryTtlUnit="DAYS"/>
+	</ee:object-store-caching-strategy>
+	<sub-flow name="getRacerId" doc:id="ecc8b7d9-7dfa-40a2-b3d9-16d899fca337" >
+		<set-variable value="#[attributes.headers.client_id]" doc:name="clientId" doc:id="320f2fd4-492e-4907-b1d1-0d955a362ae5" variableName="clientId"/>
+		<redis:get doc:name="racerid for client_id" doc:id="c2a7c733-87d9-4c33-baa2-68446e920032" key='#["racerid:$(vars.clientId)"]' config-ref="Redis_Redis"/>
+		<choice doc:name="Choice" doc:id="8d01dc18-0e3a-41e4-9bc9-16fd91d11146" >
+			<when expression="#[payload == null]">
+				<set-payload value="#[uuid()]" doc:name="uuid()" doc:id="dd80a7d6-d680-48ba-b9d3-347635e3af8b" />
+				<redis:set doc:name="racerid for client_id" doc:id="1952b5d2-68ba-44f6-bf90-42df67a6382d" config-ref="Redis_Redis" key='#["racerid:$(vars.clientId)"]' target="redisResult"/>
+			</when>
+			<otherwise >
+				<logger level="DEBUG" doc:name="DEBUG" doc:id="29dc815c-d08a-4066-8ebc-f08c87341c70" message="using cached racer ID #[payload]" category="race.getRacerId"/>
+			</otherwise>
+		</choice>
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="7f9b7500-d365-4df4-8f71-072f74bf8562" message="client id: #[vars.clientId] = racer id: #[payload]" category="race.racerId"/>
+	</sub-flow>
+	<flow name="registerRacer" doc:id="7edfeca7-3d19-4a8a-94cb-b4ba51dfb9be" >
+		<validation:is-not-null doc:name="Is not null" doc:id="3f447caa-4739-4fc3-83c3-00a6f64aa268" value="#[attributes.headers.client_id]">
+			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:CLIENT_ID_MISSING" />
+		</validation:is-not-null>
+		<flow-ref doc:name="getRacerId" doc:id="305dacb5-97c6-4d4e-bda6-ea882d1677f9" name="getRacerId" target="racerId"/>
+		<ee:transform doc:name="racer" doc:id="cb6e3fad-0340-43fc-8d2c-d00cf78a8ef1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	displayName: payload.displayName,
+	email: payload.email,
+	racerId: vars.racerId,
+	clientId: attributes.headers.client_id
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#['racer:' ++ vars.racerId]" doc:name="racerKey" doc:id="656140bf-ac85-4829-b42e-206a0fdf51ab" variableName="racerKey"/>
+		<redis:set doc:name="racerKey" doc:id="6c52874b-1116-464e-9040-46788abebcec" config-ref="Redis_Redis" key="#[vars.racerKey]" target="redisResult">
+			<redis:value ><![CDATA[#[output application/java --- write(payload, "application/json")]]]></redis:value>
+		</redis:set>
+		<logger level="INFO" doc:name="INFO" doc:id="60528fa0-8696-44a6-b973-5cdde3b4586c" message="Registered racer #[payload.racerId] for client #[payload.clientId]: #[payload.email]" category="race.register"/>
+	</flow>
+	<flow name="retrieveRacer" doc:id="0c7b9d6c-682b-423e-86e9-4bc58586110a" >
+		<validation:is-not-null doc:name="Is not null" doc:id="a6658fca-d46b-4278-a168-15b568f1cd97" value="#[attributes.headers.client_id]">
+			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:CLIENT_ID_MISSING" />
+		</validation:is-not-null>
+		<redis:get doc:name="Get racer" doc:id="deebf049-1e83-4688-9d4c-228841565a01" key="#['racer:' ++ vars.racerId]" config-ref="Redis_Redis"/>
+<validation:is-not-blank-string doc:name="Is not blank string" doc:id="6fce677b-2c7d-478b-bca2-4d0e8f271a40" >
+			<error-mapping targetType="APP:INVALID_RACER_ID" />
+		</validation:is-not-blank-string>
+		<ee:transform doc:name="Transform Message" doc:id="2bf62e0a-3cc0-4ece-b5fa-f9e781d22f53" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+import * from dw::core::Strings
+var payloadNoNewline = payload replace "\n" with ""
+---
+read(payloadNoNewline, "application/json")]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="55a0fc06-9792-4e4a-85c5-c3da80fd96a2" type="APP:INVALID_RACER_ID">
+				<set-payload value='#["Invalid racer $(vars.racerId)"]' doc:name="Set Payload" doc:id="af88e282-0627-4615-873d-f27b4a21b35e" />
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="6fc307bb-9099-4005-b365-63cb53e65084" />
+		</error-handler>
+	</flow>
+	<sub-flow name="lookupRaceAndRacer" doc:id="3db4429f-8267-4166-b99f-51797d7dfaa0">
+		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="ef2af9e6-6288-4fce-b92f-615e3f2f41e3" variableName="racerId" />
+		<flow-ref doc:name="retrieveRacer" doc:id="2f7b3f1d-bbb1-42a6-8161-0c0b6614489a" name="retrieveRacer" target="racer" />
+		<set-variable value="#[attributes.uriParams.raceId]" doc:name="raceId" doc:id="82a6e5a1-d831-4c19-9351-45b70e414b56" variableName="raceId" />
+		<redis:get doc:name="Get race" doc:id="9e19107d-5ccb-4bd1-9ab1-3558bb595931" config-ref="Redis_Redis" key='#["race:" ++ vars.raceId]' target="race">
+			<error-mapping targetType="APP:INVALID_RACE" sourceType="REDIS:INVALID_REQUEST_DATA" />
+		</redis:get>
+		<set-variable value='#[output application/json&#10;---&#10;read(vars.race, "application/json")]' doc:name="race" doc:id="9f6e0ba3-9a96-4619-abcd-91d03c126dc7" variableName="race" />
+	</sub-flow>
+</mule>
