@@ -1,0 +1,11 @@
+%dw 2.0
+
+type auto_0175e145_d233_4593_9da7_bb8272ddbf79_Input_Payload = {
+  trial: {
+    duration: Number, 
+    laps: Number, 
+    _?: Any
+  }, 
+  _?: Any
+}
+

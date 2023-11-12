@@ -1,0 +1,17 @@
+%dw 2.0
+
+type auto_5b8f69a0_00ab_4c14_9f51_e269f724b33e_Input_Payload = {
+  lap: {
+    duration: Number, 
+    count: Number, 
+    _?: Any
+  }, 
+  trial: {
+    duration: Number, 
+    laps: Number, 
+    _?: Any
+  }, 
+  token: String, 
+  _?: Any
+}
+

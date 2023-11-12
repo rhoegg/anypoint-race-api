@@ -1,0 +1,26 @@
+%dw 2.0
+
+type auto_5b8f69a0_00ab_4c14_9f51_e269f724b33e_Input_Attributes = {|
+  clientCertificate?: {|
+    publicKey?: {|  |}, 
+    "type"?: String, 
+    encoded?: Binary
+  |}, 
+  headers: {|  |}, 
+  listenerPath: String, 
+  method: String, 
+  queryParams: {|  |}, 
+  queryString: String, 
+  relativePath: String, 
+  remoteAddress: String, 
+  requestPath: String, 
+  requestUri: String, 
+  scheme: String, 
+  uriParams: {|
+    racerId: String, 
+    timeTrialId: String
+  |}, 
+  version: String, 
+  localAddress: String
+|}
+
