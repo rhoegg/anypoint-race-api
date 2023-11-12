@@ -75,7 +75,7 @@ read(payloadNoNewline, "application/json")]]></ee:set-payload>
 			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="6fc307bb-9099-4005-b365-63cb53e65084" />
 		</error-handler>
 	</flow>
-	<flow name="startRace" doc:id="4327921b-3d52-47e3-855a-f59691c3a831">
+	<flow name="startSeason2Race" doc:id="4327921b-3d52-47e3-855a-f59691c3a831">
 		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="06891a06-af15-4c69-b1b6-1ac9d98236a1" variableName="racerId" />
 		<set-variable value="#[attributes.requestPath]" doc:name="requestPath" doc:id="578d9de7-0a2d-480c-9316-875fcf3267e4" variableName="requestPath"/>
 		<set-variable value="#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	racerId: vars.racerId,&#10;	raceId: uuid(),&#10;	token: uuid(),&#10;	start: now() as String,&#10;	url: payload.racerUrl&#10;}]" doc:name="race" doc:id="cf22a59b-b3e3-4825-b9e6-bbfc1ad9a749" variableName="race"/>
@@ -83,7 +83,7 @@ read(payloadNoNewline, "application/json")]]></ee:set-payload>
 		<redis:set doc:name="raceKey" doc:id="4111c289-c1f2-4d3d-acd3-e47a68e4ca32" config-ref="Redis_Redis" key="#[vars.raceKey]" expire="${race.expiry}">
 			<redis:value ><![CDATA[#[output application/java --- write(vars.race, "application/json")]]]></redis:value>
 		</redis:set>
-		<flow-ref doc:name="notifyRaceToken" doc:id="97eed252-cbc0-485e-b187-1e0e0ce68072" name="notifyRaceToken" target="notifyResponse" />
+		<flow-ref doc:name="notifySeason2RaceToken" doc:id="97eed252-cbc0-485e-b187-1e0e0ce68072" name="notifySeason2RaceToken" target="notifyResponse" />
 		<ee:transform doc:name="response" doc:id="7e13d1b7-ee12-4c1e-9622-94bd36337f88" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -97,7 +97,7 @@ output application/json
 		<set-variable value="#[output application/java&#10;var parentDir = vars.requestPath splitBy &quot;/&quot; then $[0 to -2] then $ joinBy &quot;/&quot;&#10;---&#10;{ &#10;	Location: parentDir ++ '/races/$(vars.race.raceId)/finish'&#10;}]" doc:name="outboundHeaders" doc:id="9600a1f4-5cb0-4801-9a82-b2568be608a2" variableName="outboundHeaders"/>
 		<logger level="INFO" doc:name="INFO" doc:id="eeed0813-3b1b-466c-a647-db37dd71e50e" message="racer #[vars.racerId] started a new race #[vars.race.raceId]" category="race.start"/>
 	</flow>
-	<flow name="finishLap" doc:id="86dc1729-b308-44c7-8ccb-af52cf3290f5" >
+	<flow name="finishSeason2Lap" doc:id="86dc1729-b308-44c7-8ccb-af52cf3290f5" >
 		<set-variable value="#[now()]" doc:name="lapStart" doc:id="be1c5ab7-eba9-47b7-a13f-3e6a418bf027" variableName="lapStart"/>
 		<set-variable value="#[payload.token]" doc:name="requestToken" doc:id="16deff18-d95e-4228-8953-0756673e301a" variableName="requestToken" />
 		<flow-ref doc:name="lookupRaceAndRacer" doc:id="3a7abdf5-7e69-454b-8f21-207d67a730ef" name="lookupRaceAndRacer"/>
@@ -112,7 +112,7 @@ output application/json
 		<redis:set doc:name="race:{raceId}" doc:id="a6b3bc0a-b8a0-408d-8755-989bd719aeb6" config-ref="Redis_Redis" key='#["race:" ++ vars.raceId]' expire="${race.expiry}">
 			<redis:value ><![CDATA[#[output application/java --- write(vars.race, "application/json")]]]></redis:value>
 		</redis:set>
-		<flow-ref doc:name="notifyRaceToken" doc:id="10c9d3dc-e12a-4d0d-93e7-95253849d811" name="notifyRaceToken" target="notifyResponse"/>
+		<flow-ref doc:name="notifyRaceToken" doc:id="10c9d3dc-e12a-4d0d-93e7-95253849d811" name="notifySeason2RaceToken" target="notifyResponse"/>
 		<ee:transform doc:name="response" doc:id="923b9b21-7c53-47ea-a632-bdf291de2c86" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -129,7 +129,7 @@ output application/json
 			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="768dec70-9d72-4f56-943a-164286717fe7" />
 		</error-handler>
 	</flow>
-	<flow name="finishRace" doc:id="2958156d-0447-4dc6-85d2-a42c117388ba">
+	<flow name="finishSeason2Race" doc:id="2958156d-0447-4dc6-85d2-a42c117388ba">
 		<set-variable value="#[now()]" doc:name="finish" doc:id="e69aaf15-9103-4b99-b656-d089846eca66" variableName="finish" />
 		<set-variable value="#[payload]" doc:name="requestToken" doc:id="ae622601-9ffa-42dc-95e5-bd002b18fbaa" variableName="requestToken" />
 		<flow-ref doc:name="lookupRaceAndRacer" doc:id="547d7cd5-f1cc-41a1-83e8-2f7c9c683599" name="lookupRaceAndRacer" />
@@ -172,7 +172,7 @@ var time = vars.race.finish - vars.race.start
 		</redis:get>
 		<set-variable value='#[output application/json&#10;---&#10;read(vars.race, "application/json")]' doc:name="race" doc:id="9f6e0ba3-9a96-4619-abcd-91d03c126dc7" variableName="race"/>
 	</sub-flow>
-	<flow name="notifyRaceToken" doc:id="cbf9a2b4-f0ba-47cd-b369-9d7862b74062" >
+	<flow name="notifySeason2RaceToken" doc:id="cbf9a2b4-f0ba-47cd-b369-9d7862b74062" >
 		<http:request method="POST" doc:name="POST /race/{raceId}/token" doc:id="f9fdff86-e659-4e66-bdd7-350d20cead27" config-ref="racerHttpRequestConfig" url='#["$(vars.race.url)/race/$(vars.race.raceId)/token"]'>
 			<error-mapping sourceType="HTTP:CONNECTIVITY" targetType="APP:INVALID_URL" />
 			<http:body ><![CDATA[#[output text/plain --- vars.race.token]]]></http:body>

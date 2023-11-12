@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_2958156d_0447_4dc6_85d2_a42c117388ba_Output_Variables_race = {| finish*: DateTime |}
+
