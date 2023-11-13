@@ -19,7 +19,12 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<race-data-system-api:set-race doc:name="raceId" doc:id="6fca0210-1cc7-4fc6-91f8-255fda71a740" config-ref="Race_Data_System_API_Config" race-type="practice_restclient" id="#[payload.raceId]" expiry="${practice.expiry}"/>
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="60c55a64-7018-4482-b390-b8662de403df" message="Setting race data: #[payload]" category="race-api.practice.restclient.start"/>
+		<race-data-system-api:set-race doc:name="raceId" doc:id="6fca0210-1cc7-4fc6-91f8-255fda71a740"
+			config-ref="raceDataSystemApiConfig"
+			race-type="practice_restclient"
+			id="#[payload.raceId]"
+			expiry="${practice.expiry}" target="setRaceResult"/>
 		<ee:transform doc:name="response" doc:id="83a27d43-8aad-4c1b-b1e5-24950bb309be" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -30,7 +35,83 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="dcf4e178-7ccf-4b01-b6d3-9ffb0689f146" type="RACE-DATA-SYSTEM-API:BAD_REQUEST">
+				<logger level="DEBUG" doc:name="DEBUG" doc:id="9fb3d7f3-eb08-44aa-8f35-15763ca20dd0" message="#[error.errorMessage.payload]" category="race-api.practice.restclient.start" />
+			</on-error-propagate>
+		</error-handler>
 	</flow>
-	<flow name="practice_restclient_lap" doc:id="5b8f69a0-00ab-4c14-9f51-e269f724b33e" />
-	<flow name="practice_restclient_finish" doc:id="0175e145-d233-4593-9da7-bb8272ddbf79" />
+	<flow name="practice_restclient_lap" doc:id="5b8f69a0-00ab-4c14-9f51-e269f724b33e">
+		<set-variable doc:name="token" doc:id="nuulxb"
+			variableName="token"
+			value="#[payload]"/>
+		<set-variable doc:name="raceType" doc:id="vfvuox"
+			variableName="raceType"
+			value="practice_restclient" />
+		<set-variable doc:name="raceId" doc:id="rhytgr"
+			variableName="raceId"
+			value="#[vars.timeTrialId]" />
+    	<try doc:name="Try" doc:id="97b11221-6549-4db4-81cb-332714d4ccff" >
+			<flow-ref name="getRaceAndCheckToken" doc:name="getRaceAndCheckToken" />
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="2b321ad2-21ff-4206-8c61-1e10c2c9aa85" type="APP:BAD_TOKEN" when="isEmpty(error.errorMessage.payload.lap)">
+					<logger level="DEBUG" doc:name="DEBUG" doc:id="716af302-20ad-4219-a4a7-2d80e3a67539" message="First lap does not require token" category="race-api.practice.restclient.lap"/>
+				</on-error-continue>
+				<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="674d6167-492a-4cf2-a5e6-eeea6f501a8e" />
+			</error-handler>
+		</try>
+    	<ee:transform doc:name="update lap" doc:id="thvisp">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+import mergeWith from dw::core::Objects
+output application/json
+var lap = vars.race.lap default {
+	count: 0,
+	finish: vars.race.start
+}
+---
+vars.race mergeWith {
+	lap: {
+		count: lap.count + 1,
+		start: lap.finish, // this lap started when the last one finished
+		finish: now() as String // this lap is completed now
+	},
+	token: uuid() // new token
+}
+				]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<race-data-system-api:set-race doc:name="practice_restclient/{raceId}" doc:id="dxtume"
+			target="setRaceResult"
+			config-ref="raceDataSystemApiConfig"
+			race-type="practice_restclient"
+			id="#[vars.raceId]" />
+		<ee:transform doc:name="Transform Message" doc:id="ca7d16ba-3345-4e7f-9cec-8a29fb2b7857" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	token: payload.token,
+	lap: {
+		duration: (payload.lap.finish as DateTime - payload.lap.start as DateTime) as Number {unit: "seconds"}
+	},
+	trial: {
+		laps: payload.lap.count,
+		duration: (payload.lap.finish as DateTime - payload.start as DateTime) as Number {unit: "seconds"}
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="7659c0bd-bfb3-4fa7-b033-dde55105cca8" type="RACE-DATA-SYSTEM-API:BAD_REQUEST">
+				<logger level="DEBUG" doc:name="DEBUG" doc:id="0e4d358e-b3f2-4998-a846-975d5a5b8c35" message="#[error.errorMessage.payload]" category="race-api.practice.restclient.lap"/>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="b9106f0e-f103-4e94-afe0-426b1cc1679a" type="APP:BAD_TOKEN, APP:NO_SUCH_RACE"/>
+		</error-handler>
+	
+	</flow>
+	<flow name="practice_restclient_finish" doc:id="0175e145-d233-4593-9da7-bb8272ddbf79">
+		<logger level="DEBUG" />
+	</flow>
 </mule>

@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.mycompany</groupId>
+	<groupId>com.anypointspeedway</groupId>
 	<artifactId>race-api</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>mule-application</packaging>
@@ -14,7 +14,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
 		<app.runtime>4.4.0-20230522</app.runtime>
-		<mule.maven.plugin.version>3.8.2</mule.maven.plugin.version>
+		<mule.maven.plugin.version>4.0.0</mule.maven.plugin.version>
 	</properties>
 
 	<build>
@@ -95,7 +95,7 @@
 		<dependency>
 			<groupId>ae6d7954-6fc2-4f3e-8777-80ff8aabd859</groupId>
 			<artifactId>mule-plugin-race-data-system-api</artifactId>
-			<version>1.0.2</version>
+			<version>1.0.3</version>
 			<classifier>mule-plugin</classifier>
 		</dependency>
 	</dependencies>

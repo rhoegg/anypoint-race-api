@@ -135,9 +135,19 @@ output application/json
     </flow>
     <flow name="post:\racers\(racerId)\practice\rest-client\time-trials:anypoint-race-api-config">
 		<flow-ref doc:name="practice_restclient_startTimeTrial" doc:id="58aa5211-a400-4c74-9c9f-f05cab83bc8a" name="practice_restclient_startTimeTrial"/>
+		<logger level="INFO" doc:name="INFO" doc:id="4962065a-58c9-45b8-b52d-d03b2a571864" message="racer #[attributes.uriParams.racerId] [practice/rest-client] started a time trial #[payload.timeTrialId]" category="race-api.api"/>
     </flow>
 	<flow name="post:\racers\(racerId)\practice\rest-client\time-trials\(timeTrialId)\laps:text\plain:anypoint-race-api-config">
+		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="7879143c-3291-4f41-9910-0d56feb1b9a2" variableName="racerId"/>
+		<set-variable value="#[attributes.uriParams.timeTrialId]" doc:name="timeTrialId" doc:id="6d2bff37-5668-4df8-90a3-5c38f038d185" variableName="timeTrialId"/>
 		<flow-ref doc:name="practice_restclient_lap" doc:id="516d3022-9112-4505-ad4e-036daa4d33bd" name="practice_restclient_lap"/>
+		<logger level="INFO" doc:name="INFO" doc:id="7567af79-6e57-44dd-a04a-3a19210704f7" category="race-api.api" message="racer #[attributes.uriParams.racerId] [practice/rest-client] completed a lap for #[attributes.uriParams.timeTrialId]"/>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="238ad850-c679-434f-8504-a0953fb5274e" type="APP:NO_SUCH_RACE">
+				<set-variable value="404" doc:name="httpStatus" doc:id="149e78ad-1adb-494e-8186-17cac9bf55c6" variableName="httpStatus"/>
+				<logger level="WARN" doc:name="WARN" doc:id="2f0b42f2-f2a9-49ad-8156-64331c675333" message="racer #[vars.racerId] [practice/restclient] tried to complete a lap for non-existent time trial #[vars.timeTrialId]" category="race-api.practice.restclient.lap"/>
+			</on-error-continue>
+		</error-handler>
     </flow>
 	<flow name="put:\racers\(racerId)\practice\rest-client\time-trials\(timeTrialId)\finish-line:text\plain:anypoint-race-api-config">
 		<flow-ref doc:name="practice_restclient_finish" doc:id="31821a0a-b88a-4e72-8548-8340f52ee7ef" name="practice_restclient_finish"/>
