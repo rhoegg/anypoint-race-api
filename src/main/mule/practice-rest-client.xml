@@ -1,10 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:race-data-system-api="http://www.mulesoft.org/schema/mule/race-data-system-api"
 	xmlns="http://www.mulesoft.org/schema/mule/core"
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org/schema/mule/race-data-system-api/current/mule-race-data-system-api.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="practice_restclient_getRace" doc:id="b4bdedd5-04b2-4b29-b039-583d08b99fbb" >
+		<set-variable doc:name="token" doc:id="nuulxb" variableName="token" value="#[payload]" />
+		<set-variable doc:name="raceType" doc:id="vfvuox" variableName="raceType" value="practice_restclient" />
+		<set-variable doc:name="raceId" doc:id="rhytgr" variableName="raceId" value="#[vars.timeTrialId]" />
+		<try doc:name="Try" doc:id="97b11221-6549-4db4-81cb-332714d4ccff">
+			<flow-ref name="getRaceAndCheckToken" doc:name="getRaceAndCheckToken" target="race" />
+			<error-handler>
+				<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="2b321ad2-21ff-4206-8c61-1e10c2c9aa85" type="APP:BAD_TOKEN" when="isEmpty(payload.lap)">
+					<logger level="DEBUG" doc:name="DEBUG" doc:id="716af302-20ad-4219-a4a7-2d80e3a67539" message="First lap does not require token" category="race-api.practice.restclient.lap" />
+				</on-error-continue>
+				<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="674d6167-492a-4cf2-a5e6-eeea6f501a8e" />
+			</error-handler>
+		</try>
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="87255160-a92b-4350-b4d9-6e5233e1e4f8" message="Found race #[vars.race]" category="race-api.practice.restclient.lap" />
+	</sub-flow>
 	<flow name="practice_restclient_startTimeTrial" doc:id="2bc007b3-8021-4806-a560-2c1e2140f551" >
 		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="601b16d3-fa64-4d0d-933b-333778b93640" variableName="racerId"/>
 		<ee:transform doc:name="race" doc:id="efc1b65a-1d6a-4001-84e5-9f4713e28f07" >
@@ -42,25 +56,8 @@ output application/json
 		</error-handler>
 	</flow>
 	<flow name="practice_restclient_lap" doc:id="5b8f69a0-00ab-4c14-9f51-e269f724b33e">
-		<set-variable doc:name="token" doc:id="nuulxb"
-			variableName="token"
-			value="#[payload]"/>
-		<set-variable doc:name="raceType" doc:id="vfvuox"
-			variableName="raceType"
-			value="practice_restclient" />
-		<set-variable doc:name="raceId" doc:id="rhytgr"
-			variableName="raceId"
-			value="#[vars.timeTrialId]" />
-    	<try doc:name="Try" doc:id="97b11221-6549-4db4-81cb-332714d4ccff" >
-			<flow-ref name="getRaceAndCheckToken" doc:name="getRaceAndCheckToken" />
-			<error-handler >
-				<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="2b321ad2-21ff-4206-8c61-1e10c2c9aa85" type="APP:BAD_TOKEN" when="isEmpty(error.errorMessage.payload.lap)">
-					<logger level="DEBUG" doc:name="DEBUG" doc:id="716af302-20ad-4219-a4a7-2d80e3a67539" message="First lap does not require token" category="race-api.practice.restclient.lap"/>
-				</on-error-continue>
-				<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="674d6167-492a-4cf2-a5e6-eeea6f501a8e" />
-			</error-handler>
-		</try>
-    	<ee:transform doc:name="update lap" doc:id="thvisp">
+		<flow-ref doc:name="practice_restclient_getRace" doc:id="a6b3085c-74ca-4766-b928-45b6952c067e" name="practice_restclient_getRace" />
+		<ee:transform doc:name="update lap" doc:id="thvisp">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 import mergeWith from dw::core::Objects
@@ -86,7 +83,7 @@ vars.race mergeWith {
 			config-ref="raceDataSystemApiConfig"
 			race-type="practice_restclient"
 			id="#[vars.raceId]" />
-		<ee:transform doc:name="Transform Message" doc:id="ca7d16ba-3345-4e7f-9cec-8a29fb2b7857" >
+		<ee:transform doc:name="lap response" doc:id="ca7d16ba-3345-4e7f-9cec-8a29fb2b7857" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -94,11 +91,13 @@ output application/json
 {
 	token: payload.token,
 	lap: {
-		duration: (payload.lap.finish as DateTime - payload.lap.start as DateTime) as Number {unit: "seconds"}
+		duration: (payload.lap.finish - payload.lap.start) 
+			as Number {unit: "milliseconds"} / 1000
 	},
 	trial: {
 		laps: payload.lap.count,
-		duration: (payload.lap.finish as DateTime - payload.start as DateTime) as Number {unit: "seconds"}
+		duration: (payload.lap.finish - payload.start) 
+			as Number {unit: "milliseconds"} / 1000
 	}
 }]]></ee:set-payload>
 			</ee:message>
@@ -112,6 +111,6 @@ output application/json
 	
 	</flow>
 	<flow name="practice_restclient_finish" doc:id="0175e145-d233-4593-9da7-bb8272ddbf79">
-		<logger level="DEBUG" />
+		<flow-ref doc:name="practice_restclient_getRace" doc:id="26b5bac2-3851-4e23-b2c9-08c3897524e5" name="practice_restclient_getRace"/>
 	</flow>
 </mule>

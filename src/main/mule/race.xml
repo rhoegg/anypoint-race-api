@@ -10,13 +10,12 @@
 	http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
     <sub-flow name="getRaceAndCheckToken">
         <race-data-system-api:get-race doc:name="raceType/raceId" doc:id="lnctsm"
-            target="race"
             config-ref="raceDataSystemApiConfig"
             race-type="#[vars.raceType]"
             id="#[vars.raceId]">
 			<error-mapping sourceType="RACE-DATA-SYSTEM-API:NOT_FOUND" targetType="APP:NO_SUCH_RACE" />
         </race-data-system-api:get-race>
-        <validation:is-true doc:name="Token matches" doc:id="mxfuoc" expression="#[vars.token == vars.race.token]" message="token does not match">
+        <validation:is-true doc:name="Token matches" doc:id="mxfuoc" expression="#[vars.token == payload.token]" message="token does not match">
             <error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="APP:BAD_TOKEN" />
         </validation:is-true>
     </sub-flow>

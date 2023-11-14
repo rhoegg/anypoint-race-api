@@ -144,8 +144,14 @@ output application/json
 		<logger level="INFO" doc:name="INFO" doc:id="7567af79-6e57-44dd-a04a-3a19210704f7" category="race-api.api" message="racer #[attributes.uriParams.racerId] [practice/rest-client] completed a lap for #[attributes.uriParams.timeTrialId]"/>
 		<error-handler >
 			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="238ad850-c679-434f-8504-a0953fb5274e" type="APP:NO_SUCH_RACE">
-				<set-variable value="404" doc:name="httpStatus" doc:id="149e78ad-1adb-494e-8186-17cac9bf55c6" variableName="httpStatus"/>
+				<set-variable value="404" doc:name="httpStatus = 404" doc:id="149e78ad-1adb-494e-8186-17cac9bf55c6" variableName="httpStatus"/>
+				<set-payload value="no such race" doc:name="no such race" doc:id="702bb1b9-cdae-447c-92c1-dc4afdf1864f" />
 				<logger level="WARN" doc:name="WARN" doc:id="2f0b42f2-f2a9-49ad-8156-64331c675333" message="racer #[vars.racerId] [practice/restclient] tried to complete a lap for non-existent time trial #[vars.timeTrialId]" category="race-api.practice.restclient.lap"/>
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="38eebf08-b3fc-4f47-ba32-2ce529a396fd" type="APP:BAD_TOKEN">
+				<set-variable value="400" doc:name="httpStatus = 400" doc:id="0f13378b-4a73-48bb-9913-5a9dbe257fbe" variableName="httpStatus"/>
+				<set-payload value="bad token" doc:name="bad token" doc:id="618f4518-3859-41e1-acca-021db7da8e69" />
+				<logger level="WARN" doc:name="WARN" doc:id="9802ab05-656f-4afd-9bfd-28a05ff4d8c3" category="race-api.practice.restclient.lap" message="racer #[vars.racerId] [practice/restclient] tried to complete a lap with a bad token"/>
 			</on-error-continue>
 		</error-handler>
     </flow>
