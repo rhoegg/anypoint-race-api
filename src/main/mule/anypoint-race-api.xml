@@ -156,7 +156,21 @@ output application/json
 		</error-handler>
     </flow>
 	<flow name="put:\racers\(racerId)\practice\rest-client\time-trials\(timeTrialId)\finish-line:text\plain:anypoint-race-api-config">
-		<flow-ref doc:name="practice_restclient_finish" doc:id="31821a0a-b88a-4e72-8548-8340f52ee7ef" name="practice_restclient_finish"/>
+		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="6906d50e-36e8-4b87-9e91-8f9d9edf2729" variableName="racerId" />
+		<set-variable value="#[attributes.uriParams.timeTrialId]" doc:name="timeTrialId" doc:id="10c61589-6ce7-4208-81f6-664e62addd72" variableName="timeTrialId" />
+		<flow-ref doc:name="practice_restclient_finish" doc:id="31821a0a-b88a-4e72-8548-8340f52ee7ef" name="practice_restclient_finish" />
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="e5df2231-04b7-44fd-bc87-cb44924f1f99" type="APP:NO_SUCH_RACE">
+				<set-variable value="404" doc:name="httpStatus = 404" doc:id="c7e093c2-79ec-451b-9bbe-191fc03f5d1c" variableName="httpStatus" />
+				<set-payload value="no such race" doc:name="no such race" doc:id="f087dbfc-d675-46fd-b2bd-40bb5a9b4423" />
+				<logger level="WARN" doc:name="WARN" doc:id="3f9e751c-3b97-4eb0-9cbd-75c1c3147c41" message="racer #[vars.racerId] [practice/restclient] tried to finish a non-existent time trial #[vars.timeTrialId]" category="race-api.practice.restclient.finish" />
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="381d04ff-f688-4639-acfa-00cfc3f9a8fa" type="APP:BAD_TOKEN">
+				<set-variable value="400" doc:name="httpStatus = 400" doc:id="c19eec56-4710-4434-a035-e6ab935e14f1" variableName="httpStatus" />
+				<set-payload value="bad token" doc:name="bad token" doc:id="07585b66-97f6-4a42-a037-9a4b2ccb2fac" />
+				<logger level="WARN" doc:name="WARN" doc:id="358486aa-737a-429d-8fbc-8f039cd76393" message="racer #[vars.racerId] [practice/restclient] tried to complete a time trial with a bad token" category="race-api.practice.restclient.finish" />
+			</on-error-continue>
+		</error-handler>
     </flow>
 	<flow name="post:\racers\(racerId)\practice\seasons\2\start:application\json:anypoint-race-api-config">
         <flow-ref doc:name="startSeason2Race" doc:id="e756d0ac-78ad-4cd9-8b5f-c9921064f627" name="startSeason2Race" />
