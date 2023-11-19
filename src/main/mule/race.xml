@@ -15,7 +15,11 @@
             id="#[vars.raceId]">
 			<error-mapping sourceType="RACE-DATA-SYSTEM-API:NOT_FOUND" targetType="APP:NO_SUCH_RACE" />
         </race-data-system-api:get-race>
-        <validation:is-true doc:name="Token matches" doc:id="mxfuoc" expression="#[vars.token == payload.token]" message="token does not match">
+        <logger level="INFO" doc:name="DEBUG" doc:id="a3bd7243-66b4-4395-983e-4df52b8e5184" message="#[payload]" category="race-api.getRaceAndCheckToken" />
+		<validation:is-null doc:name="Race still active" doc:id="ec0a4b05-1fde-4038-96f0-f74082524dc2" value="#[payload.finish]" message="Race already finished">
+			<error-mapping sourceType="VALIDATION:NOT_NULL" targetType="APP:RACE_FINISHED" />
+		</validation:is-null>
+		<validation:is-true doc:name="Token matches" doc:id="mxfuoc" expression="#[vars.token == payload.token]" message="token does not match">
             <error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="APP:BAD_TOKEN" />
         </validation:is-true>
     </sub-flow>

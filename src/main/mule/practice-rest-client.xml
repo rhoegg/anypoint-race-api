@@ -9,7 +9,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<set-variable doc:name="raceType" doc:id="vfvuox" variableName="raceType" value="practice_restclient" />
 		<set-variable doc:name="raceId" doc:id="rhytgr" variableName="raceId" value="#[vars.timeTrialId]" />
 		<try doc:name="Try" doc:id="97b11221-6549-4db4-81cb-332714d4ccff">
-			<flow-ref name="getRaceAndCheckToken" doc:name="getRaceAndCheckToken" target="race" />
+			<flow-ref name="getRaceAndCheckToken" doc:name="getRaceAndCheckToken"/>
 			<error-handler>
 				<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="2b321ad2-21ff-4206-8c61-1e10c2c9aa85" type="APP:BAD_TOKEN" when="isEmpty(payload.lap)">
 					<logger level="DEBUG" doc:name="DEBUG" doc:id="716af302-20ad-4219-a4a7-2d80e3a67539" message="First lap does not require token" category="race-api.practice.restclient.getRace" />
@@ -17,6 +17,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 				<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="674d6167-492a-4cf2-a5e6-eeea6f501a8e" />
 			</error-handler>
 		</try>
+		<set-variable value="#[payload]" doc:name="race" doc:id="b4e417a4-02a2-45f3-ae82-71c578c0130c" variableName="race"/>
 		<logger level="DEBUG" doc:name="DEBUG" doc:id="87255160-a92b-4350-b4d9-6e5233e1e4f8" message="Found race #[vars.race]" category="race-api.practice.restclient.getRace" />
 	</sub-flow>
 	<flow name="practice_restclient_startTimeTrial" doc:id="2bc007b3-8021-4806-a560-2c1e2140f551" >
@@ -106,7 +107,7 @@ output application/json
 			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="7659c0bd-bfb3-4fa7-b033-dde55105cca8" type="RACE-DATA-SYSTEM-API:BAD_REQUEST">
 				<logger level="DEBUG" doc:name="DEBUG" doc:id="0e4d358e-b3f2-4998-a846-975d5a5b8c35" message="#[error.errorMessage.payload]" category="race-api.practice.restclient.lap"/>
 			</on-error-propagate>
-			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="b9106f0e-f103-4e94-afe0-426b1cc1679a" type="APP:BAD_TOKEN, APP:NO_SUCH_RACE"/>
+			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="b9106f0e-f103-4e94-afe0-426b1cc1679a" type="APP:BAD_TOKEN, APP:NO_SUCH_RACE, APP:RACE_FINISHED"/>
 		</error-handler>
 	
 	</flow>
@@ -125,12 +126,13 @@ vars.race mergeWith {
 		start: vars.race.lap.finish, // this lap started when the last one finished
 		finish: now() as String // this lap is completed now
 	},
-	finish: now() as String // this race is finished!
+	finish: now() as String, // this race is finished!
+	token: uuid() // reset to unknown value
 }
 	]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<race-data-system-api:set-race doc:name="practice_restclient/{raceId}" doc:id="8d6b3cfd-ced1-4d09-b772-e315fd0b6498" config-ref="raceDataSystemApiConfig" race-type="vars.raceType" id="vars.raceId" target="setRaceResult"/>
+		<race-data-system-api:set-race doc:name="practice_restclient/{raceId}" doc:id="8d6b3cfd-ced1-4d09-b772-e315fd0b6498" config-ref="raceDataSystemApiConfig" race-type="#[vars.raceType]" id="#[vars.raceId]" target="setRaceResult"/>
 		<ee:transform doc:name="response" doc:id="7edacac7-1411-42c3-935a-deff921aaac1" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -149,7 +151,7 @@ output application/json
 			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="f3de8ef2-bb17-40b7-8ae8-19a217632b76" type="RACE-DATA-SYSTEM-API:BAD_REQUEST">
 				<logger level="DEBUG" doc:name="DEBUG" doc:id="0f5598ec-c891-4be8-a1bd-bf23ea7a8a47" message="#[error.errorMessage.payload]" category="race-api.practice.restclient.finish"/>
 			</on-error-propagate>
-			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="66ad9d05-6f8b-4f31-b264-83ae2498510e" type="APP:BAD_TOKEN, APP:NO_SUCH_RACE"/>
+			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="66ad9d05-6f8b-4f31-b264-83ae2498510e" type="APP:BAD_TOKEN, APP:NO_SUCH_RACE, APP:RACE_FINISHED"/>
 		</error-handler>
 	</flow>
 </mule>

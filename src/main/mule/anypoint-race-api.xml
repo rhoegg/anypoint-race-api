@@ -141,7 +141,7 @@ output application/json
 		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="7879143c-3291-4f41-9910-0d56feb1b9a2" variableName="racerId"/>
 		<set-variable value="#[attributes.uriParams.timeTrialId]" doc:name="timeTrialId" doc:id="6d2bff37-5668-4df8-90a3-5c38f038d185" variableName="timeTrialId"/>
 		<flow-ref doc:name="practice_restclient_lap" doc:id="516d3022-9112-4505-ad4e-036daa4d33bd" name="practice_restclient_lap"/>
-		<logger level="INFO" doc:name="INFO" doc:id="7567af79-6e57-44dd-a04a-3a19210704f7" category="race-api.api" message="racer #[attributes.uriParams.racerId] [practice/rest-client] completed a lap for #[attributes.uriParams.timeTrialId]"/>
+		<logger level="INFO" doc:name="INFO" doc:id="7567af79-6e57-44dd-a04a-3a19210704f7" category="race-api.api" message="racer #[vars.racerId] [practice/rest-client] completed a lap for #[vars.timeTrialId]"/>
 		<error-handler >
 			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="238ad850-c679-434f-8504-a0953fb5274e" type="APP:NO_SUCH_RACE">
 				<set-variable value="404" doc:name="httpStatus = 404" doc:id="149e78ad-1adb-494e-8186-17cac9bf55c6" variableName="httpStatus"/>
@@ -153,6 +153,11 @@ output application/json
 				<set-payload value="bad token" doc:name="bad token" doc:id="618f4518-3859-41e1-acca-021db7da8e69" />
 				<logger level="WARN" doc:name="WARN" doc:id="9802ab05-656f-4afd-9bfd-28a05ff4d8c3" category="race-api.practice.restclient.lap" message="racer #[vars.racerId] [practice/restclient] tried to complete a lap with a bad token"/>
 			</on-error-continue>
+			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="c385f7ab-0552-4169-b865-49593ecf1312" type="APP:RACE_FINISHED">
+				<set-variable value="410" doc:name="httpStatus = 410" doc:id="eef31705-8a45-48cc-b306-4ed2ffafc921" variableName="httpStatus" />
+				<set-payload value="this race is over" doc:name="race is over" doc:id="16ff32c0-d27c-47e8-972c-5a38f9b61c3b" />
+				<logger level="WARN" doc:name="WARN" doc:id="5f06bae3-60f8-4d4f-a107-443740895e9d" message="racer #[vars.racerId] [practice/restclient] tried to complete a lap after a race was already finished" category="race-api.practice.restclient.lap" />
+			</on-error-propagate>
 		</error-handler>
     </flow>
 	<flow name="put:\racers\(racerId)\practice\rest-client\time-trials\(timeTrialId)\finish-line:text\plain:anypoint-race-api-config">
@@ -168,8 +173,13 @@ output application/json
 			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="381d04ff-f688-4639-acfa-00cfc3f9a8fa" type="APP:BAD_TOKEN">
 				<set-variable value="400" doc:name="httpStatus = 400" doc:id="c19eec56-4710-4434-a035-e6ab935e14f1" variableName="httpStatus" />
 				<set-payload value="bad token" doc:name="bad token" doc:id="07585b66-97f6-4a42-a037-9a4b2ccb2fac" />
-				<logger level="WARN" doc:name="WARN" doc:id="358486aa-737a-429d-8fbc-8f039cd76393" message="racer #[vars.racerId] [practice/restclient] tried to complete a time trial with a bad token" category="race-api.practice.restclient.finish" />
+				<logger level="WARN" doc:name="WARN" doc:id="358486aa-737a-429d-8fbc-8f039cd76393" message="racer #[vars.racerId] [practice/restclient] tried to complete a time trial #[vars.timeTrialId] with a bad token" category="race-api.practice.restclient.finish" />
 			</on-error-continue>
+			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="ad2b74fd-affb-42bb-be77-9aad799a19d3" type="APP:RACE_FINISHED">
+				<set-variable value="410" doc:name="httpStatus = 410" doc:id="9b77d1e3-233e-4b6c-9906-144a6e6828be" variableName="httpStatus" />
+				<set-payload value="this race is over" doc:name="race is over" doc:id="ac54b928-d843-491b-8d23-0e6b9100eac3" />
+				<logger level="WARN" doc:name="WARN" doc:id="9946d280-50c1-4c4d-ad48-44904eb7a1e3" message="racer #[vars.racerId] [practice/restclient] tried to complete a time trial #[vars.timeTrialId] after a race was already finished" category="race-api.practice.restclient.lap" />
+			</on-error-propagate>
 		</error-handler>
     </flow>
 	<flow name="post:\racers\(racerId)\practice\seasons\2\start:application\json:anypoint-race-api-config">
