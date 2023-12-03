@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<flow name="practice_restapi_enable" doc:id="896450f1-418a-48dc-915a-15050ba11dd4" >
+		<logger level="INFO" doc:name="Logger" doc:id="1b2b3deb-6c98-43df-b727-911cc16a75e9" />
+	</flow>
+	<flow name="practice_restapi_check" doc:id="930f73b2-74e1-4cb6-8a3d-474f242834c5" >
+		<logger level="INFO" doc:name="Logger" doc:id="99b8b3d3-d63a-4900-a3b4-0d974aef0d4f" />
+	</flow>
+</mule>
