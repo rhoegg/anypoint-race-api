@@ -17,14 +17,10 @@ anypoint:
         halloffame: "qz7-40n/Hall of Fame"
         easterEgg: "cr0-6ca/Results: 2023 Mystery"
 racedata:
-# will work once we deploy to a private space. Will not work in shared space
-#  host: race-data-sapi
-#  port: "8081"
-#  protocol: HTTP
-  host: race-data-sapi-yxwy1s.5sc6y6-4.usa-e2.cloudhub.io
-  port: "443"
-  protocol: HTTPS
-  path: /api
+  host: race-data-sapi
+  port: "8081"
+  protocol: HTTP
+  path: /s/race-data
   
 redis:
   host: redis-18615.c1.us-east1-2.gce.cloud.redislabs.com
