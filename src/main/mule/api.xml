@@ -3,7 +3,7 @@
     <http:listener-config name="anypoint-race-api-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
-    <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:3.1.0:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:3.1.2:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="anypoint-race-api-main">
         <http:listener config-ref="anypoint-race-api-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -185,14 +185,30 @@ output application/json
         </error-handler>
     </flow>
     <flow name="put:\racers\(racerId)\practice\rest-api:application\json:anypoint-race-api-config">
-		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="f947a5b7-788a-48e4-893d-f5f7dc3dd994" variableName="racerId"/>
-		<flow-ref doc:name="practice_restapi_enable" doc:id="b4d13a85-e1e0-42ea-99ac-0e55796e698c" name="practice_restapi_enable"/>
+        <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="f947a5b7-788a-48e4-893d-f5f7dc3dd994" variableName="racerId" />
+        <flow-ref doc:name="practice_restapi_enable" doc:id="b4d13a85-e1e0-42ea-99ac-0e55796e698c" name="practice_restapi_enable" />
     </flow>
-	<flow name="get:\racers\(racerId)\practice\rest-api:anypoint-race-api-config">
-		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="fd451d6c-0763-4bf2-8678-5d2d424d55a8" variableName="racerId"/>
-		<flow-ref doc:name="practice_restapi_check" doc:id="317652a8-28de-43a5-9570-0c411c14e4b2" name="practice_restapi_check"/>
+    <flow name="get:\racers\(racerId)\practice\rest-api:anypoint-race-api-config">
+        <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="fd451d6c-0763-4bf2-8678-5d2d424d55a8" variableName="racerId" />
+        <flow-ref doc:name="practice_restapi_check" doc:id="317652a8-28de-43a5-9570-0c411c14e4b2" name="practice_restapi_check" />
     </flow>
-	<flow name="post:\racers\(racerId)\practice\seasons\2\start:application\json:anypoint-race-api-config">
+	<flow name="put:\racers\(racerId)\practice\million-rows:application\json:anypoint-race-api-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="racerId">attributes.uriParams.'racerId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <logger level="INFO" message="put:\racers\(racerId)\practice\million-rows:application\json:anypoint-race-api-config" />
+    </flow>
+    <flow name="get:\racers\(racerId)\practice\million-rows:anypoint-race-api-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="racerId">attributes.uriParams.'racerId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <logger level="INFO" message="get:\racers\(racerId)\practice\million-rows:anypoint-race-api-config" />
+    </flow>
+    <flow name="post:\racers\(racerId)\practice\seasons\2\start:application\json:anypoint-race-api-config">
         <flow-ref doc:name="startSeason2Race" doc:id="e756d0ac-78ad-4cd9-8b5f-c9921064f627" name="startSeason2Race" />
         <error-handler>
             <on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="4edb87c3-9b1f-485e-b772-c5c0db94e2e0" type="APP:CALLBACK_UNEXPECTED_MEDIA_TYPE">

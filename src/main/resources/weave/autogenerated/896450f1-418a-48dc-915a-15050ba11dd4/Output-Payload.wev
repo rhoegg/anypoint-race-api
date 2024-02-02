@@ -1,0 +1,10 @@
+%dw 2.0
+
+type auto_896450f1_418a_48dc_915a_15050ba11dd4_Output_Payload = {
+  endpoint: String, 
+  expires?: Number, 
+  detail?: String, 
+  status: "Active" | "Down" | "Inactive" | "Error", 
+  _?: Any
+}
+

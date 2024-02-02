@@ -1,9 +1,6 @@
 anypoint:
   api:
     id: "19120248"
-  app:
-    clientId: "xxxxx"
-    clientSecret: "yyyyy"
   businessGroup: "ae6d7954-6fc2-4f3e-8777-80ff8aabd859"
   portal:
     assetId: anypoint-race-api
