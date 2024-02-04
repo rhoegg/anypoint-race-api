@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:redis="http://www.mulesoft.org/schema/mule/redis" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/redis/current/mule-redis.xsd">
-    <http:listener-config name="anypoint-race-api-httpListenerConfig">
-        <http:listener-connection host="0.0.0.0" port="8081" />
-    </http:listener-config>
     <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:3.1.2:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="anypoint-race-api-main">
-        <http:listener config-ref="anypoint-race-api-httpListenerConfig" path="/api/*">
+        <http:listener config-ref="httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:response>
             <http:error-response statusCode="#[vars.httpStatus default 500]">
-                <http:body>#[payload]</http:body>
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:error-response>
         </http:listener>
         <apikit:router config-ref="anypoint-race-api-config" />
@@ -100,13 +97,13 @@ output application/json
         </error-handler>
     </flow>
     <flow name="anypoint-race-api-console">
-        <http:listener config-ref="anypoint-race-api-httpListenerConfig" path="/console/*">
+        <http:listener config-ref="httpListenerConfig" path="/console/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:response>
             <http:error-response statusCode="#[vars.httpStatus default 500]">
-                <http:body>#[payload]</http:body>
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:error-response>
         </http:listener>
         <apikit:console config-ref="anypoint-race-api-config" />
@@ -199,6 +196,7 @@ output application/json
             </ee:variables>
         </ee:transform>
         <logger level="INFO" message="put:\racers\(racerId)\practice\million-rows:application\json:anypoint-race-api-config" />
+		<set-variable value="501" doc:name="httpStatus = 501" doc:id="9070a96d-14b5-4d0b-8500-0e9fa138beac" variableName="httpStatus"/>
     </flow>
     <flow name="get:\racers\(racerId)\practice\million-rows:anypoint-race-api-config">
         <ee:transform doc:name="Transform Message">
@@ -207,10 +205,11 @@ output application/json
             </ee:variables>
         </ee:transform>
         <logger level="INFO" message="get:\racers\(racerId)\practice\million-rows:anypoint-race-api-config" />
+		<set-variable value="501" doc:name="httpStatus = 501" doc:id="62197f81-0b3c-43ec-88f1-bb6e76f6f2a6" variableName="httpStatus"/>
     </flow>
     <flow name="post:\racers\(racerId)\practice\seasons\2\start:application\json:anypoint-race-api-config">
-        <flow-ref doc:name="startSeason2Race" doc:id="e756d0ac-78ad-4cd9-8b5f-c9921064f627" name="startSeason2Race" />
-        <error-handler>
+        <logger level="INFO" doc:name="Logger" doc:id="4c11c39a-d1f6-41c4-8500-ae29d0935965" />
+		<error-handler>
             <on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="4edb87c3-9b1f-485e-b772-c5c0db94e2e0" type="APP:CALLBACK_UNEXPECTED_MEDIA_TYPE">
                 <set-variable value="415" doc:name="httpStatus = 415" doc:id="f46192ac-2f7a-49aa-8d61-380268bb52f5" variableName="httpStatus" />
                 <set-payload value="#[error.description]" doc:name="error.description" doc:id="95ba191a-e3de-4f50-9e32-59d0ca5f4622" />
@@ -226,8 +225,8 @@ output application/json
         </error-handler>
     </flow>
     <flow name="post:\racers\(racerId)\practice\seasons\2\races\(raceId)\lap:application\json:anypoint-race-api-config">
-        <flow-ref doc:name="finishSeason2Lap" doc:id="c92d9374-c7dc-4f3f-b1e0-c87a3d4176d8" name="finishSeason2Lap" />
-        <error-handler>
+        <logger level="INFO" doc:name="Logger" doc:id="48ce752f-3e23-442b-bb5a-9d797fcbc439" />
+		<error-handler>
             <on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="9841f286-4e02-4761-8a75-bbafdddfe060" type="APP:INVALID_RACE_TOKEN">
                 <set-variable value="400" doc:name="httpStatus = 400" doc:id="e168f96f-0382-4253-85ce-ff7d98d18c4b" variableName="httpStatus" />
                 <set-payload value="invalid race token" doc:name="invalid race token" doc:id="4c367df0-c8b5-4590-b645-9f529b6b9f79" />
@@ -235,8 +234,8 @@ output application/json
         </error-handler>
     </flow>
     <flow name="post:\racers\(racerId)\practice\seasons\2\races\(raceId)\finish:text\plain:anypoint-race-api-config">
-        <flow-ref doc:name="finishSeason2Race" doc:id="1a10b516-7962-4752-9338-a3155e20fc7f" name="finishSeason2Race" />
-        <error-handler>
+        <logger level="INFO" doc:name="Logger" doc:id="42d4d186-611e-4dcc-84ed-b544fa1098ce" />
+		<error-handler>
             <on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="b6a4ad9b-dfdc-40bc-8812-71c14b1a67f0" type="APP:INVALID_RACE_TOKEN">
                 <set-variable value="400" doc:name="httpStatus = 400" doc:id="2fda5507-d927-4381-b7dd-46e42feafe3f" variableName="httpStatus" />
                 <set-payload value="invalid race token" doc:name="invalid race token" doc:id="4fa0c764-f788-4588-8a47-996b8f92937e" />

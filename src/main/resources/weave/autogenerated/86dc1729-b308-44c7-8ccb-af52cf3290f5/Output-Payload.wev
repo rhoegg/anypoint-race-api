@@ -1,8 +1,0 @@
-%dw 2.0
-
-type auto_86dc1729_b308_44c7_8ccb_af52cf3290f5_Output_Payload = {
-  lapSeconds: Number, 
-  laps: Number, 
-  _?: Any
-}
-

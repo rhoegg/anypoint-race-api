@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
 	<flow name="practice_restapi_enable" doc:id="896450f1-418a-48dc-915a-15050ba11dd4" >
-		<logger level="INFO" doc:name="Logger" doc:id="1b2b3deb-6c98-43df-b727-911cc16a75e9" />
+		<ee:transform doc:name="racerState" doc:id="adbe10f0-6e3d-464c-8f26-774c4d4f6bde" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload ++ {
+	start: now()
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<os:store doc:name="racerState" doc:id="640e8f9f-c6bc-4097-923d-990354752b3a" key='#["racerState.$(vars.racerId)"]' objectStore="practiceObjectStore"/>
 	</flow>
 	<flow name="practice_restapi_check" doc:id="930f73b2-74e1-4cb6-8a3d-474f242834c5" >
 		<logger level="INFO" doc:name="Logger" doc:id="99b8b3d3-d63a-4900-a3b4-0d974aef0d4f" />

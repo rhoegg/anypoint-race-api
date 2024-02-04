@@ -1,4 +1,0 @@
-%dw 2.0
-
-type auto_3db4429f_8267_4166_b99f_51797d7dfaa0_Output_Variables_race = {| finish: DateTime |}
-
