@@ -67,7 +67,6 @@ http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/re
 		</error-handler>
 	</flow>
 	<flow name="getFinishedRaces" doc:id="3e547877-65a8-4cde-8a28-0f726af8d4f5">
-		<http:listener doc:name="Listener" doc:id="1b05f70a-d50a-4af9-be28-f9c5399b9a89" config-ref="anypoint-race-api-httpListenerConfig" path="/getRaces"/>
 		<redis:range-from-list start="#[0]" stop="#[-1]" doc:name="Get all Keys from racer List" doc:id="c5df8e8c-e480-4590-9df8-55715401b4fd" config-ref="Redis_Redis" key="season2:racers"/>
 		<parallel-foreach doc:name="Parallel For Each" doc:id="acf92130-8a19-4f69-a3b3-950d3cd3b4e1">
 			<redis:get doc:name="Get" doc:id="7aef54f1-99bf-4f0d-a61b-0d9678c297f9" config-ref="Redis_Redis" key="#[payload]"/>

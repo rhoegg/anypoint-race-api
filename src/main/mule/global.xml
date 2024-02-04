@@ -33,8 +33,8 @@ http://www.mulesoft.org/schema/mule/referee-process-api http://www.mulesoft.org/
 	<redis:redis-config name="Redis_Redis" doc:name="Redis Redis" doc:id="ddba4915-df7f-4d30-a335-3d3ea9d6ca95" >
 		<redis:nonclustered-connection host="${redis.host}" port="${redis.port}" password="${redis.password}" />
 	</redis:redis-config>
-	<os:object-store name="practiceObjectStore" doc:name="Object store" doc:id="b4fe585f-70a9-4db3-88f3-6f1e57f33484" entryTtl="${practice.expiry}" expirationInterval="30" expirationIntervalUnit="SECONDS" />
-	<os:object-store name="raceObjectStore" doc:name="Object store" doc:id="aa49b4df-09f8-4dd1-afdb-c4dd67c3b62b" entryTtl="${race.expiry}" expirationInterval="10" expirationIntervalUnit="SECONDS" />
+	<os:object-store name="practiceObjectStore" doc:name="Object store" doc:id="b4fe585f-70a9-4db3-88f3-6f1e57f33484" entryTtl="12" entryTtlUnit="HOURS" expirationInterval="2"/>
+	<os:object-store name="raceObjectStore" doc:name="Object store" doc:id="aa49b4df-09f8-4dd1-afdb-c4dd67c3b62b" entryTtl="12" expirationInterval="2" entryTtlUnit="HOURS"/>
 	<referee-process-api:config name="refereeProcessApiConfig" doc:name="Referee Process API Config" doc:id="f6bbdef3-bf57-4fd4-8a1d-fb35bd12defe" property_host="${referee.host}" property_port="${referee.port}" property_basePath="${referee.path}" property_protocol="${referee.protocol}" property_username="${anypoint.app.clientId}" property_password="${anypoint.app.clientSecret}" />
 	<race-data-system-api:config name="raceDataSystemApiConfig" doc:name="Race Data System API Config" doc:id="86c1aec2-24ac-460e-b60f-d6a48c462cac" property_host="${racedata.host}" property_port="${racedata.port}" property_basePath="${racedata.path}" property_protocol="${racedata.protocol}" property_username="${anypoint.app.clientId}" property_password="${anypoint.app.clientSecret}" />
 </mule>

@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-	xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
-http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
 	<flow name="practice_restapi_enable" doc:id="896450f1-418a-48dc-915a-15050ba11dd4" >
 		<ee:transform doc:name="racerState" doc:id="adbe10f0-6e3d-464c-8f26-774c4d4f6bde" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
+import * from dw::app::Transforms
 output application/json
 ---
 payload ++ {
@@ -17,8 +19,41 @@ payload ++ {
 			</ee:message>
 		</ee:transform>
 		<os:store doc:name="racerState" doc:id="640e8f9f-c6bc-4097-923d-990354752b3a" key='#["racerState.$(vars.racerId)"]' objectStore="practiceObjectStore"/>
+		<ee:transform doc:name="response" doc:id="5747b2b4-8183-40f7-a5a7-a98c094bca44">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+import * from dw::app::Transforms
+output application/json
+---
+formatPracticeRacerState(payload as RacerState)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 	</flow>
 	<flow name="practice_restapi_check" doc:id="930f73b2-74e1-4cb6-8a3d-474f242834c5" >
-		<logger level="INFO" doc:name="Logger" doc:id="99b8b3d3-d63a-4900-a3b4-0d974aef0d4f" />
+		<os:retrieve doc:name="racerState" doc:id="42b56513-32c2-44fb-9f84-991d80e1ca6a" key='#["racerState.$(vars.racerId)"]' objectStore="practiceObjectStore"/>
+		<ee:transform doc:name="response" doc:id="15b595dc-3cc9-401d-9184-252482159653">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+import * from dw::app::Transforms
+output application/json
+---
+formatPracticeRacerState(payload as RacerState)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="12d1b9bb-94b0-41d3-82c2-2f961dc8580e" type="OS:KEY_NOT_FOUND">
+				<set-variable value="404" doc:name="httpStatus = 404" doc:id="e7e14e64-cb44-46ce-a4c1-ec3cf82588b6" variableName="httpStatus" />
+				<ee:transform doc:name="response" doc:id="6933b7e7-082c-47a3-b741-9ba3dc836833" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+import * from dw::app::Transforms
+output application/json
+---
+formatPracticeRacerState(payload as RacerState)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="WARN" doc:name="WARN" doc:id="b379ca3f-dec2-460f-9645-0cdabd706df1" category="race.practice.rest-api.check"/>
+			</on-error-continue>
+		</error-handler>
 	</flow>
 </mule>

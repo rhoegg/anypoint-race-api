@@ -61,7 +61,7 @@ output application/json
 		</validation:is-not-null>
 		<redis:get doc:name="Get racer" doc:id="deebf049-1e83-4688-9d4c-228841565a01" key="#['racer:' ++ vars.racerId]" config-ref="Redis_Redis"/>
 <validation:is-not-blank-string doc:name="Is not blank string" doc:id="6fce677b-2c7d-478b-bca2-4d0e8f271a40" >
-			<error-mapping targetType="APP:INVALID_RACER_ID" />
+			<error-mapping sourceType="VALIDATION:BLANK_STRING" targetType="APP:INVALID_RACER_ID" />
 		</validation:is-not-blank-string>
 		<ee:transform doc:name="Transform Message" doc:id="2bf62e0a-3cc0-4ece-b5fa-f9e781d22f53" >
 			<ee:message >
