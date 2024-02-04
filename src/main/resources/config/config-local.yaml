@@ -18,16 +18,16 @@ anypoint:
         easterEgg: "dla-n7g/Results: Easter Egg"
         
 referee:
-  host: api-test.anypointspeedway.com
-  port: "443"
-  protocol: HTTPS
-  path: /p/referee
+  host: localhost
+  port: "8092"
+  protocol: HTTP
+  path: /api
   
 racedata:
-  host: api-test.anypointspeedway.com
-  port: "443"
-  protocol: HTTPS
-  path: /s/race-data
+  host: localhost
+  port: "8093"
+  protocol: HTTP
+  path: /api
   
 redis:
   host: redis-15552.c1.us-east1-2.gce.cloud.redislabs.com

@@ -1,20 +1,27 @@
 
 import * from dw::core::Periods
 
-type RacerState = { endpoint: String, start: DateTime | String }
+type RaceState = { endpoint: String, raceType: String, racerId: String, start: DateTime | String, downMessage?: String }
 
-fun formatPracticeRacerState(racerState: RacerState | Null) = do {
-	var start = racerState.start as DateTime
-	var expiration = start + seconds(Mule::p("practice.expiry") as Number)
-	var secondsLeft = (expiration - now()) as Number {unit: "milliseconds"} / 1000
+fun practiceExpiration(nothing: Null) = now()
+
+fun practiceExpiration(raceState: RaceState) = do {
+	var start = raceState.start as DateTime
 	---
-	if (racerState == null or secondsLeft <= 0) {
-		(endpoint: racerState.endpoint) if racerState.endpoint?,
+	start + seconds(Mule::p("practice.expiry") as Number)
+}
+
+fun formatPracticeRaceState(raceState: RaceState | Null) = do {
+	var secondsLeft = (practiceExpiration(raceState) - now()) as Number {unit: "milliseconds"} / 1000
+	---
+	if (raceState == null or secondsLeft <= 0) {
+		(endpoint: raceState.endpoint) if raceState.endpoint?,
 		status: "Inactive",
 		expires: 0
 	} else {
-		endpoint: racerState.endpoint,
-		status: "Active",
-		expires: secondsLeft
+		endpoint: raceState.endpoint,
+		status: if (raceState.downMessage?) "Down" else "Active",
+		expires: secondsLeft,
+		(detail: raceState.downMessage) if raceState.downMessage?
 	}
 }
