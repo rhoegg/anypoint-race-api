@@ -53,7 +53,7 @@ formatPracticeRaceState(payload as RaceState)]]></ee:set-payload>
 import * from dw::app::Transforms
 output application/json
 ---
-formatPracticeRaceState(payload as RaceState)]]></ee:set-payload>
+formatPracticeRaceState(null)]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
 				<logger level="WARN" doc:name="WARN" doc:id="b379ca3f-dec2-460f-9645-0cdabd706df1" category="race.practice.rest-api.check" message="Checked missing race state #[vars.racerId]"/>
@@ -97,9 +97,11 @@ payload filter (key) -> key startsWith "raceState."]]></ee:set-payload>
 				<ee:transform doc:name="raceState" doc:id="12b734b4-77c4-4324-bcbb-f73e883ddb86" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
+import * from dw::core::Objects
+
 output application/json
 ---
-payload ++ {
+payload mergeWith {
 	downMessage: error.errorMessage.payload.detail default "unknown error"
 }]]></ee:set-payload>
 					</ee:message>

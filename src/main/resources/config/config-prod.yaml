@@ -13,11 +13,17 @@ anypoint:
         most: "vjf-28f/Results: Perseverance"
         halloffame: "qz7-40n/Hall of Fame"
         easterEgg: "cr0-6ca/Results: 2023 Mystery"
+referee:
+  host: referee-papi
+  port: "8081"
+  protocol: HTTP
+  path: /api
+
 racedata:
   host: race-data-sapi
   port: "8081"
   protocol: HTTP
-  path: /s/race-data
+  path: /api
   
 redis:
   host: redis-18615.c1.us-east1-2.gce.cloud.redislabs.com

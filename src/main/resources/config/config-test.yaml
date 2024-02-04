@@ -13,7 +13,13 @@ anypoint:
         most: "99i-oc0/Results: Perseverance"
         halloffame: "5ip-grn/Hall of Fame"
         easterEgg: "dla-n7g/Results: Easter Egg"
-        
+
+referee:
+  host: referee-papi
+  port: "8081"
+  protocol: HTTP
+  path: /api
+          
 racedata:
   host: race-data-sapi
   port: "8081"
