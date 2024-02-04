@@ -1,7 +1,7 @@
 
 import * from dw::core::Periods
 
-type RaceState = { endpoint: String, raceType: String, racerId: String, start: DateTime | String, downMessage?: String }
+type RaceState = { endpoint: String, raceType: String, racerId: String, start: DateTime | String, time?: Number, downMessage?: String }
 
 fun practiceExpiration(nothing: Null) = now()
 
@@ -22,6 +22,7 @@ fun formatPracticeRaceState(raceState: RaceState | Null) = do {
 		endpoint: raceState.endpoint,
 		status: if (raceState.downMessage?) "Down" else "Active",
 		expires: secondsLeft,
+		(lastTime: raceState.time) if raceState.time?,
 		(detail: raceState.downMessage) if raceState.downMessage?
 	}
 }

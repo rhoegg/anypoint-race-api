@@ -86,9 +86,22 @@ payload filter (key) -> key startsWith "raceState."]]></ee:set-payload>
 			<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="APP:EXPIRED" />
 		</validation:is-true>
 		<set-variable value="#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	endpoint: payload.endpoint,&#10;	racerId: payload.racerId,&#10;	laps: payload.laps&#10;}]" doc:name="challengeRequest" doc:id="fdb1dacb-f4a2-49a1-a0f3-ba4fdc17ae6f" variableName="challengeRequest"/>
-		<referee-process-api:rest-api-challenge doc:name="Rest API Challenge" doc:id="184abccb-62f8-4970-85da-a1b399c088de" config-ref="refereeProcessApiConfig">
+		<referee-process-api:rest-api-challenge doc:name="Rest API Challenge" doc:id="184abccb-62f8-4970-85da-a1b399c088de" config-ref="refereeProcessApiConfig" target="challengeResult">
 			<referee-process-api:rest-api-challenge-request-data ><![CDATA[#[vars.challengeRequest]]]></referee-process-api:rest-api-challenge-request-data>
 		</referee-process-api:rest-api-challenge>
+		<ee:transform doc:name="newRaceState" doc:id="6018df04-08b3-43e5-9083-15aaaaed1536" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+import * from dw::core::Objects
+
+output application/json
+---
+payload mergeWith {
+	time: vars.challengeResult.time
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<os:store doc:name="raceState" doc:id="f3ca7bd8-2263-45ed-aef8-43267cdb2ced" key='#["raceState.$(payload.racerId)"]' objectStore="practiceObjectStore"/>
 		<logger level="INFO" doc:name="INFO" doc:id="f63110ef-459c-4f1b-9162-c65614c315c0" message="Checked practice for #[payload.racerId]" category="race.practice"/>
 		<error-handler >
 			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="dd84121c-68bb-44b0-9d8d-8ebf7ebcddca" type="APP:EXPIRED"/>
