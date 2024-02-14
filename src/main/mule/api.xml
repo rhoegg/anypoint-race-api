@@ -124,7 +124,8 @@ output application/json
         </error-handler>
     </flow>
     <flow name="post:\register:application\json:anypoint-race-api-config">
-        <flow-ref doc:name="registerRacer" doc:id="af973961-b5d4-4d58-9584-62b4df5e3e27" name="registerRacer" />
+        <set-variable value='#[output application/java&#10;import * from dw::core::Strings&#10;import * from dw::core::Binaries&#10;var encodedCredentials = attributes.headers.Authorization substringAfter "Basic "&#10;var credentials = fromBase64(encodedCredentials as String)&#10;---&#10;credentials substringBefore ":"]' doc:name="clientId" doc:id="6dbfd39f-8d36-480b-bfa9-ceb3247dd9c0" variableName="clientId"/>
+		<flow-ref doc:name="registerRacer" doc:id="af973961-b5d4-4d58-9584-62b4df5e3e27" name="registerRacer" />
         <error-handler>
             <on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="5c2bb858-3c43-4d2c-a227-d18cc4bc1942" type="APP:CLIENT_ID_MISSING">
                 <set-variable value="401" doc:name="httpStatus = 401" doc:id="e125a6f8-e275-40d7-a094-26b896076540" variableName="httpStatus" />

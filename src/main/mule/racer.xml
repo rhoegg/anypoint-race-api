@@ -14,10 +14,9 @@ http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org
 		<os:private-object-store alias="registerCacheObjectStore" entryTtl="30" entryTtlUnit="DAYS"/>
 	</ee:object-store-caching-strategy>
 	<flow name="registerRacer" doc:id="7edfeca7-3d19-4a8a-94cb-b4ba51dfb9be" >
-		<validation:is-not-null doc:name="Is not null" doc:id="3f447caa-4739-4fc3-83c3-00a6f64aa268" value="#[attributes.headers.client_id]">
+		<validation:is-not-null doc:name="Is not null" doc:id="3f447caa-4739-4fc3-83c3-00a6f64aa268" value="#[vars.clientId]">
 			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:CLIENT_ID_MISSING" />
 		</validation:is-not-null>
-		<set-variable value="#[attributes.headers.client_id]" doc:name="clientId" doc:id="320f2fd4-492e-4907-b1d1-0d955a362ae5" variableName="clientId" />
 		<race-data-system-api:search-racers doc:name="by client id" doc:id="e93480f5-dc78-4c50-b091-eb6d1affaf9c" config-ref="raceDataSystemApiConfig" client-id="#[vars.clientId]" target="searchResult"/>
 		<choice doc:name="Choice" doc:id="fd8a4200-defe-4368-bc66-3ad97c955fc1" >
 			<when expression="#[isEmpty(vars.searchResult)]">

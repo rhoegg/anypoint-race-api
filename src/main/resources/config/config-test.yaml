@@ -24,7 +24,7 @@ racedata:
   host: race-data-sapi
   port: "8081"
   protocol: HTTP
-  path: /s/race-data
+  path: /api
   
 redis:
   host: redis-15552.c1.us-east1-2.gce.cloud.redislabs.com
