@@ -38,13 +38,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>ae6d7954-6fc2-4f3e-8777-80ff8aabd859</groupId>
-			<artifactId>anypoint-race-api</artifactId>
-			<version>3.1.2</version>
-			<classifier>raml</classifier>
-			<type>zip</type>
-		</dependency>
-		<dependency>
 			<groupId>com.mulesoft.connectors</groupId>
 			<artifactId>mule-redis-connector</artifactId>
 			<version>5.4.3</version>
@@ -103,6 +96,13 @@
 			<artifactId>mule-plugin-race-data-system-api</artifactId>
 			<version>1.0.13</version>
 			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>ae6d7954-6fc2-4f3e-8777-80ff8aabd859</groupId>
+			<artifactId>anypoint-race-api</artifactId>
+			<version>3.2.1</version>
+			<classifier>raml</classifier>
+			<type>zip</type>
 		</dependency>
 	</dependencies>
 

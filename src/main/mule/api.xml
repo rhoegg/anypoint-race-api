@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:redis="http://www.mulesoft.org/schema/mule/redis" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/redis/current/mule-redis.xsd">
-    <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:3.1.2:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:3.2.1:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="anypoint-race-api-main">
         <http:listener config-ref="httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -124,8 +124,8 @@ output application/json
         </error-handler>
     </flow>
     <flow name="post:\register:application\json:anypoint-race-api-config">
-        <set-variable value='#[output application/java&#10;import * from dw::core::Strings&#10;import * from dw::core::Binaries&#10;var encodedCredentials = attributes.headers.Authorization substringAfter "Basic "&#10;var credentials = fromBase64(encodedCredentials as String)&#10;---&#10;credentials substringBefore ":"]' doc:name="clientId" doc:id="6dbfd39f-8d36-480b-bfa9-ceb3247dd9c0" variableName="clientId"/>
-		<flow-ref doc:name="registerRacer" doc:id="af973961-b5d4-4d58-9584-62b4df5e3e27" name="registerRacer" />
+        <set-variable value="#[output application/java&#xA;import * from dw::core::Strings&#xA;import * from dw::core::Binaries&#xA;var encodedCredentials = attributes.headers.Authorization substringAfter &quot;Basic &quot;&#xA;var credentials = fromBase64(encodedCredentials as String)&#xA;---&#xA;credentials substringBefore &quot;:&quot;]" doc:name="clientId" doc:id="6dbfd39f-8d36-480b-bfa9-ceb3247dd9c0" variableName="clientId" />
+        <flow-ref doc:name="registerRacer" doc:id="af973961-b5d4-4d58-9584-62b4df5e3e27" name="registerRacer" />
         <error-handler>
             <on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="5c2bb858-3c43-4d2c-a227-d18cc4bc1942" type="APP:CLIENT_ID_MISSING">
                 <set-variable value="401" doc:name="httpStatus = 401" doc:id="e125a6f8-e275-40d7-a094-26b896076540" variableName="httpStatus" />
@@ -190,25 +190,23 @@ output application/json
         <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="fd451d6c-0763-4bf2-8678-5d2d424d55a8" variableName="racerId" />
         <flow-ref doc:name="practice_restapi_check" doc:id="317652a8-28de-43a5-9570-0c411c14e4b2" name="practice_restapi_check" />
     </flow>
-	<flow name="put:\racers\(racerId)\practice\million-rows:application\json:anypoint-race-api-config">
+    <flow name="put:\racers\(racerId)\practice\average-temperatures:application\json:anypoint-race-api-config">
         <ee:transform doc:name="Transform Message">
             <ee:variables>
                 <ee:set-variable variableName="racerId">attributes.uriParams.'racerId'</ee:set-variable>
             </ee:variables>
         </ee:transform>
-        <logger level="INFO" message="put:\racers\(racerId)\practice\million-rows:application\json:anypoint-race-api-config" />
-		<set-variable value="501" doc:name="httpStatus = 501" doc:id="9070a96d-14b5-4d0b-8500-0e9fa138beac" variableName="httpStatus"/>
+        <logger level="INFO" message="put:\racers\(racerId)\practice\average-temperatures:application\json:anypoint-race-api-config" />
     </flow>
-    <flow name="get:\racers\(racerId)\practice\million-rows:anypoint-race-api-config">
+	<flow name="get:\racers\(racerId)\practice\average-temperatures:anypoint-race-api-config">
         <ee:transform doc:name="Transform Message">
             <ee:variables>
                 <ee:set-variable variableName="racerId">attributes.uriParams.'racerId'</ee:set-variable>
             </ee:variables>
         </ee:transform>
-        <logger level="INFO" message="get:\racers\(racerId)\practice\million-rows:anypoint-race-api-config" />
-		<set-variable value="501" doc:name="httpStatus = 501" doc:id="62197f81-0b3c-43ec-88f1-bb6e76f6f2a6" variableName="httpStatus"/>
+        <logger level="INFO" message="get:\racers\(racerId)\practice\average-temperatures:anypoint-race-api-config" />
     </flow>
-    <flow name="post:\racers\(racerId)\practice\seasons\2\start:application\json:anypoint-race-api-config">
+	<flow name="post:\racers\(racerId)\practice\seasons\2\start:application\json:anypoint-race-api-config">
         <logger level="INFO" doc:name="Logger" doc:id="4c11c39a-d1f6-41c4-8500-ae29d0935965" />
     </flow>
     <flow name="post:\racers\(racerId)\practice\seasons\2\races\(raceId)\lap:application\json:anypoint-race-api-config">

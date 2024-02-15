@@ -1,5 +1,0 @@
-%dw 2.0
-
-type auto_0c7b9d6c_682b_423e_86e9_4bc58586110a_Output_Variables_racer = {|  |} {"typeAlias": "Serializable",
-"typeId": "java.io.Serializable"}
-
