@@ -35,7 +35,7 @@ payload mergeWith {
 		<logger level="INFO" doc:name="INFO" doc:id="f63110ef-459c-4f1b-9162-c65614c315c0" message='#[output text/plain --- "Checked practice for $(payload.racerId)"]' category="race.practice"/>
 		<error-handler >
 			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="dd84121c-68bb-44b0-9d8d-8ebf7ebcddca" type="APP:EXPIRED"/>
-			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="976b585a-98da-4fd2-ab6d-4a1875a364bf" type="REFEREE-PROCESS-API:BAD_REQUEST" when="#[error.errorMessage.payload.error == 'non-compliant endpoint']">
+			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="976b585a-98da-4fd2-ab6d-4a1875a364bf" type="REFEREE-PROCESS-API:BAD_REQUEST">
 				<logger level="DEBUG" doc:name="DEBUG" doc:id="0ed2f98d-a896-4666-8d84-3eda7ea0d480" category="race.practice.check.error" message="#[payload]"/>
 				<ee:transform doc:name="raceState" doc:id="12b734b4-77c4-4324-bcbb-f73e883ddb86" >
 					<ee:message >
@@ -49,7 +49,7 @@ payload mergeWith {
 }]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
-				<os:store doc:name="raceState" doc:id="610623d5-6387-4034-acd8-a9cd1f48f2f4" objectStore="practiceObjectStore" key='#["raceState.$(payload.racerId)"]'/>
+				<os:store doc:name="raceState" doc:id="610623d5-6387-4034-acd8-a9cd1f48f2f4" objectStore="practiceObjectStore" key='#["raceState.$(payload.raceType).$(payload.racerId)"]'/>
 			</on-error-propagate>
 		</error-handler>
 	</flow>
