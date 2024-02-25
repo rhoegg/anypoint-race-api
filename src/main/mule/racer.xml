@@ -36,7 +36,7 @@ output application/json
 				<race-data-system-api:create-racer doc:name="Create racer" doc:id="fde57ecf-ecf5-4b4c-8064-a0a33b1cf6b2" config-ref="raceDataSystemApiConfig"/>
 			</when>
 			<otherwise >
-				<set-variable value="#[vars.searchResult[0]]" doc:name="racerId" doc:id="ee68f7bf-12bf-462d-a8b3-ac36c84a4f28" variableName="racerId"/>
+				<set-variable value="#[vars.searchResult[0].racerId]" doc:name="racerId" doc:id="ee68f7bf-12bf-462d-a8b3-ac36c84a4f28" variableName="racerId"/>
 				<ee:transform doc:name="racer" doc:id="6aaf3486-37f4-477b-bf0f-95a285c21259">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
@@ -45,6 +45,7 @@ output application/json
 {
 	displayName: payload.displayName,
 	email: payload.email,
+	racerId: vars.racerId,
 	clientId: vars.clientId
 }]]></ee:set-payload>
 					</ee:message>

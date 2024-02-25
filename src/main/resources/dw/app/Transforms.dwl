@@ -19,10 +19,11 @@ fun formatPracticeRaceState(raceState: RaceState | Null) = do {
 		status: "Inactive",
 		expires: 0
 	} else {
-		endpoint: raceState.endpoint,
+		endpoint: log(raceState).endpoint,
 		status: if (raceState.downMessage?) "Down" else "Active",
 		expires: secondsLeft,
-		(lastTime: raceState.time) if raceState.time?,
-		(detail: raceState.downMessage) if raceState.downMessage?
+		(laps: raceState.laps) if raceState.laps?,
+		(time: raceState.time) if raceState.time?,
+		(error: raceState.downMessage) if raceState.downMessage?
 	}
 }

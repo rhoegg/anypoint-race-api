@@ -15,7 +15,7 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 	<global-property doc:name="Global Property" doc:id="7856bb19-6f24-4ce3-94db-c749613205a6" name="mule.env" value="local" />
 	<configuration-properties doc:name="Configuration properties" doc:id="7dd03197-6465-46dd-87c5-7f709a4dc803" file="config/config-${mule.env}.yaml" />
     <http:listener-config name="httpListenerConfig">
-        <http:listener-connection host="0.0.0.0" port="8081" />
+        <http:listener-connection host="0.0.0.0" port="${http.port}" />
     </http:listener-config>
 	<http:request-config name="exchangeV2HttpRequestConfig" doc:name="HTTP Request configuration" doc:id="4dc19007-7bd0-4d1c-9f92-0d43bef9bfab" basePath="/exchange/api/v2" enableCookies="false" responseTimeout="120000">
 		<http:request-connection host="anypoint.mulesoft.com" port="443" protocol="HTTPS" connectionIdleTimeout="150000">
@@ -36,11 +36,12 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 	</redis:redis-config>
 	<os:object-store name="practiceObjectStore" doc:name="Object store" doc:id="b4fe585f-70a9-4db3-88f3-6f1e57f33484" entryTtl="12" entryTtlUnit="HOURS" expirationInterval="2"/>
 	<os:object-store name="raceObjectStore" doc:name="Object store" doc:id="aa49b4df-09f8-4dd1-afdb-c4dd67c3b62b" entryTtl="12" expirationInterval="2" entryTtlUnit="HOURS"/>
-	<referee-process-api:config name="refereeProcessApiConfig" doc:name="Referee Process API Config" doc:id="f6bbdef3-bf57-4fd4-8a1d-fb35bd12defe" property_host="${referee.host}" property_port="${referee.port}" property_basePath="${referee.path}" property_protocol="${referee.protocol}" property_username="${anypoint.app.clientId}" property_password="${anypoint.app.clientSecret}" />
+	<referee-process-api:config name="refereeProcessApiConfig" doc:name="Referee Process API Config" doc:id="f6bbdef3-bf57-4fd4-8a1d-fb35bd12defe" property_host="${referee.host}" property_port="${referee.port}" property_basePath="${referee.path}" property_protocol="${referee.protocol}" property_username="${anypoint.app.clientId}" property_password="${anypoint.app.clientSecret}" property_responseTimeout="600000"/>
 	<race-data-system-api:config name="raceDataSystemApiConfig" doc:name="Race Data System API Config" doc:id="86c1aec2-24ac-460e-b60f-d6a48c462cac" property_host="${racedata.host}" property_port="${racedata.port}" property_basePath="${racedata.path}" property_protocol="${racedata.protocol}" property_username="${anypoint.app.clientId}" property_password="${anypoint.app.clientSecret}" />
 	<vm:config name="VM_Config" doc:name="VM Config" doc:id="37caf69b-d742-475b-950e-a1e4028d58e6" >
 		<vm:queues >
-			<vm:queue queueName="practice" />
+			<vm:queue queueName="practice-rest-api" />
+			<vm:queue queueName="practice-averages" />
 		</vm:queues>
 	</vm:config>
 </mule>

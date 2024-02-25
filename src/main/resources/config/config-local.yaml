@@ -1,3 +1,6 @@
+http:
+  port: "8091"
+  
 anypoint:
   api:
     id: "1"

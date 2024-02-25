@@ -8,88 +8,17 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
 http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
 http://www.mulesoft.org/schema/mule/referee-process-api http://www.mulesoft.org/schema/mule/referee-process-api/current/mule-referee-process-api.xsd">
-	<flow name="practice_restapi_enable" doc:id="896450f1-418a-48dc-915a-15050ba11dd4" >
-		<ee:transform doc:name="raceState" doc:id="adbe10f0-6e3d-464c-8f26-774c4d4f6bde" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-import * from dw::app::Transforms
-output application/json
----
-payload ++ {
-	raceType: "rest-api",
-	racerId: vars.racerId,
-	start: now()
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<os:store doc:name="raceState" doc:id="640e8f9f-c6bc-4097-923d-990354752b3a" key='#["raceState.$(vars.racerId)"]' objectStore="practiceObjectStore"/>
-		<ee:transform doc:name="response" doc:id="5747b2b4-8183-40f7-a5a7-a98c094bca44">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
-import * from dw::app::Transforms
-output application/json
----
-formatPracticeRaceState(payload as RaceState)]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-	</flow>
-	<flow name="practice_restapi_check" doc:id="930f73b2-74e1-4cb6-8a3d-474f242834c5" >
-		<os:retrieve doc:name="raceState" doc:id="42b56513-32c2-44fb-9f84-991d80e1ca6a" key='#["raceState.$(vars.racerId)"]' objectStore="practiceObjectStore"/>
-		<ee:transform doc:name="response" doc:id="15b595dc-3cc9-401d-9184-252482159653">
-					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0
-import * from dw::app::Transforms
-output application/json
----
-formatPracticeRaceState(payload as RaceState)]]></ee:set-payload>
-					</ee:message>
-				</ee:transform>
-		<error-handler >
-			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="12d1b9bb-94b0-41d3-82c2-2f961dc8580e" type="OS:KEY_NOT_FOUND">
-				<set-variable value="404" doc:name="httpStatus = 404" doc:id="e7e14e64-cb44-46ce-a4c1-ec3cf82588b6" variableName="httpStatus" />
-				<ee:transform doc:name="response" doc:id="6933b7e7-082c-47a3-b741-9ba3dc836833" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
-import * from dw::app::Transforms
-output application/json
----
-formatPracticeRaceState(null)]]></ee:set-payload>
-					</ee:message>
-				</ee:transform>
-				<logger level="WARN" doc:name="WARN" doc:id="b379ca3f-dec2-460f-9645-0cdabd706df1" category="race.practice.rest-api.check" message="Checked missing race state #[vars.racerId]"/>
-			</on-error-continue>
-		</error-handler>
-	</flow>
-	<flow name="practiceCheckSchedule" doc:id="7e151b1b-d3a5-4262-8210-b5f8d05a17b4" >
-		<scheduler doc:name="check schedule" doc:id="b9a890da-51f5-4c0b-b36f-99ea7cbb5c63" >
-			<scheduling-strategy >
-				<fixed-frequency frequency="30" timeUnit="SECONDS"/>
-			</scheduling-strategy>
-		</scheduler>
-		<os:retrieve-all-keys doc:name="Retrieve all keys" doc:id="10723195-7585-4049-b136-5597405d3987" objectStore="practiceObjectStore"/>
-		<ee:transform doc:name="raceState filter" doc:id="89e88ae2-54b1-4373-b3ec-609d20f4c616" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
----
-payload filter (key) -> key startsWith "raceState."]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<foreach doc:name="For Each" doc:id="95918006-6537-4c2e-86a6-b8678bfb32a0" >
-			<os:retrieve doc:name="raceState" doc:id="84e26b0f-be0e-4e4a-aebf-1a66f4b74ef4" key="#[payload]" objectStore="practiceObjectStore"/>
-			<vm:publish doc:name="practice" doc:id="53185ad6-33ba-4663-9724-bd5957cc36dd" config-ref="VM_Config" queueName="practice"/>
-		</foreach>
-	</flow>
-	<flow name="checkPractice" doc:id="9bbbc4b0-17bc-4bad-8b74-46dfffd0a105" >
-		<vm:listener doc:name="practice" doc:id="b235d514-2ccb-484c-adfe-c4539f577b0c" config-ref="VM_Config" queueName="practice"/>
+
+	<flow name="practice_restapi_check" doc:id="9bbbc4b0-17bc-4bad-8b74-46dfffd0a105" >
+		<vm:listener doc:name="practice-rest-api" doc:id="b235d514-2ccb-484c-adfe-c4539f577b0c" config-ref="VM_Config" queueName="practice-rest-api"/>
 		<validation:is-true doc:name="not expired" doc:id="af77041b-9671-453d-9823-857471c72b93" expression="#[dw::app::Transforms::practiceExpiration(payload) &gt; now()]" message="expired race">
 			<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="APP:EXPIRED" />
 		</validation:is-true>
-		<set-variable value="#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	endpoint: payload.endpoint,&#10;	racerId: payload.racerId,&#10;	laps: payload.laps&#10;}]" doc:name="challengeRequest" doc:id="fdb1dacb-f4a2-49a1-a0f3-ba4fdc17ae6f" variableName="challengeRequest"/>
+		<set-variable value="#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	endpoint: payload.endpoint,&#10;	racerId: payload.racerId,&#10;	laps: payload.laps&#10;}]" doc:name="challengeRequest " doc:id="fdb1dacb-f4a2-49a1-a0f3-ba4fdc17ae6f" variableName="challengeRequest"/>
 		<referee-process-api:rest-api-challenge doc:name="Rest API Challenge" doc:id="184abccb-62f8-4970-85da-a1b399c088de" config-ref="refereeProcessApiConfig" target="challengeResult">
 			<referee-process-api:rest-api-challenge-request-data ><![CDATA[#[vars.challengeRequest]]]></referee-process-api:rest-api-challenge-request-data>
 		</referee-process-api:rest-api-challenge>
-		<ee:transform doc:name="newRaceState" doc:id="6018df04-08b3-43e5-9083-15aaaaed1536" >
+		<ee:transform doc:name="newRaceState" doc:id="dac61c0d-1d49-4eaa-a33b-2f322a15b40c" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 import * from dw::core::Objects
@@ -101,12 +30,13 @@ payload mergeWith {
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<os:store doc:name="raceState" doc:id="f3ca7bd8-2263-45ed-aef8-43267cdb2ced" key='#["raceState.$(payload.racerId)"]' objectStore="practiceObjectStore"/>
-		<logger level="INFO" doc:name="INFO" doc:id="f63110ef-459c-4f1b-9162-c65614c315c0" message="Checked practice for #[payload.racerId]" category="race.practice"/>
+		<os:store doc:name="raceState" doc:id="f3ca7bd8-2263-45ed-aef8-43267cdb2ced" key='#["raceState.$(payload.raceType).$(payload.racerId)"]' objectStore="practiceObjectStore"/>
+		<logger level="DEBUG" doc:name="DEBUG " doc:id="bf0f1c53-dd19-4286-b022-bf0fe51ef218" message="#[payload]" category="race.practice"/>
+		<logger level="INFO" doc:name="INFO" doc:id="f63110ef-459c-4f1b-9162-c65614c315c0" message='#[output text/plain --- "Checked practice for $(payload.racerId)"]' category="race.practice"/>
 		<error-handler >
 			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="dd84121c-68bb-44b0-9d8d-8ebf7ebcddca" type="APP:EXPIRED"/>
 			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="976b585a-98da-4fd2-ab6d-4a1875a364bf" type="REFEREE-PROCESS-API:BAD_REQUEST" when="#[error.errorMessage.payload.error == 'non-compliant endpoint']">
-				<logger level="INFO" doc:name="INFO" doc:id="0ed2f98d-a896-4666-8d84-3eda7ea0d480" category="race.practice.check" message="#[payload]"/>
+				<logger level="DEBUG" doc:name="DEBUG" doc:id="0ed2f98d-a896-4666-8d84-3eda7ea0d480" category="race.practice.check.error" message="#[payload]"/>
 				<ee:transform doc:name="raceState" doc:id="12b734b4-77c4-4324-bcbb-f73e883ddb86" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
