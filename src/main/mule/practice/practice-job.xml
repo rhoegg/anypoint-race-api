@@ -22,7 +22,18 @@ payload ++ {
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<os:store doc:name="raceState" doc:id="c21b2b18-b2fa-4721-baaf-97dcbdcc2a08" key='#["raceState.$(vars.raceType).$(vars.racerId)"]' objectStore="practiceObjectStore" />
+		<set-variable value='#["raceState.$(payload.raceType).$(payload.racerId)"]' doc:name="raceDataKey" doc:id="2c2bc1d4-9702-4a2b-93d0-65344a486dc4" variableName="raceDataKey" />
+		<try doc:name="Try" doc:id="b359bcbb-c53f-4f6f-94bc-1dc2d7e0b422">
+			<os:remove doc:name="lock" doc:id="cf02d850-685d-4cc5-b53c-5d878eac6b70" key='#["lock.$(vars.raceDataKey)"]' objectStore="practiceObjectStore">
+				<error-mapping sourceType="OS:KEY_NOT_FOUND" targetType="APP:LOCK_MISSING" />
+			</os:remove>
+			<error-handler>
+				<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="e5d55fa1-5a7b-4ceb-b368-021a87c8ec16" type="APP:LOCK_MISSING">
+					<logger level="DEBUG" doc:name="DEBUG" doc:id="d1983acf-d9c4-432a-93a0-6f8cead3cf32" message='#[output text/plain --- "no lock exists for $(vars.raceDataKey)"]' category="race.practice.check" />
+				</on-error-continue>
+			</error-handler>
+		</try>
+		<os:store doc:name="raceState" doc:id="c21b2b18-b2fa-4721-baaf-97dcbdcc2a08" key='#[vars.raceDataKey]' objectStore="practiceObjectStore" />
 		<ee:transform doc:name="response" doc:id="dde991e8-bb0f-4714-ab1b-735d1db27e0e">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
