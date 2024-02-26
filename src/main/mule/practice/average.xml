@@ -11,13 +11,13 @@ http://www.mulesoft.org/schema/mule/referee-process-api http://www.mulesoft.org/
 	<flow name="practice_averages_check" doc:id="f95e5595-0028-4616-87c4-562bb884ddf2" >
 		<vm:listener doc:name="practice-averages" doc:id="9df1ba69-ac70-4fd4-93a1-d1694a01c92d" config-ref="VM_Config" queueName="practice-averages"/>
 		<set-variable value='#["raceState.$(payload.raceType).$(payload.racerId)"]' doc:name="raceDataKey" doc:id="476adbf3-cb09-411f-a0a9-7a8920580f8b" variableName="raceDataKey" />
-		<validation:is-true doc:name="not expired" doc:id="9a14076d-bcfc-437a-867c-049242474f56" expression="#[dw::app::Transforms::practiceExpiration(payload) &gt; now()]" message="expired race" >
-			<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="APP:EXPIRED" />
-		</validation:is-true>
 		<os:store doc:name="lock" doc:id="8a47d35d-678c-4cb9-943e-6a88225040db" key='#["lock.$(vars.raceDataKey)"]' failIfPresent="true" objectStore="practiceObjectStore">
 			<error-mapping sourceType="OS:KEY_ALREADY_EXISTS" targetType="APP:LOCKED" />
 			<os:value ><![CDATA[locked]]></os:value>
 		</os:store>
+		<validation:is-true doc:name="not expired" doc:id="9a14076d-bcfc-437a-867c-049242474f56" expression="#[dw::app::Transforms::practiceExpiration(payload) &gt; now()]" message="expired race">
+			<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="APP:EXPIRED" />
+		</validation:is-true>
 		<set-variable value='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	endpoint: payload.endpoint,&#10;	racerId: payload.racerId,&#10;	count: payload.scale match {&#10;		case "thousand" -&gt; 1000&#10;		case "million" -&gt; 1000000&#10;		case "billion" -&gt; 1000000000&#10;		else -&gt; 0&#10;	}&#10;}]' doc:name="challengeRequest " doc:id="c0e0933c-6743-49bf-99ab-e7631af2f6be" variableName="challengeRequest" />
 		<referee-process-api:billion-row-challenge doc:name="Billion Row Challenge" doc:id="d40e18fc-31da-45f6-af2f-bf72d33031aa" config-ref="refereeProcessApiConfig" target="challengeResult">
 			<referee-process-api:billion-row-challenge-request-data ><![CDATA[#[vars.challengeRequest]]]></referee-process-api:billion-row-challenge-request-data>
