@@ -194,11 +194,13 @@ output application/json
     </flow>
     <flow name="put:\racers\(racerId)\practice\average-temperatures:application\json:anypoint-race-api-config">
         <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="400f4c7b-e8d8-47f8-bb7e-d6640f3f4874" variableName="racerId" />
-        <logger level="INFO" message="put:\racers\(racerId)\practice\average-temperatures:application\json:anypoint-race-api-config" />
+		<set-variable value="averages" doc:name="raceType" doc:id="ed469eeb-33de-492c-9247-0a85318b3ea6" variableName="raceType" />
+		<flow-ref doc:name="practice_racer_enable" doc:id="0a89f84f-215c-4a5d-ab20-673853dc1257" name="practice_racer_enable" />
     </flow>
     <flow name="get:\racers\(racerId)\practice\average-temperatures:anypoint-race-api-config">
-        <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="9ccc3daf-7d38-4ac7-a231-1e61fbe09fe0" variableName="racerId" />
-        <logger level="INFO" message="get:\racers\(racerId)\practice\average-temperatures:anypoint-race-api-config" />
+		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="eb55415b-2200-4801-973c-354b6fa290bb" variableName="racerId" />
+		<set-variable value="averages" doc:name="raceType" doc:id="3bd10bbc-7cae-41a0-b586-f30498bcfee4" variableName="raceType" />
+		<flow-ref doc:name="practice_racer_checkStatus" doc:id="2cde0c38-dca4-4290-942d-482ff8de8ad0" name="practice_racer_checkStatus" />
     </flow>
     <flow name="get:\racers\(racerId)\entry:anypoint-race-api-config">
         <ee:transform doc:name="Transform Message">
@@ -208,9 +210,6 @@ output application/json
         </ee:transform>
         <logger level="INFO" message="get:\racers\(racerId)\entry:anypoint-race-api-config" />
     </flow>
-    <flow name="get:\seasons\3\leaderboard:anypoint-race-api-config">
-        <logger level="INFO" message="get:\seasons\3\leaderboard:anypoint-race-api-config" />
-    </flow>
     <flow name="post:\racers\(racerId)\entry:application\json:anypoint-race-api-config">
         <ee:transform doc:name="Transform Message">
             <ee:variables>
@@ -218,5 +217,8 @@ output application/json
             </ee:variables>
         </ee:transform>
         <logger level="INFO" message="post:\racers\(racerId)\entry:application\json:anypoint-race-api-config" />
+    </flow>
+	<flow name="get:\seasons\3\leaderboard:anypoint-race-api-config">
+        <logger level="INFO" message="get:\seasons\3\leaderboard:anypoint-race-api-config" />
     </flow>
 </mule>

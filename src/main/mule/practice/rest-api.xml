@@ -11,6 +11,7 @@ http://www.mulesoft.org/schema/mule/referee-process-api http://www.mulesoft.org/
 
 	<flow name="practice_restapi_check" doc:id="9bbbc4b0-17bc-4bad-8b74-46dfffd0a105" >
 		<vm:listener doc:name="practice-rest-api" doc:id="b235d514-2ccb-484c-adfe-c4539f577b0c" config-ref="VM_Config" queueName="practice-rest-api"/>
+		<set-variable value='#["raceState.$(payload.raceType).$(payload.racerId)"]' doc:name="raceDataKey" doc:id="513fc9cd-2568-4c39-85fe-513a0fa65840" variableName="raceDataKey" />
 		<validation:is-true doc:name="not expired" doc:id="af77041b-9671-453d-9823-857471c72b93" expression="#[dw::app::Transforms::practiceExpiration(payload) &gt; now()]" message="expired race">
 			<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="APP:EXPIRED" />
 		</validation:is-true>
@@ -25,16 +26,18 @@ import * from dw::core::Objects
 
 output application/json
 ---
-payload mergeWith {
+(payload mergeWith {
 	time: vars.challengeResult.time
-}]]></ee:set-payload>
+}) - "downMessage"]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<os:store doc:name="raceState" doc:id="f3ca7bd8-2263-45ed-aef8-43267cdb2ced" key='#["raceState.$(payload.raceType).$(payload.racerId)"]' objectStore="practiceObjectStore"/>
+		<os:store doc:name="raceState" doc:id="f3ca7bd8-2263-45ed-aef8-43267cdb2ced" key='#[vars.raceDataKey]' objectStore="practiceObjectStore"/>
 		<logger level="DEBUG" doc:name="DEBUG " doc:id="bf0f1c53-dd19-4286-b022-bf0fe51ef218" message="#[payload]" category="race.practice"/>
 		<logger level="INFO" doc:name="INFO" doc:id="f63110ef-459c-4f1b-9162-c65614c315c0" message='#[output text/plain --- "Checked practice for $(payload.racerId)"]' category="race.practice"/>
 		<error-handler >
-			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="dd84121c-68bb-44b0-9d8d-8ebf7ebcddca" type="APP:EXPIRED"/>
+			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="dd84121c-68bb-44b0-9d8d-8ebf7ebcddca" type="APP:EXPIRED">
+				<os:remove doc:name="raceDataKey" doc:id="e99a5f9b-444b-46c5-8f12-271c8c5c6117" key="#[vars.raceDataKey]" objectStore="practiceObjectStore"/>
+			</on-error-continue>
 			<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="976b585a-98da-4fd2-ab6d-4a1875a364bf" type="REFEREE-PROCESS-API:BAD_REQUEST">
 				<logger level="DEBUG" doc:name="DEBUG" doc:id="0ed2f98d-a896-4666-8d84-3eda7ea0d480" category="race.practice.check.error" message="#[payload]"/>
 				<ee:transform doc:name="raceState" doc:id="12b734b4-77c4-4324-bcbb-f73e883ddb86" >
@@ -49,7 +52,7 @@ payload mergeWith {
 }]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
-				<os:store doc:name="raceState" doc:id="610623d5-6387-4034-acd8-a9cd1f48f2f4" objectStore="practiceObjectStore" key='#["raceState.$(payload.raceType).$(payload.racerId)"]'/>
+				<os:store doc:name="raceState" doc:id="610623d5-6387-4034-acd8-a9cd1f48f2f4" objectStore="practiceObjectStore" key='#[vars.raceDataKey]'/>
 			</on-error-propagate>
 		</error-handler>
 	</flow>
