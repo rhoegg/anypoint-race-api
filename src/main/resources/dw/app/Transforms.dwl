@@ -11,18 +11,22 @@ fun practiceExpiration(raceState: RaceState) = do {
 	start + seconds(Mule::p("practice.expiry") as Number)
 }
 
-fun formatPracticeRaceState(raceState: RaceState | Null) = do {
-	var secondsLeft = (practiceExpiration(raceState) - now()) as Number {unit: "milliseconds"} / 1000
-	---
-	if (raceState == null or secondsLeft <= 0) {
-		(endpoint: raceState.endpoint) if raceState.endpoint?,
+fun formatPracticeRaceState(n: Null) = 
+	{
 		status: "Inactive",
 		expires: 0
-	} else {
+	}
+	
+fun formatPracticeRaceState(raceState: RaceState) = do {
+	var secondsLeft = (practiceExpiration(raceState) - now()) as Number {unit: "milliseconds"} / 1000
+	---
+	if (secondsLeft <= 0) formatPracticeRaceState(null)
+	else {
 		endpoint: raceState.endpoint,
 		status: if (raceState.downMessage?) "Down" else "Active",
 		expires: secondsLeft,
 		(laps: raceState.laps) if raceState.laps?,
+		(scale: raceState.scale) if raceState.scale?,
 		(time: raceState.time) if raceState.time?,
 		(error: raceState.downMessage) if raceState.downMessage?
 	}

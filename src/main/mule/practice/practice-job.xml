@@ -12,7 +12,7 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 		<ee:transform doc:name="raceState" doc:id="8b047c0b-7ee6-4f30-abec-35cf9615d93b">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
-import * from dw::app::Transforms
+
 output application/json
 ---
 payload ++ {

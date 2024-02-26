@@ -983,4 +983,13 @@ type auto_81dba380_d3a9_4b6d_b6c3_4de61a38f21e_Output_Variables_outboundHeaders 
       </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
+  <types:enrichment select="#229f3dfe-596a-4682-b3fa-ae421a87ba6a">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:variables>
+          <types:variable name="raceDataKey" type="String"/>
+        </types:variables>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
 </types:mule>
