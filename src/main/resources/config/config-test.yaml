@@ -34,7 +34,7 @@ redis:
   port: "15552"
 
 race:
-  expiry: "600" # seconds
+  expiry: "7200" # seconds
 
 practice:
-  expiry: "600" # seconds
+  expiry: "7200" # seconds

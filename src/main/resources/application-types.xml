@@ -992,4 +992,31 @@ type auto_81dba380_d3a9_4b6d_b6c3_4de61a38f21e_Output_Variables_outboundHeaders 
       </types:input-event>
     </types:processor-declaration>
   </types:enrichment>
+  <types:enrichment select="#12b734b4-77c4-4324-bcbb-f73e883ddb86">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="raceState"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#840759b6-1cb8-40fa-bc7f-7106bd4feafc">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="raceState"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#3cd8ba3c-6a7b-4625-86cc-371a6adf98e3">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="raceState"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
 </types:mule>
