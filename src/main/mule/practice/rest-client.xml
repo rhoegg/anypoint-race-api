@@ -9,7 +9,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<set-variable doc:name="raceType" doc:id="vfvuox" variableName="raceType" value="practice_restclient" />
 		<set-variable doc:name="raceId" doc:id="rhytgr" variableName="raceId" value="#[vars.timeTrialId]" />
 		<try doc:name="Try" doc:id="97b11221-6549-4db4-81cb-332714d4ccff">
-			<flow-ref name="getRaceAndCheckToken" doc:name="getRaceAndCheckToken"/>
+			<flow-ref name="restclient_getRaceAndCheckToken" doc:name="getRaceAndCheckToken"/>
 			<error-handler>
 				<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="2b321ad2-21ff-4206-8c61-1e10c2c9aa85" type="APP:BAD_TOKEN" when="isEmpty(payload.lap)">
 					<logger level="DEBUG" doc:name="DEBUG" doc:id="716af302-20ad-4219-a4a7-2d80e3a67539" message="First lap does not require token" category="race-api.practice.restclient.getRace" />

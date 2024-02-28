@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:redis="http://www.mulesoft.org/schema/mule/redis" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/redis/current/mule-redis.xsd">
-    <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:3.2.2:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:3.2.4:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="anypoint-race-api-main">
         <http:listener config-ref="httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -124,7 +124,7 @@ output application/json
         </error-handler>
     </flow>
     <flow name="post:\register:application\json:anypoint-race-api-config">
-        <set-variable value='#[import * from dw::core::Strings&#10;import * from dw::core::Binaries&#10;var encodedCredentials = attributes.headers.Authorization substringAfter "Basic "&#10;var credentials = fromBase64(encodedCredentials as String)&#10;---&#10;credentials substringBefore ":"]' doc:name="clientId " doc:id="6dbfd39f-8d36-480b-bfa9-ceb3247dd9c0" variableName="clientId" />
+        <set-variable value="#[import * from dw::core::Strings&#xA;import * from dw::core::Binaries&#xA;var encodedCredentials = attributes.headers.Authorization substringAfter &quot;Basic &quot;&#xA;var credentials = fromBase64(encodedCredentials as String)&#xA;---&#xA;credentials substringBefore &quot;:&quot;]" doc:name="clientId " doc:id="6dbfd39f-8d36-480b-bfa9-ceb3247dd9c0" variableName="clientId" />
         <flow-ref doc:name="registerRacer" doc:id="af973961-b5d4-4d58-9584-62b4df5e3e27" name="registerRacer" />
         <error-handler>
             <on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="5c2bb858-3c43-4d2c-a227-d18cc4bc1942" type="APP:CLIENT_ID_MISSING">
@@ -184,41 +184,83 @@ output application/json
     </flow>
     <flow name="put:\racers\(racerId)\practice\rest-api:application\json:anypoint-race-api-config">
         <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="f947a5b7-788a-48e4-893d-f5f7dc3dd994" variableName="racerId" />
-        <set-variable value="rest-api" doc:name="raceType" doc:id="6c536571-5498-4f54-a9fe-5401ef46dace" variableName="raceType"/>
-		<flow-ref doc:name="practice_racer_enable" doc:id="b4d13a85-e1e0-42ea-99ac-0e55796e698c" name="practice_racer_enable" />
+        <set-variable value="rest-api" doc:name="raceType" doc:id="6c536571-5498-4f54-a9fe-5401ef46dace" variableName="raceType" />
+        <flow-ref doc:name="practice_racer_enable" doc:id="b4d13a85-e1e0-42ea-99ac-0e55796e698c" name="practice_racer_enable" />
     </flow>
     <flow name="get:\racers\(racerId)\practice\rest-api:anypoint-race-api-config">
         <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="fd451d6c-0763-4bf2-8678-5d2d424d55a8" variableName="racerId" />
-        <set-variable value="rest-api" doc:name="raceType" doc:id="4c30180c-caca-4aec-9f1e-15d6aee258a6" variableName="raceType"/>
-		<flow-ref doc:name="practice_racer_checkStatus" doc:id="317652a8-28de-43a5-9570-0c411c14e4b2" name="practice_racer_checkStatus" />
+        <set-variable value="rest-api" doc:name="raceType" doc:id="4c30180c-caca-4aec-9f1e-15d6aee258a6" variableName="raceType" />
+        <flow-ref doc:name="practice_racer_checkStatus" doc:id="317652a8-28de-43a5-9570-0c411c14e4b2" name="practice_racer_checkStatus" />
     </flow>
     <flow name="put:\racers\(racerId)\practice\average-temperatures:application\json:anypoint-race-api-config">
         <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="400f4c7b-e8d8-47f8-bb7e-d6640f3f4874" variableName="racerId" />
-		<set-variable value="averages" doc:name="raceType" doc:id="ed469eeb-33de-492c-9247-0a85318b3ea6" variableName="raceType" />
-		<flow-ref doc:name="practice_racer_enable" doc:id="0a89f84f-215c-4a5d-ab20-673853dc1257" name="practice_racer_enable" />
+        <set-variable value="averages" doc:name="raceType" doc:id="ed469eeb-33de-492c-9247-0a85318b3ea6" variableName="raceType" />
+        <flow-ref doc:name="practice_racer_enable" doc:id="0a89f84f-215c-4a5d-ab20-673853dc1257" name="practice_racer_enable" />
     </flow>
     <flow name="get:\racers\(racerId)\practice\average-temperatures:anypoint-race-api-config">
-		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="eb55415b-2200-4801-973c-354b6fa290bb" variableName="racerId" />
-		<set-variable value="averages" doc:name="raceType" doc:id="3bd10bbc-7cae-41a0-b586-f30498bcfee4" variableName="raceType" />
-		<flow-ref doc:name="practice_racer_checkStatus" doc:id="2cde0c38-dca4-4290-942d-482ff8de8ad0" name="practice_racer_checkStatus" />
+        <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="eb55415b-2200-4801-973c-354b6fa290bb" variableName="racerId" />
+        <set-variable value="averages" doc:name="raceType" doc:id="3bd10bbc-7cae-41a0-b586-f30498bcfee4" variableName="raceType" />
+        <flow-ref doc:name="practice_racer_checkStatus" doc:id="2cde0c38-dca4-4290-942d-482ff8de8ad0" name="practice_racer_checkStatus" />
     </flow>
     <flow name="get:\racers\(racerId)\entry:anypoint-race-api-config">
-        <ee:transform doc:name="Transform Message">
-            <ee:variables>
-                <ee:set-variable variableName="racerId">attributes.uriParams.'racerId'</ee:set-variable>
-            </ee:variables>
+        <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="dff08145-b663-4dc3-b0bf-db1a79b664e6" variableName="racerId" />
+        <set-variable value="#[&quot;entry.season3.$(vars.racerId)&quot;]" doc:name="entryKey" doc:id="0d3373a4-6932-4729-b761-6524d404d7d8" variableName="entryKey" />
+        <os:retrieve doc:name="entry" doc:id="85f08eed-c44d-4d9a-8f05-1aed718b9da3" key="#[vars.entryKey]" objectStore="raceObjectStore">
+            <error-mapping sourceType="OS:KEY_NOT_FOUND" targetType="APP:ENTRY_MISSING" />
+        </os:retrieve>
+        <ee:transform doc:name="response" doc:id="b5c27769-a840-4d79-90e0-0e955e247690">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+
+fun determineStatus(entry) = "Active"
+---
+{
+	submitted: payload.submitted,
+	endpoint: payload.endpoint,
+	status: determineStatus(payload),
+	results: {
+		time: {
+			(race: payload.time1) if payload.time1?,
+			(hundredLaps: payload.time2) if payload.time2?,
+			(thousandRows: payload.time3) if payload.time3?,
+			(millionRows: payload.time4) if payload.time4?,
+			(billionRows: payload.time5) if payload.time5?
+		}
+	},
+	(error: {
+		tier: payload.level match {
+			case 1 -> "racer"
+			case 2 -> "hundredLaps"
+			case 3 -> "thousandRows"
+			case 4 -> "millionRows"
+			case 5 -> "billionRows"
+			else -> "racer"
+		},
+		message: payload.downMessage
+	}) if payload.downMessage?
+}]]></ee:set-payload>
+            </ee:message>
         </ee:transform>
-        <logger level="INFO" message="get:\racers\(racerId)\entry:anypoint-race-api-config" />
+        <error-handler>
+            <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="aac2b59e-2324-4996-acc9-9096c6f43406" type="APP:ENTRY_MISSING">
+                <set-variable value="404" doc:name="httpStatus = 404" doc:id="55578ccc-56d3-477f-ab84-3b1585e0d4da" variableName="httpStatus" />
+            </on-error-propagate>
+        </error-handler>
     </flow>
     <flow name="post:\racers\(racerId)\entry:application\json:anypoint-race-api-config">
+        <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="f61a35d9-6db7-4e24-9346-81397592fcc9" variableName="racerId" />
+        <flow-ref doc:name="createSeasonThreeEntry" doc:id="d3ecac10-ad99-459e-bfbc-3c625e3a8a8c" name="createSeasonThreeEntry" />
+    </flow>
+    <flow name="get:\seasons\3\leaderboard:anypoint-race-api-config">
+        <logger level="INFO" message="get:\seasons\3\leaderboard:anypoint-race-api-config" />
+    </flow>
+    <flow name="delete:\racers\(racerId)\entry:anypoint-race-api-config">
         <ee:transform doc:name="Transform Message">
             <ee:variables>
                 <ee:set-variable variableName="racerId">attributes.uriParams.'racerId'</ee:set-variable>
             </ee:variables>
         </ee:transform>
-        <logger level="INFO" message="post:\racers\(racerId)\entry:application\json:anypoint-race-api-config" />
-    </flow>
-	<flow name="get:\seasons\3\leaderboard:anypoint-race-api-config">
-        <logger level="INFO" message="get:\seasons\3\leaderboard:anypoint-race-api-config" />
+        <logger level="INFO" message="delete:\racers\(racerId)\entry:anypoint-race-api-config" />
     </flow>
 </mule>

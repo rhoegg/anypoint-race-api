@@ -81,13 +81,6 @@
 		</dependency>
 		<dependency>
 			<groupId>ae6d7954-6fc2-4f3e-8777-80ff8aabd859</groupId>
-			<artifactId>anypoint-race-api</artifactId>
-			<version>3.2.2</version>
-			<classifier>raml</classifier>
-			<type>zip</type>
-		</dependency>
-		<dependency>
-			<groupId>ae6d7954-6fc2-4f3e-8777-80ff8aabd859</groupId>
 			<artifactId>mule-plugin-race-data-system-api</artifactId>
 			<version>1.0.14</version>
 			<classifier>mule-plugin</classifier>
@@ -97,6 +90,19 @@
 			<artifactId>mule-plugin-referee-process-api</artifactId>
 			<version>1.0.3</version>
 			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.mule.modules</groupId>
+			<artifactId>mule-tracing-module</artifactId>
+			<version>1.0.0</version>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>ae6d7954-6fc2-4f3e-8777-80ff8aabd859</groupId>
+			<artifactId>anypoint-race-api</artifactId>
+			<version>3.2.4</version>
+			<classifier>raml</classifier>
+			<type>zip</type>
 		</dependency>
 	</dependencies>
 	<repositories>
