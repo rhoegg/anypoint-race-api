@@ -45,6 +45,8 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 			<vm:queue queueName="official-entry" queueType="PERSISTENT" />
 			<vm:queue queueName="official-level2" queueType="PERSISTENT" />
 			<vm:queue queueName="official-level3" queueType="PERSISTENT" />
+			<vm:queue queueName="official-level4" queueType="PERSISTENT" />
+			<vm:queue queueName="official-level5" queueType="PERSISTENT" />
 		</vm:queues>
 	</vm:config>
 </mule>

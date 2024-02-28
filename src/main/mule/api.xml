@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:redis="http://www.mulesoft.org/schema/mule/redis" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/redis/current/mule-redis.xsd">
-    <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:3.2.4:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:3.2.5:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="anypoint-race-api-main">
         <http:listener config-ref="httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -251,16 +251,29 @@ fun determineStatus(entry) = "Active"
     <flow name="post:\racers\(racerId)\entry:application\json:anypoint-race-api-config">
         <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="f61a35d9-6db7-4e24-9346-81397592fcc9" variableName="racerId" />
         <flow-ref doc:name="createSeasonThreeEntry" doc:id="d3ecac10-ad99-459e-bfbc-3c625e3a8a8c" name="createSeasonThreeEntry" />
+        <error-handler>
+            <on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="f8e363d2-dbe9-4a32-80aa-0dbffd376bc1" type="APP:ENTRY_EXISTS">
+                <set-variable value="409" doc:name="httpStatus = 409" doc:id="27f9d70d-e1f6-4b9b-96ac-1cd1c6596768" variableName="httpStatus" />
+                <os:retrieve doc:name="entry" doc:id="30df85ed-cb3e-475b-946a-34bf7d706e9f" key="#[vars.entryKey]" objectStore="raceObjectStore" />
+                <ee:transform doc:name="Transform Message" doc:id="fd66bc39-7cec-4955-9e55-a39cc2030ae3">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	submitted: payload.submitted,
+	endpoint: payload.endpoint
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="delete:\racers\(racerId)\entry:anypoint-race-api-config">
+        <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="d93ff794-ff59-491f-bb61-43a10bc543b5" variableName="racerId" />
+        <flow-ref doc:name="clearSeasonThreeEntry" doc:id="f0aa0bb3-34dc-4f88-af02-a9b77847f6e1" name="clearSeasonThreeEntry" />
     </flow>
     <flow name="get:\seasons\3\leaderboard:anypoint-race-api-config">
         <logger level="INFO" message="get:\seasons\3\leaderboard:anypoint-race-api-config" />
-    </flow>
-    <flow name="delete:\racers\(racerId)\entry:anypoint-race-api-config">
-        <ee:transform doc:name="Transform Message">
-            <ee:variables>
-                <ee:set-variable variableName="racerId">attributes.uriParams.'racerId'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <logger level="INFO" message="delete:\racers\(racerId)\entry:anypoint-race-api-config" />
     </flow>
 </mule>

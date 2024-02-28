@@ -23,7 +23,7 @@ fun formatPracticeRaceState(raceState: RaceState) = do {
 	if (secondsLeft <= 0) formatPracticeRaceState(null)
 	else {
 		endpoint: raceState.endpoint,
-		status: if (raceState.downMessage?) "Down" else "Active",
+		status: if (raceState.downMessage?) "Error" else "Active",
 		expires: secondsLeft,
 		(laps: raceState.laps) if raceState.laps?,
 		(scale: raceState.scale) if raceState.scale?,
