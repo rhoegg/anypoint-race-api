@@ -25,6 +25,7 @@ http://www.mulesoft.org/schema/mule/referee-process-api http://www.mulesoft.org/
         </validation:is-true>
     </sub-flow>
 	<sub-flow name="createSeasonThreeEntry" doc:id="8ea89464-0bab-4719-8cfb-581cbcaf1667">
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="19b8aeb7-ad5e-4574-b74d-b3fbdb9fced1" message="#[payload]" category="race.season3"/>
 		<ee:transform doc:name="entry" doc:id="b1b240a8-28d1-451f-b360-378f35957b78">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
@@ -47,7 +48,10 @@ output application/json
 	</sub-flow>
 	<sub-flow name="clearSeasonThreeEntry" doc:id="114b1ea6-295a-43b5-b8c6-521f53f39198" >
 		<set-variable value='#["entry.season3.$(vars.racerId)"]' doc:name="entryKey" doc:id="eb2bb382-ff30-4d8f-b9bf-7a06b5de8823" variableName="entryKey" />
-		<os:remove doc:name="entry" doc:id="10dd9247-0f58-40a5-8baf-64054c272a8c" key="#[vars.entryKey]" objectStore="raceObjectStore"/>
+		<os:remove doc:name="entry" doc:id="10dd9247-0f58-40a5-8baf-64054c272a8c" key="#[vars.entryKey]" objectStore="raceObjectStore">
+			<error-mapping sourceType="OS:KEY_NOT_FOUND" targetType="APP:ENTRY_MISSING" />
+		</os:remove>
+		<logger level="INFO" doc:name="INFO" doc:id="0bdc0d47-eea1-4cc2-8bef-13bf8ace14e5" message="Cleared entry #[vars.entryKey]" category="race.season3"/>
 	</sub-flow>
 	<flow name="seasonThreeLevel1" doc:id="f1359ec9-aba6-454e-8abb-203328ac0d72" >
 		<vm:listener queueName="official-entry" doc:name="official-entry" doc:id="1ac0aa11-235a-4aa0-9135-85fdfcd660dd" config-ref="VM_Config" transactionalAction="ALWAYS_BEGIN" outputMimeType="application/json"/>

@@ -272,6 +272,11 @@ output application/json
     <flow name="delete:\racers\(racerId)\entry:anypoint-race-api-config">
         <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="d93ff794-ff59-491f-bb61-43a10bc543b5" variableName="racerId" />
         <flow-ref doc:name="clearSeasonThreeEntry" doc:id="f0aa0bb3-34dc-4f88-af02-a9b77847f6e1" name="clearSeasonThreeEntry" />
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="cd07e700-1f6c-4d35-baa7-451972f73c64" type="APP:ENTRY_MISSING">
+				<logger level="DEBUG" doc:name="DEBUG" doc:id="4052fac7-6cc5-47e4-affe-0c8e91247679" category="race.api" message="Racer #[vars.racerId] cleared non-existent entry"/>
+			</on-error-continue>
+		</error-handler>
     </flow>
     <flow name="get:\seasons\3\leaderboard:anypoint-race-api-config">
         <logger level="INFO" message="get:\seasons\3\leaderboard:anypoint-race-api-config" />
