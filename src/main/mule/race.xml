@@ -54,7 +54,7 @@ output application/json
 		<logger level="INFO" doc:name="INFO" doc:id="0bdc0d47-eea1-4cc2-8bef-13bf8ace14e5" message="Cleared entry #[vars.entryKey]" category="race.season3"/>
 	</sub-flow>
 	<flow name="seasonThreeLevel1" doc:id="f1359ec9-aba6-454e-8abb-203328ac0d72" >
-		<vm:listener queueName="official-entry" doc:name="official-entry" doc:id="1ac0aa11-235a-4aa0-9135-85fdfcd660dd" config-ref="VM_Config" transactionalAction="ALWAYS_BEGIN" outputMimeType="application/json"/>
+		<vm:listener queueName="official-entry" doc:name="official-entry" doc:id="1ac0aa11-235a-4aa0-9135-85fdfcd660dd" config-ref="VM_Config" outputMimeType="application/json"/>
 		<set-variable value='#["entry.season3.$(payload.racer)"]' doc:name="entryKey" doc:id="75027f3e-e872-4646-87e5-dac53a0c8e73" variableName="entryKey"/>
 		<tracing:set-logging-variable doc:name="entry" doc:id="40ad3246-d5d1-4d98-8429-5c43edf987d3" variableName="entry" value="#[vars.entryKey]" />
 		<set-variable value="#[payload]" doc:name="entry" doc:id="0de36d56-79c1-4806-9a06-36602737998e" variableName="entry"/>
@@ -71,7 +71,7 @@ output application/json
 			</ee:message>
 		</ee:transform>
 		<referee-process-api:rest-api-challenge doc:name="Rest API Challenge" doc:id="bac01358-08c3-49c1-b2a9-5899be76a21f" config-ref="refereeProcessApiConfig" mode="official"/>
-		<logger level="DEBUG" doc:name="DEBUG" doc:id="8151e8e6-eb9e-45d3-95e5-e847432819fb" message='#["level 1 complete in $(payload.time)s:$(payload.raceId)"]' category="race.season3.level1"/>
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="8151e8e6-eb9e-45d3-95e5-e847432819fb" message='#["$(payload.racerId) completed level 1 in $(payload.time)s:$(payload.raceId)"]' category="race.season3.level1"/>
 		<ee:transform doc:name="entry" doc:id="33ccf227-f122-4f50-a818-86257e78038b" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -105,7 +105,7 @@ vars.entry mergeWith {
 		</error-handler>
 	</flow>
 	<flow name="seasonThreeLevel2" doc:id="fcf74c3c-bb61-4887-81d4-8a8ddc61f0d5" >
-		<vm:listener queueName="official-level2" doc:name="official-level2" doc:id="c143545a-87fb-4d3d-877a-ab3c76643201" config-ref="VM_Config" outputMimeType="application/json" transactionalAction="ALWAYS_BEGIN"/>
+		<vm:listener queueName="official-level2" doc:name="official-level2" doc:id="c143545a-87fb-4d3d-877a-ab3c76643201" config-ref="VM_Config" outputMimeType="application/json"/>
 		<set-variable value='#["entry.season3.$(payload.racer)"]' doc:name="entryKey" doc:id="3a5ef504-5b04-487f-8884-5836c8212b1a" variableName="entryKey" />
 		<tracing:set-logging-variable doc:name="entry" doc:id="422c19e6-6119-4b90-9590-9f66a7c15bf8" variableName="entry" value="#[vars.entryKey]" />
 		<set-variable value="#[payload]" doc:name="entry" doc:id="042ac6bf-f7f9-4306-b07b-92f6f6b57f4f" variableName="entry" />
@@ -122,7 +122,7 @@ output application/json
 			</ee:message>
 		</ee:transform>
 		<referee-process-api:rest-api-challenge doc:name="Rest API Challenge" doc:id="7ddfc1e5-7372-442d-a312-1bf7b3fa64be" config-ref="refereeProcessApiConfig" mode="official" />
-		<logger level="DEBUG" doc:name="DEBUG" doc:id="62ca2486-5aab-4f58-9329-a09c8336924e" message='#["level 2 complete in $(payload.time)s:$(payload.raceId)"]' category="race.season3.level2" />
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="62ca2486-5aab-4f58-9329-a09c8336924e" message='#["$(payload.racerId) completed level 2 in $(payload.time)s:$(payload.raceId)"]' category="race.season3.level2" />
 		<ee:transform doc:name="entry" doc:id="397a69e1-a98e-46d3-ba08-de79bc6fdec5" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -156,7 +156,7 @@ vars.entry mergeWith {
 		</error-handler>
 	</flow>
 	<flow name="seasonThreeLevel3" doc:id="3ff6cff4-4e20-4fe5-b410-c326f38f0cd2" >
-		<vm:listener doc:name="official-level3" doc:id="cb1cc667-2841-45e5-b25d-45d1cc242e0e" config-ref="VM_Config" queueName="official-level3" outputMimeType="application/json" transactionalAction="ALWAYS_BEGIN"/>
+		<vm:listener doc:name="official-level3" doc:id="cb1cc667-2841-45e5-b25d-45d1cc242e0e" config-ref="VM_Config" queueName="official-level3" outputMimeType="application/json"/>
 		<set-variable value='#["entry.season3.$(payload.racer)"]' doc:name="entryKey" doc:id="28bc5b45-2971-4d95-99e7-5b86511ceee4" variableName="entryKey" />
 		<tracing:set-logging-variable doc:name="entry" doc:id="848f1088-2f13-42c7-a52c-4b801a3cc0ae" variableName="entry" value="#[vars.entryKey]" />
 		<set-variable value="#[payload]" doc:name="entry" doc:id="318ad55c-bd59-4073-8bb3-1a860f87a990" variableName="entry" />
@@ -173,7 +173,7 @@ output application/json
 			</ee:message>
 		</ee:transform>
 		<referee-process-api:billion-row-challenge doc:name="Billion Row Challenge" doc:id="8e399bca-502d-4711-a7fa-4862bfcf52c5" config-ref="refereeProcessApiConfig" mode="official"/>
-		<logger level="DEBUG" doc:name="DEBUG" doc:id="b2a2547a-461a-4af9-a3a4-857a122d862b" message='#["level 3 complete in $(payload.time)s:$(payload.raceId)"]' category="race.season3.level3" />
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="b2a2547a-461a-4af9-a3a4-857a122d862b" message='#["$(payload.racerId) completed level 3 in $(payload.time)s:$(payload.raceId)"]' category="race.season3.level3" />
 		<ee:transform doc:name="entry" doc:id="07d335a9-bf0b-44f3-a0ad-7f00ef24fa78" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -207,7 +207,7 @@ vars.entry mergeWith {
 		</error-handler>
 	</flow>
 	<flow name="seasonThreeLevel4" doc:id="21bdc68b-aca3-45f8-8777-0582b4aacc39" >
-		<vm:listener doc:name="official-level4" doc:id="4f97ebf0-8acb-4894-8396-1eb5271a2a5e" config-ref="VM_Config" queueName="official-level4" outputMimeType="application/json" transactionalAction="ALWAYS_BEGIN"/>
+		<vm:listener doc:name="official-level4" doc:id="4f97ebf0-8acb-4894-8396-1eb5271a2a5e" config-ref="VM_Config" queueName="official-level4" outputMimeType="application/json"/>
 		<set-variable value='#["entry.season3.$(payload.racer)"]' doc:name="entryKey" doc:id="2f0df4d7-a3c6-4145-a223-cd46257bf0e4" variableName="entryKey" />
 		<tracing:set-logging-variable doc:name="entry" doc:id="3218b5da-b672-427c-9b56-56fcda15571b" variableName="entry" value="#[vars.entryKey]" />
 		<set-variable value="#[payload]" doc:name="entry" doc:id="098ab252-6baa-415a-93c5-5c7cf4d7e21e" variableName="entry" />
@@ -224,7 +224,7 @@ output application/json
 			</ee:message>
 		</ee:transform>
 		<referee-process-api:billion-row-challenge doc:name="Billion Row Challenge" doc:id="aa3b4aac-7dbb-4b5b-8589-5dae53b66f9e" config-ref="refereeProcessApiConfig" mode="official" />
-		<logger level="DEBUG" doc:name="DEBUG" doc:id="c2ab46b8-fa3f-4455-bdc5-1fb4baa29d6d" message='#["level 4 complete in $(payload.time)s:$(payload.raceId)"]' category="race.season3.level4" />
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="c2ab46b8-fa3f-4455-bdc5-1fb4baa29d6d" message='#["$(payload.racerId) completed level 4 in $(payload.time)s:$(payload.raceId)"]' category="race.season3.level4" />
 		<ee:transform doc:name="entry" doc:id="0dcd84dd-b21e-4f0c-9d23-08c0c4298e68" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -275,7 +275,7 @@ output application/json
 			</ee:message>
 		</ee:transform>
 		<referee-process-api:billion-row-challenge doc:name="Billion Row Challenge" doc:id="1bbae59f-6d19-46c0-8a93-e2ef2c02073f" config-ref="refereeProcessApiConfig" mode="official" />
-		<logger level="DEBUG" doc:name="DEBUG" doc:id="3461af61-1e6b-4a5c-a306-9e83bcf2e8dc" message='#["level 5 complete in $(payload.time)s:$(payload.raceId)"]' category="race.season3.level5" />
+		<logger level="DEBUG" doc:name="DEBUG" doc:id="3461af61-1e6b-4a5c-a306-9e83bcf2e8dc" message='#["$(payload.racerId) completed level 5 in $(payload.time)s:$(payload.raceId)"]' category="race.season3.level5" />
 		<ee:transform doc:name="entry" doc:id="be1925e1-c381-4c44-98b5-1c5b152c884c" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0

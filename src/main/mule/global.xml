@@ -31,9 +31,6 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 		<http:request-connection protocol="HTTPS" host="anypoint.mulesoft.com" port="443" />
 	</http:request-config>
 	<api-gateway:autodiscovery apiId="${anypoint.api.id}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="7e1fbca3-3bff-4464-acd9-f2ce95227e3e" flowRef="anypoint-race-api-main" />
-	<redis:redis-config name="Redis_Redis" doc:name="Redis Redis" doc:id="ddba4915-df7f-4d30-a335-3d3ea9d6ca95" >
-		<redis:nonclustered-connection host="${redis.host}" port="${redis.port}" password="${redis.password}" />
-	</redis:redis-config>
 	<os:object-store name="practiceObjectStore" doc:name="Object store" doc:id="b4fe585f-70a9-4db3-88f3-6f1e57f33484" entryTtl="12" entryTtlUnit="HOURS" expirationInterval="2"/>
 	<os:object-store name="raceObjectStore" doc:name="Object store" doc:id="aa49b4df-09f8-4dd1-afdb-c4dd67c3b62b" entryTtl="2" expirationInterval="2" entryTtlUnit="HOURS"/>
 	<referee-process-api:config name="refereeProcessApiConfig" doc:name="Referee Process API Config" doc:id="f6bbdef3-bf57-4fd4-8a1d-fb35bd12defe" property_host="${referee.host}" property_port="${referee.port}" property_basePath="${referee.path}" property_protocol="${referee.protocol}" property_username="${anypoint.app.clientId}" property_password="${anypoint.app.clientSecret}" property_responseTimeout="600000"/>

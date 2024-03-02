@@ -1,0 +1,28 @@
+%dw 2.0
+
+type auto_1c6b973d_7dc2_423b_9c8a_8a9930fd573c_Output_Attributes = {|
+  clientCertificate?: {|
+    publicKey?: {|  |}, 
+    "type"?: String, 
+    encoded?: Binary
+  |}, 
+  headers: {|  |}, 
+  listenerPath: String, 
+  method: String, 
+  queryParams: {|
+    timespan?: "week" | "hour" | "season" | "day", 
+    racer?: String, 
+    minRank?: Number, 
+    count?: Number
+  |}, 
+  queryString: String, 
+  relativePath: String, 
+  remoteAddress: String, 
+  requestPath: String, 
+  requestUri: String, 
+  scheme: String, 
+  uriParams: {|  |}, 
+  version: String, 
+  localAddress: String
+|}
+

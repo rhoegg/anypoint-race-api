@@ -100,7 +100,7 @@
 		<dependency>
 			<groupId>ae6d7954-6fc2-4f3e-8777-80ff8aabd859</groupId>
 			<artifactId>anypoint-race-api</artifactId>
-			<version>3.2.5</version>
+			<version>3.2.6</version>
 			<classifier>raml</classifier>
 			<type>zip</type>
 		</dependency>
