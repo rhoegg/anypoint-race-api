@@ -1,6 +1,6 @@
 %dw 2.0
 
-type auto_1c6b973d_7dc2_423b_9c8a_8a9930fd573c_Output_Attributes = {|
+type auto_feda3787_f9ba_4f84_b7b7_096756789fd3_Input_Attributes = {|
   clientCertificate?: {|
     publicKey?: {|  |}, 
     "type"?: String, 
@@ -10,7 +10,7 @@ type auto_1c6b973d_7dc2_423b_9c8a_8a9930fd573c_Output_Attributes = {|
   listenerPath: String, 
   method: String, 
   queryParams: {|
-    timespan?: "day", 
+    timespan?: String, 
     racer?: String, 
     minRank?: Number, 
     count?: Number

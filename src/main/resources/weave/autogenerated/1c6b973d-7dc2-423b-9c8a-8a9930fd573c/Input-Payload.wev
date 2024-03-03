@@ -1,8 +1,4 @@
 %dw 2.0
 
-type auto_1c6b973d_7dc2_423b_9c8a_8a9930fd573c_Input_Payload = {
-  scores: Array<{    tier: String,     name: String,     rank: Number,     time: Number,     _?: Any  }>, 
-  banner?: String, 
-  _?: Any
-}
+type auto_1c6b973d_7dc2_423b_9c8a_8a9930fd573c_Input_Payload = Any
 
