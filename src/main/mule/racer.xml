@@ -29,7 +29,7 @@ output application/json
 	displayName: payload.displayName,
 	email: payload.email,
 	racerId: uuid(),
-	clientId: attributes.headers.client_id
+	clientId: vars.clientId
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>

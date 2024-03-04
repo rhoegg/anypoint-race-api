@@ -7,7 +7,7 @@ anypoint:
   businessGroup: "ae6d7954-6fc2-4f3e-8777-80ff8aabd859"
   portal:
     assetId: anypoint-race-api
-    version: "3.0.1"
+    version: "3.2.6"
     timeout: "20000"
     pages:
       results:
@@ -27,10 +27,6 @@ racedata:
   port: "8081"
   protocol: HTTP
   path: /api
-  
-redis:
-  host: redis-18615.c1.us-east1-2.gce.cloud.redislabs.com
-  port: "18615"
 
 race:
   expiry: "259200" # seconds
