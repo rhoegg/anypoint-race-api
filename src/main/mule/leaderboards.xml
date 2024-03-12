@@ -33,11 +33,13 @@ output application/json
 		<ee:transform doc:name="results" doc:id="88c57a89-2141-4d49-8d13-27e773b8a847" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
-import take from dw::core::Arrays
+import some, take from dw::core::Arrays
 output application/json
 fun appendNewResults(scores) = do {
 	var maxRank = max(scores map $.rank) default 0
-	var newScores = vars.newResults map (result) -> 
+	var unranked = vars.newResults filter (result) ->
+		not (scores some (score) -> score.racerId == result.racerId)
+	var newScores = unranked map (result) -> 
 		{
 			tier: vars.leaderboardId,
 			name: result.name,
