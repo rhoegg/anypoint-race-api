@@ -21,7 +21,6 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<logger level="DEBUG" doc:name="DEBUG" doc:id="87255160-a92b-4350-b4d9-6e5233e1e4f8" message="Found race #[vars.race]" category="race-api.practice.restclient.getRace" />
 	</sub-flow>
 	<flow name="practice_restclient_startTimeTrial" doc:id="2bc007b3-8021-4806-a560-2c1e2140f551" >
-		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="601b16d3-fa64-4d0d-933b-333778b93640" variableName="racerId"/>
 		<ee:transform doc:name="race" doc:id="efc1b65a-1d6a-4001-84e5-9f4713e28f07" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
