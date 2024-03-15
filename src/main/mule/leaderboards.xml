@@ -39,12 +39,12 @@ fun appendNewResults(scores) = do {
 	var maxRank = max(scores map $.rank) default 0
 	var unranked = vars.newResults filter (result) ->
 		not (scores some (score) -> score.racerId == result.racerId)
-	var newScores = unranked map (result) -> 
+	var newScores = unranked map (result, index) -> 
 		{
 			tier: vars.leaderboardId,
 			name: result.name,
 			racerId: result.racerId,
-			rank: maxRank + result.rank,
+			rank: maxRank + index + 1,
 			time: result.time
 		}
 	---
