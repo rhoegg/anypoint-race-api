@@ -325,6 +325,7 @@ output application/json
     <flow name="get:\seasons\3\leaderboard:anypoint-race-api-config">
 		<set-variable value='#[attributes.queryParams.timespan default "season"]' doc:name="timespan" doc:id="ef0f3d03-10b4-4e67-aac5-ac0b6ec6dc3b" variableName="timespan"/>
 		<set-variable value="#[attributes.queryParams.count default 10]" doc:name="count" doc:id="157d3701-be12-48f5-a102-dca9b71d7861" variableName="count"/>
+		<set-variable value="#[attributes.queryParams.minRank default 1]" doc:name="minRank" doc:id="363f74d4-5c27-436f-865c-13d1d6a05d21" variableName="minRank"/>
 		<flow-ref doc:name="getLeaderboard" doc:id="01c79235-770a-4538-93af-79de1e827fa8" name="getLeaderboard"/>
     </flow>
 </mule>
