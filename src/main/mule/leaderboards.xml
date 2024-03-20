@@ -25,11 +25,22 @@ output application/json
 			</ee:message>
 		</ee:transform>
 		<flow-ref doc:name="appendLeaderboard" doc:id="8b378404-9c71-4852-b870-5690f3205046" name="appendLeaderboard"/>
+		<ee:transform doc:name="Transform Message" doc:id="6d1f1155-9f49-4c64-bcc8-7990e3de2e12" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	banner: "season",
+	scores: payload.scores filter ($.rank >= vars.minRank)
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 	</sub-flow>
 	<sub-flow name="appendLeaderboard" doc:id="feda3787-f9ba-4f84-b7b7-096756789fd3" >
 		<set-variable value='#[vars.leaderboardId match {&#10;        case is Null -&gt; "average1b"&#10;        case "average1b" -&gt; "average1m"&#10;        case "average1m" -&gt; "average1k"&#10;        case "average1k" -&gt; "lap100"&#10;        case "lap100" -&gt; "racer"&#10;        else -&gt; null&#10;    }]' doc:name="leaderboardId" doc:id="8c4fe7e9-0a63-436e-8cb1-416b6a099dff" variableName="leaderboardId"/>
 		<logger level="DEBUG" doc:name="DEBUG" doc:id="fde5a8f1-e35d-44c7-82bf-c7c62d66dc45" message="Fetching #[vars.leaderboardId] results for #[vars.timespan]" category="race.leaderboards"/>
-		<race-data-system-api:get-leaderboard doc:name="Get Leaderboard" doc:id="6fcfa73d-779d-462d-b4b2-6dfea7c9ac0b" config-ref="raceDataSystemApiConfig" count="#[vars.count]" id="#[vars.leaderboardId]" target="newResults" timespan="#[vars.timespan]" min-rank="#[vars.minRank]" racer-id="#[vars.racerId]"/>
+		<race-data-system-api:get-leaderboard doc:name="Get Leaderboard" doc:id="6fcfa73d-779d-462d-b4b2-6dfea7c9ac0b" config-ref="raceDataSystemApiConfig" id="#[vars.leaderboardId]" target="newResults" timespan="#[vars.timespan]" count="#[output application/java&#10;---&#10;vars.minRank + vars.count - (sizeOf(payload.scores) default 0) - 1]"/>
 		<ee:transform doc:name="results" doc:id="88c57a89-2141-4d49-8d13-27e773b8a847" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -52,13 +63,13 @@ fun appendNewResults(scores) = do {
 }
 ---
 payload update {
-	case scores at .scores -> appendNewResults(scores) take vars.count
+	case scores at .scores -> appendNewResults(scores) take (vars.count + vars.minRank -1)
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="DEBUG" doc:name="DEBUG" doc:id="6bbb4e2d-3be8-4229-9b16-bee46cb0724e" category="race.leaderboards" message="after append  #[output application/json --- payload]"/>
 		<choice doc:name="Choice" doc:id="2153b8fb-8a47-442b-b836-211b808f3c7f" >
-			<when expression='#[vars.count &gt; sizeOf(payload.scores) and "racer" != vars.leaderboardId]'>
+			<when expression='#[vars.count + vars.minRank - 1 &gt; sizeOf(payload.scores) and "racer" != vars.leaderboardId]'>
 				<flow-ref doc:name="appendLeaderboard" doc:id="b8ae29ac-8413-4eb7-b79f-64e4837b24b2" name="appendLeaderboard"/>
 			</when>
 			<otherwise >
