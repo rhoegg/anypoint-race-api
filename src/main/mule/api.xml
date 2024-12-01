@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:redis="http://www.mulesoft.org/schema/mule/redis" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/redis/current/mule-redis.xsd">
-    <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:3.2.6:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:race-data-system-api="http://www.mulesoft.org/schema/mule/race-data-system-api" xmlns:redis="http://www.mulesoft.org/schema/mule/redis" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/redis/current/mule-redis.xsd http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org/schema/mule/race-data-system-api/current/mule-race-data-system-api.xsd">
+    <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:4.0.3:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="anypoint-race-api-main">
         <http:listener config-ref="httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -11,9 +11,9 @@
                 <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:error-response>
         </http:listener>
-        <set-variable value='#[import * from dw::core::Strings&#10;import * from dw::core::Binaries&#10;var encodedCredentials = attributes.headers.Authorization substringAfter "Basic "&#10;var credentials = fromBase64(encodedCredentials as String)&#10;---&#10;credentials substringBefore ":"]' doc:name="clientId " doc:id="fd287ef3-5439-46a3-9c31-d49faf680625" variableName="clientId" />
-		<apikit:router config-ref="anypoint-race-api-config" />
-		<error-handler>
+        <set-variable value="#[import * from dw::core::Strings&#xA;import * from dw::core::Binaries&#xA;var encodedCredentials = attributes.headers.Authorization substringAfter &quot;Basic &quot;&#xA;var credentials = fromBase64(encodedCredentials as String)&#xA;---&#xA;credentials substringBefore &quot;:&quot;]" doc:name="clientId " doc:id="fd287ef3-5439-46a3-9c31-d49faf680625" variableName="clientId" />
+        <apikit:router config-ref="anypoint-race-api-config" />
+        <error-handler>
             <on-error-propagate type="APIKIT:BAD_REQUEST">
                 <ee:transform doc:name="Transform Message">
                     <ee:message>
@@ -95,39 +95,39 @@ output application/json
                     </ee:variables>
                 </ee:transform>
             </on-error-propagate>
-			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="662ea67a-d5ce-4682-afda-2716927c4db1" type="APP:FORBIDDEN_RACER">
-				<ee:transform doc:name="Transform Message" doc:id="666fa16d-673e-4c39-b0d0-27c55654067f" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
+            <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="662ea67a-d5ce-4682-afda-2716927c4db1" type="APP:FORBIDDEN_RACER">
+                <ee:transform doc:name="Transform Message" doc:id="666fa16d-673e-4c39-b0d0-27c55654067f">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {message: error.description}]]></ee:set-payload>
-					</ee:message>
-					<ee:variables >
-						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
 output application/java
 ---
 403]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-			</on-error-propagate>
-			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="e8cd57d1-3eb6-4fbd-98e4-0457753c049e" type="APP:RACER_NOT_FOUND">
-				<logger level="WARN" doc:name="WARN" doc:id="fa99f555-0ff7-4854-b263-4ca7eb3b3f74" message="No racer found for client #[vars.clientId]" category="race.api"/>
-				<ee:transform doc:name="Transform Message" doc:id="ecb780cf-3061-4f9a-bd36-3ab71f8c7338" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="e8cd57d1-3eb6-4fbd-98e4-0457753c049e" type="APP:RACER_NOT_FOUND">
+                <logger level="WARN" doc:name="WARN" doc:id="fa99f555-0ff7-4854-b263-4ca7eb3b3f74" message="No racer found for client #[vars.clientId]" category="race.api" />
+                <ee:transform doc:name="Transform Message" doc:id="ecb780cf-3061-4f9a-bd36-3ab71f8c7338">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {message: "No racer found for your client ID.  Did you register?"}]]></ee:set-payload>
-					</ee:message>
-					<ee:variables >
-						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
 output application/java
 ---
 404]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-			</on-error-propagate>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
         </error-handler>
     </flow>
     <flow name="anypoint-race-api-console">
@@ -166,165 +166,81 @@ output application/json
             </on-error-continue>
         </error-handler>
     </flow>
-    <flow name="post:\racers\(racerId)\practice\rest-client\time-trials:anypoint-race-api-config">
-		<set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="43246a44-1f32-41cf-b61f-cb817f84f1f1" variableName="racerId" />
-		<flow-ref doc:name="checkRacerClientId" doc:id="61337346-a065-4f34-a575-6f20b5bc5091" name="checkRacerClientId"/>
-		<flow-ref doc:name="practice_restclient_startTimeTrial" doc:id="58aa5211-a400-4c74-9c9f-f05cab83bc8a" name="practice_restclient_startTimeTrial" />
-        <logger level="INFO" doc:name="INFO" doc:id="4962065a-58c9-45b8-b52d-d03b2a571864" message="racer #[attributes.uriParams.racerId] [practice/rest-client] started a time trial #[payload.timeTrialId]" category="race.api" />
+    <flow name="get:\health:anypoint-race-api-config">
+		<set-payload value="OK" doc:name="OK" doc:id="f778d824-2707-4433-a698-40c4407eb460" />
     </flow>
-    <flow name="post:\racers\(racerId)\practice\rest-client\time-trials\(timeTrialId)\laps:text\plain:anypoint-race-api-config">
-        <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="7879143c-3291-4f41-9910-0d56feb1b9a2" variableName="racerId" />
-		<flow-ref doc:name="checkRacerClientId" doc:id="fe3b3fb9-a607-426c-9a1d-4678bc5e9bf1" name="checkRacerClientId" />
-		<set-variable value="#[attributes.uriParams.timeTrialId]" doc:name="timeTrialId" doc:id="6d2bff37-5668-4df8-90a3-5c38f038d185" variableName="timeTrialId" />
-        <flow-ref doc:name="practice_restclient_lap" doc:id="516d3022-9112-4505-ad4e-036daa4d33bd" name="practice_restclient_lap" />
-        <logger level="INFO" doc:name="INFO" doc:id="7567af79-6e57-44dd-a04a-3a19210704f7" category="race.api" message="racer #[vars.racerId] [practice/rest-client] completed a lap for #[vars.timeTrialId]" />
-		<error-handler>
-            <on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="238ad850-c679-434f-8504-a0953fb5274e" type="APP:NO_SUCH_RACE">
-                <set-variable value="404" doc:name="httpStatus = 404" doc:id="149e78ad-1adb-494e-8186-17cac9bf55c6" variableName="httpStatus" />
-                <set-payload value="no such race" doc:name="no such race" doc:id="702bb1b9-cdae-447c-92c1-dc4afdf1864f" />
-                <logger level="WARN" doc:name="WARN" doc:id="2f0b42f2-f2a9-49ad-8156-64331c675333" message="racer #[vars.racerId] [practice/restclient] tried to complete a lap for non-existent time trial #[vars.timeTrialId]" category="race.practice.restclient.lap" />
-            </on-error-continue>
-            <on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="38eebf08-b3fc-4f47-ba32-2ce529a396fd" type="APP:BAD_TOKEN">
-                <set-variable value="400" doc:name="httpStatus = 400" doc:id="0f13378b-4a73-48bb-9913-5a9dbe257fbe" variableName="httpStatus" />
-                <set-payload value="bad token" doc:name="bad token" doc:id="618f4518-3859-41e1-acca-021db7da8e69" />
-                <logger level="WARN" doc:name="WARN" doc:id="9802ab05-656f-4afd-9bfd-28a05ff4d8c3" category="race.practice.restclient.lap" message="racer #[vars.racerId] [practice/restclient] tried to complete a lap with a bad token" />
-            </on-error-continue>
-            <on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="c385f7ab-0552-4169-b865-49593ecf1312" type="APP:RACE_FINISHED">
-                <set-variable value="410" doc:name="httpStatus = 410" doc:id="eef31705-8a45-48cc-b306-4ed2ffafc921" variableName="httpStatus" />
-                <set-payload value="this race is over" doc:name="race is over" doc:id="16ff32c0-d27c-47e8-972c-5a38f9b61c3b" />
-                <logger level="WARN" doc:name="WARN" doc:id="5f06bae3-60f8-4d4f-a107-443740895e9d" message="racer #[vars.racerId] [practice/restclient] tried to complete a lap after a race was already finished" category="race.practice.restclient.lap" />
-            </on-error-propagate>
-        </error-handler>
+	<flow name="get:\racers:anypoint-race-api-config">
+        <race-data-system-api:search-racers doc:name="Search Racers" doc:id="3b62eb50-7efb-4b2c-89bd-f25f2afce8a6" config-ref="raceDataSystemApiConfig" result="profile" />
     </flow>
-    <flow name="put:\racers\(racerId)\practice\rest-client\time-trials\(timeTrialId)\finish-line:text\plain:anypoint-race-api-config">
-        <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="6906d50e-36e8-4b87-9e91-8f9d9edf2729" variableName="racerId" />
-        <flow-ref doc:name="checkRacerClientId" doc:id="c7d3e564-81c9-403a-aa5d-af8735f54341" name="checkRacerClientId" />
-		<set-variable value="#[attributes.uriParams.timeTrialId]" doc:name="timeTrialId" doc:id="10c61589-6ce7-4208-81f6-664e62addd72" variableName="timeTrialId" />
-        <flow-ref doc:name="practice_restclient_finish" doc:id="31821a0a-b88a-4e72-8548-8340f52ee7ef" name="practice_restclient_finish" />
-		<error-handler>
-            <on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="e5df2231-04b7-44fd-bc87-cb44924f1f99" type="APP:NO_SUCH_RACE">
-                <set-variable value="404" doc:name="httpStatus = 404" doc:id="c7e093c2-79ec-451b-9bbe-191fc03f5d1c" variableName="httpStatus" />
-                <set-payload value="no such race" doc:name="no such race" doc:id="f087dbfc-d675-46fd-b2bd-40bb5a9b4423" />
-                <logger level="WARN" doc:name="WARN" doc:id="3f9e751c-3b97-4eb0-9cbd-75c1c3147c41" message="racer #[vars.racerId] [practice/restclient] tried to finish a non-existent time trial #[vars.timeTrialId]" category="race.practice.restclient.finish" />
-            </on-error-continue>
-            <on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="381d04ff-f688-4639-acfa-00cfc3f9a8fa" type="APP:BAD_TOKEN">
-                <set-variable value="400" doc:name="httpStatus = 400" doc:id="c19eec56-4710-4434-a035-e6ab935e14f1" variableName="httpStatus" />
-                <set-payload value="bad token" doc:name="bad token" doc:id="07585b66-97f6-4a42-a037-9a4b2ccb2fac" />
-                <logger level="WARN" doc:name="WARN" doc:id="358486aa-737a-429d-8fbc-8f039cd76393" message="racer #[vars.racerId] [practice/restclient] tried to complete a time trial #[vars.timeTrialId] with a bad token" category="race.practice.restclient.finish" />
-            </on-error-continue>
-            <on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="ad2b74fd-affb-42bb-be77-9aad799a19d3" type="APP:RACE_FINISHED">
-                <set-variable value="410" doc:name="httpStatus = 410" doc:id="9b77d1e3-233e-4b6c-9906-144a6e6828be" variableName="httpStatus" />
-                <set-payload value="this race is over" doc:name="race is over" doc:id="ac54b928-d843-491b-8d23-0e6b9100eac3" />
-                <logger level="WARN" doc:name="WARN" doc:id="9946d280-50c1-4c4d-ad48-44904eb7a1e3" message="racer #[vars.racerId] [practice/restclient] tried to complete a time trial #[vars.timeTrialId] after a race was already finished" category="race.practice.restclient.lap" />
-            </on-error-propagate>
-        </error-handler>
+    <flow name="get:\racers\mine:anypoint-race-api-config">
+        <race-data-system-api:search-racers doc:name="Search Racers" doc:id="52b6d811-2426-4b24-9aa6-3edbaced1be6" config-ref="raceDataSystemApiConfig" client-id="#[vars.clientId]" result="profile"/>
+		<choice doc:name="Choice" doc:id="dda4eb52-f50a-434c-95d5-551f9323d5da" >
+			<when expression="#[sizeOf(payload) == 1]">
+				<ee:transform doc:name="to Racer" doc:id="d3f66692-5a88-4885-a800-cbf0dec13134">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var result = payload[0]
+---
+result - "racerId" ++ {
+	id: result.racerId
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</when>
+			<otherwise >
+				<set-variable value="404" doc:name="httpStatus = 404" doc:id="f331d5b6-5b1b-44d6-824a-e1f92f424e0f" variableName="httpStatus"/>
+				<ee:transform doc:name="error message" doc:id="1709dfed-ec43-4e21-b6cb-31a27124c105" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "No racer found for clientId $(vars.clientId). Create one with POST /register"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
     </flow>
-    <flow name="put:\racers\(racerId)\practice\rest-api:application\json:anypoint-race-api-config">
-        <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="f947a5b7-788a-48e4-893d-f5f7dc3dd994" variableName="racerId" />
-        <flow-ref doc:name="checkRacerClientId" doc:id="c3d5115c-9ed7-4314-80ba-1cb8e4ccac8c" name="checkRacerClientId" />
-		<set-variable value="rest-api" doc:name="raceType" doc:id="6c536571-5498-4f54-a9fe-5401ef46dace" variableName="raceType" />
-        <flow-ref doc:name="practice_racer_enable" doc:id="b4d13a85-e1e0-42ea-99ac-0e55796e698c" name="practice_racer_enable" />
+	<flow name="put:\racers\(racerId):application\json:anypoint-race-api-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="racerId">attributes.uriParams.'racerId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <logger level="INFO" message="put:\racers\(racerId):application\json:anypoint-race-api-config" />
     </flow>
-    <flow name="get:\racers\(racerId)\practice\rest-api:anypoint-race-api-config">
-        <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="fd451d6c-0763-4bf2-8678-5d2d424d55a8" variableName="racerId" />
-        <flow-ref doc:name="checkRacerClientId" doc:id="cc83134b-17ac-4822-a038-59be43f8d876" name="checkRacerClientId" />
-		<set-variable value="rest-api" doc:name="raceType" doc:id="4c30180c-caca-4aec-9f1e-15d6aee258a6" variableName="raceType" />
-        <flow-ref doc:name="practice_racer_checkStatus" doc:id="317652a8-28de-43a5-9570-0c411c14e4b2" name="practice_racer_checkStatus" />
+	<flow name="get:\racers\(racerId)\who-are-you:anypoint-race-api-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="racerId">attributes.uriParams.'racerId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <logger level="INFO" message="get:\racers\(racerId)\who-are-you:anypoint-race-api-config" />
     </flow>
-    <flow name="put:\racers\(racerId)\practice\average-temperatures:application\json:anypoint-race-api-config">
-        <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="400f4c7b-e8d8-47f8-bb7e-d6640f3f4874" variableName="racerId" />
-        <flow-ref doc:name="checkRacerClientId" doc:id="7c0f2ca4-81b2-4a8e-bb87-a7986961f60d" name="checkRacerClientId" />
-		<set-variable value="averages" doc:name="raceType" doc:id="ed469eeb-33de-492c-9247-0a85318b3ea6" variableName="raceType" />
-        <flow-ref doc:name="practice_racer_enable" doc:id="0a89f84f-215c-4a5d-ab20-673853dc1257" name="practice_racer_enable" />
+    <flow name="get:\seasons\3\leaderboard:anypoint-race-api-config">
+        <set-variable value="#[attributes.queryParams.timespan default &quot;season&quot;]" doc:name="timespan" doc:id="ef0f3d03-10b4-4e67-aac5-ac0b6ec6dc3b" variableName="timespan" />
+        <set-variable value="#[attributes.queryParams.count default 10]" doc:name="count" doc:id="157d3701-be12-48f5-a102-dca9b71d7861" variableName="count" />
+        <flow-ref doc:name="getLeaderboard" doc:id="01c79235-770a-4538-93af-79de1e827fa8" name="getLeaderboard" />
     </flow>
-    <flow name="get:\racers\(racerId)\practice\average-temperatures:anypoint-race-api-config">
-        <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="eb55415b-2200-4801-973c-354b6fa290bb" variableName="racerId" />
-        <flow-ref doc:name="checkRacerClientId" doc:id="839769ec-38e1-48fe-80a8-9d8d74cbc811" name="checkRacerClientId" />
-		<set-variable value="averages" doc:name="raceType" doc:id="3bd10bbc-7cae-41a0-b586-f30498bcfee4" variableName="raceType" />
-        <flow-ref doc:name="practice_racer_checkStatus" doc:id="2cde0c38-dca4-4290-942d-482ff8de8ad0" name="practice_racer_checkStatus" />
-    </flow>
-    <flow name="get:\racers\(racerId)\entry:anypoint-race-api-config">
-        <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="dff08145-b663-4dc3-b0bf-db1a79b664e6" variableName="racerId" />
-        <flow-ref doc:name="checkRacerClientId" doc:id="7d53099c-9683-449c-93f5-bba17bb013f6" name="checkRacerClientId" />
-		<set-variable value="#[&quot;entry.season3.$(vars.racerId)&quot;]" doc:name="entryKey" doc:id="0d3373a4-6932-4729-b761-6524d404d7d8" variableName="entryKey" />
-        <os:retrieve doc:name="entry" doc:id="85f08eed-c44d-4d9a-8f05-1aed718b9da3" key="#[vars.entryKey]" objectStore="raceObjectStore">
-            <error-mapping sourceType="OS:KEY_NOT_FOUND" targetType="APP:ENTRY_MISSING" />
-        </os:retrieve>
-        <ee:transform doc:name="response" doc:id="b5c27769-a840-4d79-90e0-0e955e247690">
+    <flow name="get:\racers\(racerId):anypoint-race-api-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="racerId">attributes.uriParams.'racerId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform doc:name="Transform Message">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json
-
-fun determineStatus(entry) = "Active"
 ---
 {
-	submitted: payload.submitted,
-	endpoint: payload.endpoint,
-	status: determineStatus(payload),
-	results: {
-		time: {
-			(race: payload.time1) if payload.time1?,
-			(hundredLaps: payload.time2) if payload.time2?,
-			(thousandRows: payload.time3) if payload.time3?,
-			(millionRows: payload.time4) if payload.time4?,
-			(billionRows: payload.time5) if payload.time5?
-		}
-	},
-	(error: {
-		tier: payload.level match {
-			case 1 -> "racer"
-			case 2 -> "hundredLaps"
-			case 3 -> "thousandRows"
-			case 4 -> "millionRows"
-			case 5 -> "billionRows"
-			else -> "racer"
-		},
-		message: payload.downMessage
-	}) if payload.downMessage?
-}]]></ee:set-payload>
+  displayName: "Sylvester the Cat",
+  email: "sylvester@wb.com",
+  baseUri: "https://api.wb.com/anypoint-speedway/sylvester-racer"
+} as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
             </ee:message>
         </ee:transform>
-		<error-handler>
-            <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="aac2b59e-2324-4996-acc9-9096c6f43406" type="APP:ENTRY_MISSING">
-                <set-variable value="404" doc:name="httpStatus = 404" doc:id="55578ccc-56d3-477f-ab84-3b1585e0d4da" variableName="httpStatus" />
-            </on-error-propagate>
-        </error-handler>
-    </flow>
-    <flow name="post:\racers\(racerId)\entry:application\json:anypoint-race-api-config">
-        <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="f61a35d9-6db7-4e24-9346-81397592fcc9" variableName="racerId" />
-        <flow-ref doc:name="checkRacerClientId" doc:id="f6142fc9-82fe-448b-9f1a-c4fc4584825b" name="checkRacerClientId" />
-		<flow-ref doc:name="createSeasonThreeEntry" doc:id="d3ecac10-ad99-459e-bfbc-3c625e3a8a8c" name="createSeasonThreeEntry" />
-		<error-handler>
-            <on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="f8e363d2-dbe9-4a32-80aa-0dbffd376bc1" type="APP:ENTRY_EXISTS">
-                <set-variable value="409" doc:name="httpStatus = 409" doc:id="27f9d70d-e1f6-4b9b-96ac-1cd1c6596768" variableName="httpStatus" />
-                <os:retrieve doc:name="entry" doc:id="30df85ed-cb3e-475b-946a-34bf7d706e9f" key="#[vars.entryKey]" objectStore="raceObjectStore" />
-                <ee:transform doc:name="Transform Message" doc:id="fd66bc39-7cec-4955-9e55-a39cc2030ae3">
-                    <ee:message>
-                        <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-	submitted: payload.submitted,
-	endpoint: payload.endpoint
-}]]></ee:set-payload>
-                    </ee:message>
-                </ee:transform>
-            </on-error-propagate>
-        </error-handler>
-    </flow>
-    <flow name="delete:\racers\(racerId)\entry:anypoint-race-api-config">
-        <set-variable value="#[attributes.uriParams.racerId]" doc:name="racerId" doc:id="d93ff794-ff59-491f-bb61-43a10bc543b5" variableName="racerId" />
-        <flow-ref doc:name="checkRacerClientId" doc:id="d76f24c9-0502-4614-8ee3-410f7f67e016" name="checkRacerClientId" />
-		<flow-ref doc:name="clearSeasonThreeEntry" doc:id="f0aa0bb3-34dc-4f88-af02-a9b77847f6e1" name="clearSeasonThreeEntry" />
-		<error-handler>
-            <on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="cd07e700-1f6c-4d35-baa7-451972f73c64" type="APP:ENTRY_MISSING">
-                <logger level="DEBUG" doc:name="DEBUG" doc:id="4052fac7-6cc5-47e4-affe-0c8e91247679" category="race.api" message="Racer #[vars.racerId] cleared non-existent entry" />
-            </on-error-continue>
-        </error-handler>
-    </flow>
-    <flow name="get:\seasons\3\leaderboard:anypoint-race-api-config">
-		<set-variable value='#[attributes.queryParams.timespan default "season"]' doc:name="timespan" doc:id="ef0f3d03-10b4-4e67-aac5-ac0b6ec6dc3b" variableName="timespan"/>
-		<set-variable value="#[attributes.queryParams.count default 10]" doc:name="count" doc:id="157d3701-be12-48f5-a102-dca9b71d7861" variableName="count"/>
-		<flow-ref doc:name="getLeaderboard" doc:id="01c79235-770a-4538-93af-79de1e827fa8" name="getLeaderboard"/>
     </flow>
 </mule>

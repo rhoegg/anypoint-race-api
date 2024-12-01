@@ -3,11 +3,11 @@ http:
   
 anypoint:
   api:
-    id: "19105319"
+    id: "20093051"
   businessGroup: "3ab0f923-8bcb-4e7b-aa6e-0b984a18c811"
   portal:
     assetId: anypoint-race-api
-    version: "2.0.0"
+    version: "4.0.0"
     timeout: "20000"
     pages:
       results:

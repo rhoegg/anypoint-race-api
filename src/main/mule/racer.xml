@@ -23,11 +23,10 @@ http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org
 				<ee:transform doc:name="racer" doc:id="cb6e3fad-0340-43fc-8d2c-d00cf78a8ef1">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
+import mergeWith from dw::core::Objects
 output application/json
 ---
-{
-	displayName: payload.displayName,
-	email: payload.email,
+payload mergeWith {
 	racerId: uuid(),
 	clientId: vars.clientId
 }]]></ee:set-payload>
@@ -42,9 +41,7 @@ output application/json
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-{
-	displayName: payload.displayName,
-	email: payload.email,
+payload ++ {
 	racerId: vars.racerId,
 	clientId: vars.clientId
 }]]></ee:set-payload>
