@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:race-data-system-api="http://www.mulesoft.org/schema/mule/race-data-system-api" xmlns:redis="http://www.mulesoft.org/schema/mule/redis" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/redis/current/mule-redis.xsd http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org/schema/mule/race-data-system-api/current/mule-race-data-system-api.xsd">
-    <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:4.0.3:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:4.0.6:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="anypoint-race-api-main">
         <http:listener config-ref="httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -167,51 +167,43 @@ output application/json
         </error-handler>
     </flow>
     <flow name="get:\health:anypoint-race-api-config">
-		<set-payload value="OK" doc:name="OK" doc:id="f778d824-2707-4433-a698-40c4407eb460" />
+        <set-payload value="OK" doc:name="OK" doc:id="f778d824-2707-4433-a698-40c4407eb460" />
     </flow>
-	<flow name="get:\racers:anypoint-race-api-config">
+    <flow name="get:\racers:anypoint-race-api-config">
         <race-data-system-api:search-racers doc:name="Search Racers" doc:id="3b62eb50-7efb-4b2c-89bd-f25f2afce8a6" config-ref="raceDataSystemApiConfig" result="profile" />
     </flow>
     <flow name="get:\racers\mine:anypoint-race-api-config">
-        <race-data-system-api:search-racers doc:name="Search Racers" doc:id="52b6d811-2426-4b24-9aa6-3edbaced1be6" config-ref="raceDataSystemApiConfig" client-id="#[vars.clientId]" result="profile"/>
-		<choice doc:name="Choice" doc:id="dda4eb52-f50a-434c-95d5-551f9323d5da" >
-			<when expression="#[sizeOf(payload) == 1]">
-				<ee:transform doc:name="to Racer" doc:id="d3f66692-5a88-4885-a800-cbf0dec13134">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
+        <race-data-system-api:search-racers doc:name="Search Racers" doc:id="52b6d811-2426-4b24-9aa6-3edbaced1be6" config-ref="raceDataSystemApiConfig" client-id="#[vars.clientId]" result="profile" />
+        <choice doc:name="Choice" doc:id="dda4eb52-f50a-434c-95d5-551f9323d5da">
+            <when expression="#[sizeOf(payload) == 1]">
+                <ee:transform doc:name="to Racer" doc:id="d3f66692-5a88-4885-a800-cbf0dec13134">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 var result = payload[0]
 ---
 result - "racerId" ++ {
 	id: result.racerId
 }]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-			</when>
-			<otherwise >
-				<set-variable value="404" doc:name="httpStatus = 404" doc:id="f331d5b6-5b1b-44d6-824a-e1f92f424e0f" variableName="httpStatus"/>
-				<ee:transform doc:name="error message" doc:id="1709dfed-ec43-4e21-b6cb-31a27124c105" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
+                    </ee:message>
+                </ee:transform>
+            </when>
+            <otherwise>
+                <set-variable value="404" doc:name="httpStatus = 404" doc:id="f331d5b6-5b1b-44d6-824a-e1f92f424e0f" variableName="httpStatus" />
+                <ee:transform doc:name="error message" doc:id="1709dfed-ec43-4e21-b6cb-31a27124c105">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
 	message: "No racer found for clientId $(vars.clientId). Create one with POST /register"
 }]]></ee:set-payload>
-					</ee:message>
-				</ee:transform>
-			</otherwise>
-		</choice>
+                    </ee:message>
+                </ee:transform>
+            </otherwise>
+        </choice>
     </flow>
-	<flow name="put:\racers\(racerId):application\json:anypoint-race-api-config">
-        <ee:transform doc:name="Transform Message">
-            <ee:variables>
-                <ee:set-variable variableName="racerId">attributes.uriParams.'racerId'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <logger level="INFO" message="put:\racers\(racerId):application\json:anypoint-race-api-config" />
-    </flow>
-	<flow name="get:\racers\(racerId)\who-are-you:anypoint-race-api-config">
+    <flow name="get:\racers\(racerId)\who-are-you:anypoint-race-api-config">
         <ee:transform doc:name="Transform Message">
             <ee:variables>
                 <ee:set-variable variableName="racerId">attributes.uriParams.'racerId'</ee:set-variable>
@@ -242,5 +234,25 @@ output application/json
 } as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
             </ee:message>
         </ee:transform>
+    </flow>
+   <flow name="put:\racers\mine\entry:anypoint-race-api-config">
+    <set-variable value="500" doc:name="httpStatus = 500" variableName="httpStatus" />
+    <ee:transform doc:name="Error Response">
+        <ee:message>
+            <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    message: "500",
+    details: "Internal Server"
+}]]></ee:set-payload>
+        </ee:message>
+    </ee:transform>
+</flow>
+    <flow name="delete:\racers\mine\entry:anypoint-race-api-config">
+        <logger level="INFO" message="delete:\racers\mine\entry:anypoint-race-api-config" />
+    </flow>
+    <flow name="get:\racers\mine\entry:anypoint-race-api-config">
+        <logger level="INFO" message="get:\racers\mine\entry:anypoint-race-api-config" />
     </flow>
 </mule>
