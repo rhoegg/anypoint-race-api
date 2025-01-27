@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:referee-process-api="http://www.mulesoft.org/schema/mule/referee-process-api"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/referee-process-api http://www.mulesoft.org/schema/mule/referee-process-api/current/mule-referee-process-api.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="enterAiChallenge" doc:id="a3287cbc-a972-4405-8409-cddc92968ce0" >
+		<ee:transform doc:name="Transform Message" doc:id="1bcc7b10-54f6-4211-9f6d-8e0106da127d">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	racerId : vars.racerId
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<referee-process-api:ai-agent-challenge doc:name="AI Agent Challenge" doc:id="93819127-3692-404a-a891-d75fc20eb263" config-ref="refereeProcessApiConfig"/>
+	</sub-flow>
+</mule>

@@ -52,13 +52,15 @@ payload ++ {
 		</choice>
 		<logger level="INFO" doc:name="INFO" doc:id="60528fa0-8696-44a6-b973-5cdde3b4586c" message="Registered racer #[payload.racerId] for client #[payload.clientId]: #[payload.email]" category="race.register"/>
 	</flow>
-	<sub-flow name="checkRacerClientId" doc:id="835aaecc-5ab2-44a0-99b8-9a7b562bd50e" >
-		<race-data-system-api:search-racers doc:name="Search Racers" doc:id="b5869bc6-bd4b-4764-90c3-2a82d29452bf" config-ref="raceDataSystemApiConfig" client-id="#[vars.clientId]" target="authenticatedRacerResults"/>
-		<validation:is-not-empty-collection doc:name="racer results" doc:id="a20e6756-4828-4278-905a-b8981c024460" values="#[vars.authenticatedRacerResults]" message='#[output text/plain --- "No racer found for clientId $(vars.clientId)"]'>
-			<error-mapping targetType="APP:RACER_NOT_FOUND" />
-		</validation:is-not-empty-collection>
-		<validation:is-true doc:name="racerId matches database" doc:id="f3f59f4e-a56d-429d-bb15-1a122f51216c" expression="#[vars.authenticatedRacerResults[0].racerId == vars.racerId]" message='#[output text/plain --- "Client not allowed for racer $(vars.racerId)"]'>
-			<error-mapping targetType="APP:FORBIDDEN_RACER" />
-		</validation:is-true>
+	<sub-flow name="getRacerId" doc:id="835aaecc-5ab2-44a0-99b8-9a7b562bd50e" >
+		<race-data-system-api:search-racers doc:name="Search Racers" doc:id="b5869bc6-bd4b-4764-90c3-2a82d29452bf" config-ref="raceDataSystemApiConfig" client-id="#[vars.clientId]" target="authenticatedRacerResults" result="id"/>
+		<ee:transform doc:name="Transform Message" doc:id="32f5640c-27cb-4372-9bf4-713137c8fde6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.authenticatedRacerResults[0].racerId]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 	</sub-flow>
 </mule>

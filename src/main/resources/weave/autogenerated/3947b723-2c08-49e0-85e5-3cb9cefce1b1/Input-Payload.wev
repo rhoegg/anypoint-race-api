@@ -1,8 +1,0 @@
-%dw 2.0
-
-type auto_3947b723_2c08_49e0_85e5_3cb9cefce1b1_Input_Payload = {
-  endpoint: String, 
-  laps: Number, 
-  _?: Any
-}
-

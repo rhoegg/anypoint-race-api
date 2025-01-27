@@ -95,39 +95,6 @@ output application/json
                     </ee:variables>
                 </ee:transform>
             </on-error-propagate>
-            <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="662ea67a-d5ce-4682-afda-2716927c4db1" type="APP:FORBIDDEN_RACER">
-                <ee:transform doc:name="Transform Message" doc:id="666fa16d-673e-4c39-b0d0-27c55654067f">
-                    <ee:message>
-                        <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{message: error.description}]]></ee:set-payload>
-                    </ee:message>
-                    <ee:variables>
-                        <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
-output application/java
----
-403]]></ee:set-variable>
-                    </ee:variables>
-                </ee:transform>
-            </on-error-propagate>
-            <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="e8cd57d1-3eb6-4fbd-98e4-0457753c049e" type="APP:RACER_NOT_FOUND">
-                <logger level="WARN" doc:name="WARN" doc:id="fa99f555-0ff7-4854-b263-4ca7eb3b3f74" message="No racer found for client #[vars.clientId]" category="race.api" />
-                <ee:transform doc:name="Transform Message" doc:id="ecb780cf-3061-4f9a-bd36-3ab71f8c7338">
-                    <ee:message>
-                        <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{message: "No racer found for your client ID.  Did you register?"}]]></ee:set-payload>
-                    </ee:message>
-                    <ee:variables>
-                        <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
-output application/java
----
-404]]></ee:set-variable>
-                    </ee:variables>
-                </ee:transform>
-            </on-error-propagate>
         </error-handler>
     </flow>
     <flow name="anypoint-race-api-console">
@@ -236,7 +203,10 @@ output application/json
         </ee:transform>
     </flow>
    <flow name="put:\racers\mine\entry:anypoint-race-api-config">
-    <set-variable value="500" doc:name="httpStatus = 500" variableName="httpStatus" />
+    <flow-ref doc:name="getRacerId" doc:id="30c96650-bf4d-4884-b13f-b456c2baf185" name="getRacerId" target="racerId"/>
+		<flow-ref doc:name="enterAiChallenge" doc:id="99f30eb8-6fc4-40c5-8eaf-f5051bca213e" name="enterAiChallenge"/>
+		<logger level="INFO" doc:name="Logger" doc:id="0213f8e1-e809-4e92-8092-b9015c3d4b85" message='#["Racerid " ++ vars.racerId]'/>
+		<set-variable value="500" doc:name="httpStatus = 500" variableName="httpStatus" />
     <ee:transform doc:name="Error Response">
         <ee:message>
             <ee:set-payload><![CDATA[%dw 2.0

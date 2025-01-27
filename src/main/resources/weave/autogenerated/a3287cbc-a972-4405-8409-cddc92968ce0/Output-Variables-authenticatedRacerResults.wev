@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_a3287cbc_a972_4405_8409_cddc92968ce0_Output_Variables_authenticatedRacerResults = Array<{  racerId: String,   _?: Any} | {  lastUpdated?: String,   racerId?: String,   clientId: String,   displayName: String,   baseUri?: String,   email: String,   _?: Any}>
+
