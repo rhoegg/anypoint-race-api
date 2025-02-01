@@ -1,0 +1,70 @@
+{
+  "basicConstraints": 50,
+  "criticalExtensionOIDs": [
+    "eros",
+    "semper"
+  ],
+  "extendedKeyUsage": [
+    "at",
+    "ut"
+  ],
+  "extensions": [
+    {
+      "criticality": false,
+      "oid": "erat"
+    }
+  ],
+  "issuerAlternativeNames": [
+    {
+      "name": "Alita",
+      "type": 4
+    }
+  ],
+  "issuerDN": {
+    "commonName": "ipsum",
+    "name": "Alexandria"
+  },
+  "issuerUniqueID": [
+    false,
+    false
+  ],
+  "issuerX500Principal": {
+    "name": "Courtney"
+  },
+  "keyUsage": [
+    true,
+    false
+  ],
+  "name": "Alethea",
+  "nonCriticalExtensionOIDs": [
+    "felis",
+    "eget"
+  ],
+  "publicKey": {
+    "algorithm": "nunc",
+    "modulus": 34,
+    "params": 61,
+    "publicKey": "Fusce"
+  },
+  "serialNumber": 97,
+  "serialNumberObject": {
+    "serialNumber": 27
+  },
+  "sigAlgName": "arcu",
+  "sigAlgOID": "molestie",
+  "subjectAlternativeNames": [
+    {
+      "name": "Alejandrina",
+      "type": 65
+    }
+  ],
+  "subjectDN": {
+    "commonName": "a",
+    "name": "Daniel"
+  },
+  "subjectX500Principal": {
+    "name": "Alease"
+  },
+  "type": "risus",
+  "version": 28
+}

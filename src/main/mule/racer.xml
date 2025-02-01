@@ -39,9 +39,10 @@ payload mergeWith {
 				<ee:transform doc:name="racer" doc:id="6aaf3486-37f4-477b-bf0f-95a285c21259">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
+import mergeWith from dw::core::Objects
 output application/json
 ---
-payload ++ {
+payload mergeWith {
 	racerId: vars.racerId,
 	clientId: vars.clientId
 }]]></ee:set-payload>
@@ -53,13 +54,14 @@ payload ++ {
 		<logger level="INFO" doc:name="INFO" doc:id="60528fa0-8696-44a6-b973-5cdde3b4586c" message="Registered racer #[payload.racerId] for client #[payload.clientId]: #[payload.email]" category="race.register"/>
 	</flow>
 	<sub-flow name="getRacerId" doc:id="835aaecc-5ab2-44a0-99b8-9a7b562bd50e" >
-		<race-data-system-api:search-racers doc:name="Search Racers" doc:id="b5869bc6-bd4b-4764-90c3-2a82d29452bf" config-ref="raceDataSystemApiConfig" client-id="#[vars.clientId]" target="authenticatedRacerResults" result="id"/>
+		<race-data-system-api:search-racers doc:name="Search Racers" doc:id="b5869bc6-bd4b-4764-90c3-2a82d29452bf" config-ref="raceDataSystemApiConfig" client-id="#[vars.clientId]" result="id"/>
+		<logger level="TRACE" doc:name="TRACE" doc:id="9688f0a4-db84-4d9e-8042-6533fef4f761" message="Found #[sizeOf(payload)] racers for client ID #[vars.clientId]" category="race.racer.search"/>
 		<ee:transform doc:name="Transform Message" doc:id="32f5640c-27cb-4372-9bf4-713137c8fde6" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-vars.authenticatedRacerResults[0].racerId]]></ee:set-payload>
+payload[0].racerId]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</sub-flow>

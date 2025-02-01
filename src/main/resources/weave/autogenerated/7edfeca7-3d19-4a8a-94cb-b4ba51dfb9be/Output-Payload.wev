@@ -3,7 +3,7 @@
 type auto_7edfeca7_3d19_4a8a_94cb_b4ba51dfb9be_Output_Payload = {
   racerId: String, 
   clientId: String, 
-  displayName: String, 
+  name: String, 
   email: String, 
   _?: Any
 }
