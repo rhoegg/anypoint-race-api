@@ -25,8 +25,12 @@ http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org
 						<ee:message >
 							<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
+var errorResponse = error.errorMessage.payload
 ---
-error.errorMessage.payload]]></ee:set-payload>
+{
+	error: errorResponse.error,
+	details: errorResponse.details,
+}]]></ee:set-payload>
 						</ee:message>
 						<ee:variables >
 							<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
