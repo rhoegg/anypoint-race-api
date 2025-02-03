@@ -7,14 +7,39 @@ http://www.mulesoft.org/schema/mule/referee-process-api http://www.mulesoft.org/
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org/schema/mule/race-data-system-api/current/mule-race-data-system-api.xsd">
 	<sub-flow name="enterAIChallenge" doc:id="a3287cbc-a972-4405-8409-cddc92968ce0" >
-		<logger level="DEBUG" doc:name="DEBUG" doc:id="b6843dcc-7863-4c75-89cf-8332beb3ea93" message='racer: #[vars.racerId]' category="referee.entry.aiChallenge"/>
-		<referee-process-api:ai-agent-challenge doc:name="AI Agent Challenge" doc:id="93819127-3692-404a-a891-d75fc20eb263" config-ref="refereeProcessApiConfig">
-			<referee-process-api:ai-agent-challenge-request-data ><![CDATA[#[output application/json
+		<try doc:name="Try" doc:id="d77ef1a7-d337-4156-a411-de72a475a3b2" >
+			<logger level="DEBUG" doc:name="DEBUG" doc:id="b6843dcc-7863-4c75-89cf-8332beb3ea93" message="racer: #[vars.racerId]" category="referee.entry.aiChallenge" />
+			<referee-process-api:ai-agent-challenge doc:name="AI Agent Challenge" doc:id="93819127-3692-404a-a891-d75fc20eb263" config-ref="refereeProcessApiConfig">
+			<error-mapping sourceType="HTTP:GATEWAY_TIMEOUT" targetType="APP:RACER_TIMEOUT" />
+			<error-mapping sourceType="HTTP:BAD_GATEWAY" targetType="APP:UNREACHABLE_RACER_ENDPOINT" />
+				<referee-process-api:ai-agent-challenge-request-data><![CDATA[#[output application/json
 ---
 {
 	racerId : vars.racerId
 }]]]></referee-process-api:ai-agent-challenge-request-data>
 		</referee-process-api:ai-agent-challenge>
-		<logger level="INFO" doc:name="Logger" doc:id="4bdf0a91-f06f-4fae-961e-a97280172263" message='#[payload]'/>
+			<logger level="INFO" doc:name="Logger" doc:id="4bdf0a91-f06f-4fae-961e-a97280172263" message="#[payload]" />
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="770c19d2-b6f5-4dd3-9eee-b37077e277de" type="APP:RACER_TIMEOUT, APP:UNREACHABLE_RACER_ENDPOINT">
+					<ee:transform doc:name="502 and error response" doc:id="d2e0653c-1cbb-4649-984f-424966cbf606" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+error.errorMessage.payload]]></ee:set-payload>
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/json
+---
+502]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</on-error-continue>
+				<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="b9839f90-10e8-4fe6-8791-d069ad4fad20" type="ANY">
+					<logger level="ERROR" doc:name="ERROR" doc:id="3d756abd-fa47-4390-9d6a-059d76cb77a8" message="#[output application/json &#10;--- &#10;{&#10;	error: error.errorType.identifier,&#10;	thing: error.errorMessage.payload&#10;}]" category="race.something" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
 	</sub-flow>
 </mule>
