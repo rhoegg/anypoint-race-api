@@ -20,8 +20,8 @@ http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org
 		</referee-process-api:ai-agent-challenge>
 			<logger level="INFO" doc:name="Logger" doc:id="4bdf0a91-f06f-4fae-961e-a97280172263" message="#[payload]" />
 			<error-handler >
-				<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="770c19d2-b6f5-4dd3-9eee-b37077e277de" type="APP:RACER_TIMEOUT, APP:UNREACHABLE_RACER_ENDPOINT">
-					<ee:transform doc:name="502 and error response" doc:id="d2e0653c-1cbb-4649-984f-424966cbf606" >
+				<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="d01d5237-300d-47d3-8941-4e2f09f9d006" type="REFEREE-PROCESS-API:INTERNAL_SERVER_ERROR">
+					<ee:transform doc:name="500 and error response" doc:id="4096a6b3-c409-4afe-ba14-412a159470c2" >
 						<ee:message >
 							<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -30,10 +30,31 @@ var errorResponse = error.errorMessage.payload
 {
 	error: errorResponse.error,
 	details: errorResponse.details,
+	(score: errorResponse.score) if errorResponse.score?
 }]]></ee:set-payload>
 						</ee:message>
 						<ee:variables >
 							<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/json
+---
+500]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</on-error-continue>
+				<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="770c19d2-b6f5-4dd3-9eee-b37077e277de" type="APP:RACER_TIMEOUT, APP:UNREACHABLE_RACER_ENDPOINT">
+					<ee:transform doc:name="502 and error response" doc:id="d2e0653c-1cbb-4649-984f-424966cbf606">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var errorResponse = error.errorMessage.payload
+---
+{
+	error: errorResponse.error,
+	details: errorResponse.details,
+}]]></ee:set-payload>
+						</ee:message>
+						<ee:variables>
+							<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
 output application/json
 ---
 502]]></ee:set-variable>
