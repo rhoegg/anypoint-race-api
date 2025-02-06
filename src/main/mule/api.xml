@@ -214,6 +214,7 @@ output application/json
         <logger level="INFO" message="get:\racers\mine\entry:anypoint-race-api-config" />
     </flow>
 	<flow name="put:\racers\mine\entry:anypoint-race-api-config" doc:id="d51a1505-ed60-4a11-8518-01b701dc8fe3">
+		<flow-ref doc:name="getRacerId" doc:id="6564ffd6-713a-40c0-9ae3-68f35c3f686d" name="getRacerId" target="racerId" />
 		<flow-ref doc:name="enterAiChallenge" doc:id="99f30eb8-6fc4-40c5-8eaf-f5051bca213e" name="enterAIChallenge" />
     </flow>
 	<flow name="delete:\racers\mine\entry:anypoint-race-api-config">
