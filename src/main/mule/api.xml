@@ -137,8 +137,7 @@ output application/json
         </error-handler>
     </flow>
     <flow name="get:\health:anypoint-race-api-config">
-		<flow-ref doc:name="Flow Reference" doc:id="4b7122ca-63ff-40f0-a304-9c479cabbd7c" name="get:\racers\mine:anypoint-race-api-config" target="racerId" targetValue="#[payload.id]"/>
-		<set-payload value="#[%dw 2.0&#10;    output application/json&#10;    ---&#10;    {&#10;        racerId: vars.racerId&#10;    }]" doc:name="racerId" doc:id="f778d824-2707-4433-a698-40c4407eb460" />
+		<set-payload value="Ok" doc:name="Ok" doc:id="f778d824-2707-4433-a698-40c4407eb460" />
     </flow>
     <flow name="post:\register:application\json:anypoint-race-api-config">
         <flow-ref doc:name="registerRacer" doc:id="af973961-b5d4-4d58-9584-62b4df5e3e27" name="registerRacer" />
