@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:race-data-system-api="http://www.mulesoft.org/schema/mule/race-data-system-api" xmlns:redis="http://www.mulesoft.org/schema/mule/redis" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/redis/current/mule-redis.xsd http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org/schema/mule/race-data-system-api/current/mule-race-data-system-api.xsd">
-    <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:4.0.8:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:4.0.9:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="anypoint-race-api-main">
         <http:listener config-ref="httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -11,21 +11,20 @@
                 <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:error-response>
         </http:listener>
-        <ee:transform doc:name="variable clientId" doc:id="7f495b90-95e2-4248-b771-4642d749adb7" >
-			<ee:message >
-			</ee:message>
-			<ee:variables >
-				<ee:set-variable variableName="clientId" ><![CDATA[output application/java
+        <ee:transform doc:name="variable clientId" doc:id="7f495b90-95e2-4248-b771-4642d749adb7">
+            <ee:message />
+            <ee:variables>
+                <ee:set-variable variableName="clientId"><![CDATA[output application/java
 import * from dw::core::Strings
 import * from dw::core::Binaries
 var encodedCredentials = attributes.headers.Authorization substringAfter "Basic "
 var credentials = fromBase64(encodedCredentials as String) as String
 ---
 credentials substringBefore ":"]]></ee:set-variable>
-			</ee:variables>
-		</ee:transform>
-		<logger level="TRACE" doc:name="TRACE" doc:id="bfe69168-4f62-4cf3-985e-0f6adb858e8c" category="race.api" message="API client #[vars.clientId]"/>
-		<apikit:router config-ref="anypoint-race-api-config" />
+            </ee:variables>
+        </ee:transform>
+        <logger level="TRACE" doc:name="TRACE" doc:id="bfe69168-4f62-4cf3-985e-0f6adb858e8c" category="race.api" message="API client #[vars.clientId]" />
+        <apikit:router config-ref="anypoint-race-api-config" />
         <error-handler>
             <on-error-propagate type="APIKIT:BAD_REQUEST">
                 <ee:transform doc:name="Transform Message">
@@ -138,9 +137,9 @@ output application/json
         </error-handler>
     </flow>
     <flow name="get:\health:anypoint-race-api-config">
-        <set-payload value="OK" doc:name="OK" doc:id="f778d824-2707-4433-a698-40c4407eb460" />
+		<set-payload value="Ok" doc:name="Ok" doc:id="f778d824-2707-4433-a698-40c4407eb460" />
     </flow>
-	<flow name="post:\register:application\json:anypoint-race-api-config">
+    <flow name="post:\register:application\json:anypoint-race-api-config">
         <flow-ref doc:name="registerRacer" doc:id="af973961-b5d4-4d58-9584-62b4df5e3e27" name="registerRacer" />
         <error-handler>
             <on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="5c2bb858-3c43-4d2c-a227-d18cc4bc1942" type="APP:CLIENT_ID_MISSING">
@@ -149,10 +148,10 @@ output application/json
             </on-error-continue>
         </error-handler>
     </flow>
-    <flow name="get:\racers:anypoint-race-api-config">
+    <flow name="get:\racers:anypoint-race-api-config" doc:id="22ac3fb4-8fde-4cf1-a262-536d3728fd10">
         <race-data-system-api:search-racers doc:name="Search Racers" doc:id="3b62eb50-7efb-4b2c-89bd-f25f2afce8a6" config-ref="raceDataSystemApiConfig" result="profile" />
     </flow>
-    <flow name="get:\racers\mine:anypoint-race-api-config">
+    <flow name="get:\racers\mine:anypoint-race-api-config" doc:id="73de8e45-481a-4c2a-9b7b-938034287510">
         <race-data-system-api:search-racers doc:name="Search Racers" doc:id="52b6d811-2426-4b24-9aa6-3edbaced1be6" config-ref="raceDataSystemApiConfig" client-id="#[vars.clientId]" result="profile" />
         <choice doc:name="Choice" doc:id="dda4eb52-f50a-434c-95d5-551f9323d5da">
             <when expression="#[sizeOf(payload) == 1]">
@@ -210,34 +209,45 @@ output application/json
             </ee:message>
         </ee:transform>
     </flow>
-	<flow name="get:\racers\mine\entry:anypoint-race-api-config" doc:id="0109f5a3-7f5b-4eae-8fcb-34e16a3a479e">
-        <logger level="INFO" message="get:\racers\mine\entry:anypoint-race-api-config" />
+    <flow name="get:\racers\mine\entry:anypoint-race-api-config" doc:id="0109f5a3-7f5b-4eae-8fcb-34e16a3a479e">
+		<race-data-system-api:search-racers doc:name="Search Racers" doc:id="5c1b5456-511f-4a29-b3b7-37721e69ea2a" config-ref="raceDataSystemApiConfig" client-id="#[vars.clientId]" result="id"/>
+		<race-data-system-api:get-entry doc:name="Get Entry" doc:id="349f0a36-81a2-4f69-abee-7773af094c0e" config-ref="raceDataSystemApiConfig" id="#[payload[0].racerId]"/>
+		<ee:transform doc:name="Transform Message" doc:id="cfb74eac-f7fe-408b-bab2-355c110461e3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  active: payload.active 
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
     </flow>
-	<flow name="put:\racers\mine\entry:anypoint-race-api-config" doc:id="d51a1505-ed60-4a11-8518-01b701dc8fe3">
-		<flow-ref doc:name="getRacerId" doc:id="6564ffd6-713a-40c0-9ae3-68f35c3f686d" name="getRacerId" target="racerId" />
-		<flow-ref doc:name="enterAiChallenge" doc:id="99f30eb8-6fc4-40c5-8eaf-f5051bca213e" name="enterAIChallenge" />
+    <flow name="put:\racers\mine\entry:anypoint-race-api-config" doc:id="d51a1505-ed60-4a11-8518-01b701dc8fe3">
+        <flow-ref doc:name="getRacerId" doc:id="6564ffd6-713a-40c0-9ae3-68f35c3f686d" name="getRacerId" target="racerId" />
+        <flow-ref doc:name="enterAiChallenge" doc:id="99f30eb8-6fc4-40c5-8eaf-f5051bca213e" name="enterAIChallenge" />
     </flow>
-	<flow name="delete:\racers\mine\entry:anypoint-race-api-config">
-        <flow-ref doc:name="getRacerId" doc:id="f7fbcc3f-9cd3-4b04-b92b-8904a8b7125e" name="getRacerId" target="racerId"/>
-		<race-data-system-api:get-entry doc:name="Get Entry" doc:id="b9f6b6bc-b498-4dd5-bc23-f4873d186627" config-ref="raceDataSystemApiConfig" id="#[vars.racerId]"/>
-		<ee:transform doc:name="race entry data" doc:id="7d795220-d3fe-4690-bf9f-0768b808ea84">
-			<ee:variables>
-				<ee:set-variable variableName="entry"><![CDATA[%dw 2.0
+    <flow name="delete:\racers\mine\entry:anypoint-race-api-config">
+        <flow-ref doc:name="getRacerId" doc:id="f7fbcc3f-9cd3-4b04-b92b-8904a8b7125e" name="getRacerId" target="racerId" />
+        <race-data-system-api:get-entry doc:name="Get Entry" doc:id="b9f6b6bc-b498-4dd5-bc23-f4873d186627" config-ref="raceDataSystemApiConfig" id="#[vars.racerId]" />
+        <ee:transform doc:name="race entry data" doc:id="7d795220-d3fe-4690-bf9f-0768b808ea84">
+            <ee:variables>
+                <ee:set-variable variableName="entry"><![CDATA[%dw 2.0
 output application/json 
 ---
 payload update {
 	case .active -> false
 }]]></ee:set-variable>
-			</ee:variables>
-		</ee:transform>
-		<race-data-system-api:store-entry doc:name="Store Entry" doc:id="d77d7293-082d-4de1-a073-08849e0add99" config-ref="raceDataSystemApiConfig" id="#[vars.racerId]">
-			<race-data-system-api:store-entry-request-data ><![CDATA[#[vars.entry]]]></race-data-system-api:store-entry-request-data>
-		</race-data-system-api:store-entry>
-		<logger level="INFO" message="delete:\racers\mine\entry:anypoint-race-api-config" />
+            </ee:variables>
+        </ee:transform>
+        <race-data-system-api:store-entry doc:name="Store Entry" doc:id="d77d7293-082d-4de1-a073-08849e0add99" config-ref="raceDataSystemApiConfig" id="#[vars.racerId]">
+            <race-data-system-api:store-entry-request-data><![CDATA[#[vars.entry]]]></race-data-system-api:store-entry-request-data>
+        </race-data-system-api:store-entry>
+        <logger level="INFO" message="delete:\racers\mine\entry:anypoint-race-api-config" />
     </flow>
-	<flow name="get:\seasons\3\leaderboard:anypoint-race-api-config">
+    <flow name="get:\seasons\3\leaderboard:anypoint-race-api-config">
         <set-variable value="#[attributes.queryParams.timespan default &quot;season&quot;]" doc:name="timespan" doc:id="ef0f3d03-10b4-4e67-aac5-ac0b6ec6dc3b" variableName="timespan" />
         <set-variable value="#[attributes.queryParams.count default 10]" doc:name="count" doc:id="157d3701-be12-48f5-a102-dca9b71d7861" variableName="count" />
-		<flow-ref doc:name="getLeaderboard" doc:id="01c79235-770a-4538-93af-79de1e827fa8" name="getLeaderboard" />
+        <flow-ref doc:name="getLeaderboard" doc:id="01c79235-770a-4538-93af-79de1e827fa8" name="getLeaderboard" />
     </flow>
 </mule>
