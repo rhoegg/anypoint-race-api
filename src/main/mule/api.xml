@@ -229,20 +229,9 @@ output application/json
     </flow>
     <flow name="delete:\racers\mine\entry:anypoint-race-api-config">
         <flow-ref doc:name="getRacerId" doc:id="f7fbcc3f-9cd3-4b04-b92b-8904a8b7125e" name="getRacerId" target="racerId" />
-        <race-data-system-api:get-entry doc:name="Get Entry" doc:id="b9f6b6bc-b498-4dd5-bc23-f4873d186627" config-ref="raceDataSystemApiConfig" id="#[vars.racerId]" />
-        <ee:transform doc:name="race entry data" doc:id="7d795220-d3fe-4690-bf9f-0768b808ea84">
-            <ee:variables>
-                <ee:set-variable variableName="entry"><![CDATA[%dw 2.0
-output application/json 
----
-payload update {
-	case .active -> false
-}]]></ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <race-data-system-api:deactive-entry doc:name="Deactive Entry" doc:id="edc484f0-1353-4e9c-bcc3-b52e1945d194" config-ref="raceDataSystemApiConfig" id="#[vars.racerId]">
-			<race-data-system-api:deactive-entry-request-data ><![CDATA[#[vars.entry]]]></race-data-system-api:deactive-entry-request-data>
-		</race-data-system-api:deactive-entry>
+        <race-data-system-api:set-entry-active doc:name="Set Entry Active" doc:id="60d12f23-1436-4b5f-a7a9-de41a4506124" config-ref="raceDataSystemApiConfig" id="#[vars.racerId]">
+            <race-data-system-api:set-entry-active-request-data><![CDATA[#[false]]]></race-data-system-api:set-entry-active-request-data>
+        </race-data-system-api:set-entry-active>
         <logger level="INFO" message="delete:\racers\mine\entry:anypoint-race-api-config" />
     </flow>
     <flow name="get:\seasons\3\leaderboard:anypoint-race-api-config">
