@@ -218,10 +218,12 @@ output application/json
 output application/json
 ---
 {
-  active: payload.active 
+  active: payload.active,
+  score: payload.score
 }]]></ee:set-payload>
             </ee:message>
         </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="a52cacd5-3d2c-4341-b9e7-e6dc33ff7049" />
     </flow>
     <flow name="put:\racers\mine\entry:anypoint-race-api-config" doc:id="d51a1505-ed60-4a11-8518-01b701dc8fe3">
         <flow-ref doc:name="getRacerId" doc:id="6564ffd6-713a-40c0-9ae3-68f35c3f686d" name="getRacerId" target="racerId" />
