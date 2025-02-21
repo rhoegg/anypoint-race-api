@@ -210,7 +210,7 @@ output application/json
         </ee:transform>
     </flow>
     <flow name="get:\racers\mine\entry:anypoint-race-api-config" doc:id="0109f5a3-7f5b-4eae-8fcb-34e16a3a479e">
-        <race-data-system-api:search-racers doc:name="Search Racers" doc:id="5c1b5456-511f-4a29-b3b7-37721e69ea2a" config-ref="raceDataSystemApiConfig" client-id="#[vars.clientId]" result="id" />
+		<race-data-system-api:search-racers doc:name="Search Racers" doc:id="5c1b5456-511f-4a29-b3b7-37721e69ea2a" config-ref="raceDataSystemApiConfig" client-id="#[vars.clientId]" result="id" />
         <race-data-system-api:get-entry doc:name="Get Entry" doc:id="349f0a36-81a2-4f69-abee-7773af094c0e" config-ref="raceDataSystemApiConfig" id="#[payload[0].racerId]" />
         <ee:transform doc:name="Transform Message" doc:id="cfb74eac-f7fe-408b-bab2-355c110461e3">
             <ee:message>
@@ -219,8 +219,9 @@ output application/json
 ---
 {
   active: payload.active,
-  score: payload.score
-}]]></ee:set-payload>
+  score: payload.score,
+  challengeScore: payload.challengeScore 
+  }]]></ee:set-payload>
             </ee:message>
         </ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="a52cacd5-3d2c-4341-b9e7-e6dc33ff7049" />
