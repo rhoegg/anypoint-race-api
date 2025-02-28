@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:race-data-system-api="http://www.mulesoft.org/schema/mule/race-data-system-api" xmlns:redis="http://www.mulesoft.org/schema/mule/redis" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/redis/current/mule-redis.xsd http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org/schema/mule/race-data-system-api/current/mule-race-data-system-api.xsd">
-    <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:4.0.10:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:race-data-system-api="http://www.mulesoft.org/schema/mule/race-data-system-api" xmlns:redis="http://www.mulesoft.org/schema/mule/redis" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/redis/current/mule-redis.xsd http://www.mulesoft.org/schema/mule/race-data-system-api http://www.mulesoft.org/schema/mule/race-data-system-api/current/mule-race-data-system-api.xsd http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+    <apikit:config name="anypoint-race-api-config" api="resource::ae6d7954-6fc2-4f3e-8777-80ff8aabd859:anypoint-race-api:4.0.11:raml:zip:anypoint-race-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="anypoint-race-api-main">
         <http:listener config-ref="httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -210,7 +210,7 @@ output application/json
         </ee:transform>
     </flow>
     <flow name="get:\racers\mine\entry:anypoint-race-api-config" doc:id="0109f5a3-7f5b-4eae-8fcb-34e16a3a479e">
-		<race-data-system-api:search-racers doc:name="Search Racers" doc:id="5c1b5456-511f-4a29-b3b7-37721e69ea2a" config-ref="raceDataSystemApiConfig" client-id="#[vars.clientId]" result="id" />
+        <race-data-system-api:search-racers doc:name="Search Racers" doc:id="5c1b5456-511f-4a29-b3b7-37721e69ea2a" config-ref="raceDataSystemApiConfig" client-id="#[vars.clientId]" result="id" />
         <race-data-system-api:get-entry doc:name="Get Entry" doc:id="349f0a36-81a2-4f69-abee-7773af094c0e" config-ref="raceDataSystemApiConfig" id="#[payload[0].racerId]" />
         <ee:transform doc:name="Transform Message" doc:id="cfb74eac-f7fe-408b-bab2-355c110461e3">
             <ee:message>
@@ -224,7 +224,7 @@ output application/json
   }]]></ee:set-payload>
             </ee:message>
         </ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="a52cacd5-3d2c-4341-b9e7-e6dc33ff7049" />
+        <logger level="INFO" doc:name="Logger" doc:id="a52cacd5-3d2c-4341-b9e7-e6dc33ff7049" />
     </flow>
     <flow name="put:\racers\mine\entry:anypoint-race-api-config" doc:id="d51a1505-ed60-4a11-8518-01b701dc8fe3">
         <flow-ref doc:name="getRacerId" doc:id="6564ffd6-713a-40c0-9ae3-68f35c3f686d" name="getRacerId" target="racerId" />
@@ -237,9 +237,10 @@ output application/json
         </race-data-system-api:set-entry-active>
         <logger level="INFO" message="delete:\racers\mine\entry:anypoint-race-api-config" />
     </flow>
-    <flow name="get:\seasons\3\leaderboard:anypoint-race-api-config">
+    <flow name="get:\seasons\4\leaderboard\(board):anypoint-race-api-config">
         <set-variable value="#[attributes.queryParams.timespan default &quot;season&quot;]" doc:name="timespan" doc:id="ef0f3d03-10b4-4e67-aac5-ac0b6ec6dc3b" variableName="timespan" />
+        <set-variable value="#[attributes.uriParams.'board' default &quot;overall&quot;]" doc:name="board" doc:id="97e365a7-435d-4823-9b5f-471a69f4f22d" variableName="board" />
         <set-variable value="#[attributes.queryParams.count default 10]" doc:name="count" doc:id="157d3701-be12-48f5-a102-dca9b71d7861" variableName="count" />
-        <flow-ref doc:name="getLeaderboard" doc:id="01c79235-770a-4538-93af-79de1e827fa8" name="getLeaderboard" />
+        <flow-ref doc:name="leaderboard" doc:id="01c79235-770a-4538-93af-79de1e827fa8" name="leaderboard" />
     </flow>
 </mule>

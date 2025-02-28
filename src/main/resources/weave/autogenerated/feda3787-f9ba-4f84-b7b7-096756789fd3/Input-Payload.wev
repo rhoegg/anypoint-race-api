@@ -1,7 +1,0 @@
-%dw 2.0
-
-type auto_feda3787_f9ba_4f84_b7b7_096756789fd3_Input_Payload = {|
-  banner: String, 
-  scores: Array<Nothing>
-|}
-
